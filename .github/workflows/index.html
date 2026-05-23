@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dragonfly To Tie v2.66</title>
+    <style>
+        :root {
+            --felt-green: #0a4d2c;
+            --gold: #d4af37;
+            --banker-red: #8b1e1e;
+            --player-blue: #1e5aa8;
+            --tie-green: #1a5220;
+            --panda-purple: #511f73;
+            --dragon-orange: #b86200;
+            --wood-trim: #3e2723;
+            --road-bg: #fff;
+            --road-b: #e0e0e0;
+            --panel-dark: #111b15;
+            --text-gray: #aaa;
+        }
+
+        body {
+            font-family: 'Garamond', serif;
+            background: #05140b;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s; }
+        .overlay.hidden { opacity: 0; pointer-events: none; }
+        .modal { background: #1a2e22; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .modal h2 { margin-top: 0; color: var(--gold); font-family: sans-serif; letter-spacing: 1px; }
+        .modal input { width: 80%; padding: 12px; margin: 15px 0; background: #0b1811; border: 1px solid var(--gold); color: white; font-size: 1.2rem; text-align: center; border-radius: 6px; }
+        .modal button { background: linear-gradient(135deg, #d4af37, #aa841c); border: none; color: black; font-weight: bold; padding: 12px 30px; font-size: 1.1rem; border-radius: 6px; cursor: pointer; text-transform: uppercase; width: 85%; transition: transform 0.1s; }
+        .modal button:active { transform: scale(0.98); }
+
+        header { background: linear-gradient(180deg, #163a24, #0b1d12); width: 100%; text-align: center; padding: 10px 0; border-bottom: 3px solid var(--gold); font-size: 1.8rem; letter-spacing: 2px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); position: relative; }
+        header .subtitle { font-size: 0.8rem; color: var(--gold); font-family: sans-serif; letter-spacing: 4px; display: block; margin-top: 4px; }
+        
+        .main-container { display: flex; flex-direction: column; width: 100%; max-width: 1400px; padding: 15px; box-sizing: border-box; gap: 15px; }
+        
+        /* Layout Grid for Roads and Stats */
+        .gameplay-layout { display: flex; flex-direction: row; gap: 15px; width: 100%; flex-wrap: wrap; }
+        .roads-section { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; }
+
+        /* Financial Stats Panel (Right Side Styling) */
+        .financial-panel { width: 320px; background: var(--panel-dark); border: 2px solid #223a2b; border-radius: 8px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; height: fit-content; }
+        .financial-panel h3 { margin: 0 0 5px 0; font-family: sans-serif; font-size: 1.1rem; color: var(--gold); border-bottom: 1px solid #223a2b; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; font-family: sans-serif; font-size: 0.95rem; padding: 4px 0; border-bottom: 1px dashed #1a2a20; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: var(--text-gray); }
+        .stat-value { font-weight: bold; color: #fff; }
+        .stat-value.win { color: #4caf50; }
+        .stat-value.loss { color: #f44336; }
+
+        .dashboard { display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(0,0,0,0.4); border: 1px solid #1c3d27; border-radius: 8px; padding: 10px; width: 100%; box-sizing: border-box; gap: 10px; text-align: center; }
+        .dash-item { display: flex; flex-direction: column; justify-content: center; }
+        .dash-label { font-size: 0.75rem; font-family: sans-serif; color: #8cb89d; text-transform: uppercase; margin-bottom: 2px; }
+        .dash-val { font-size: 1.4rem; font-weight: bold; font-family: sans-serif; }
+
+        .board-container { background: #000; border: 2px solid #222; border-radius: 6px; overflow-x: auto; width: 100%; position: relative; box-sizing: border-box; }
+        .road-grid { display: grid; background: var(--road-b); gap: 1px; width: max-content; }
+        
+        /* 6 rows always */
+        .bead-plate { grid-template-rows: repeat(6, 35px); grid-auto-columns: 35px; padding: 1px; }
+        .big-road { grid-template-rows: repeat(6, 22px); grid-auto-columns: 22px; padding: 1px; }
+        
+        .cell { background: var(--road-bg); display: flex; align-items: center; justify-content: center; position: relative; width: 100%; height: 100%; }
+        
+        /* Bead Plate Tokens */
+        .bead { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: sans-serif; font-size: 0.8rem; font-weight: bold; color: white; position: relative; }
+        .bead.B { background: var(--banker-red); }
+        .bead.P { background: var(--player-blue); }
+        .bead.T { background: var(--tie-green); }
+        .bead .tie-badge { position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; background: var(--tie-green); border: 1px solid white; border-radius: 50%; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; }
+        .bead .pair-b { position: absolute; top: 1px; left: 1px; width: 6px; height: 6px; background: var(--banker-red); border: 0.5px solid white; border-radius: 50%; }
+        .bead .pair-p { position: absolute; bottom: 1px; right: 1px; width: 6px; height: 6px; background: var(--player-blue); border: 0.5px solid white; border-radius: 50%; }
+        .bead .natural-star { position: absolute; top: -2px; right: -2px; color: var(--gold); font-size: 0.7rem; }
+
+        /* Big Road Tokens */
+        .br-circle { width: 16px; height: 16px; border-radius: 50%; border-width: 2.5px; border-style: solid; background: transparent; position: relative; }
+        .br-circle.B { border-color: var(--banker-red); }
+        .br-circle.P { border-color: var(--player-blue); }
+        .br-circle.T { border-color: var(--tie-green); background: rgba(26,82,32,0.3); }
+        .br-line { position: absolute; width: 100%; height: 2px; background: var(--tie-green); transform: rotate(-45deg); top: 7px; left: 0; }
+        .br-count { position: absolute; font-size: 0.6rem; color: #000; font-family: sans-serif; font-weight: bold; top: 2px; left: 4px; }
+        .br-dot-b { position: absolute; top: -2px; left: -2px; width: 4px; height: 4px; background: var(--banker-red); border-radius: 50%; }
+        .br-dot-p { position: absolute; bottom: -2px; right: -2px; width: 4px; height: 4px; background: var(--player-blue); border-radius: 50%; }
+
+        .betting-table { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; box-sizing: border-box; margin-top: 5px; }
+        .bet-zone { background: #0c2216; border: 2px solid #1c3d27; border-radius: 8px; padding: 15px 10px; text-align: center; cursor: pointer; position: relative; transition: background 0.2s, border-color 0.2s; min-height: 90px; display: flex; flex-direction: column; justify-content: space-between; }
+        .bet-zone:hover { background: #123321; border-color: var(--gold); }
+        .bet-zone.active-b { border-color: var(--banker-red); box-shadow: inset 0 0 10px rgba(139,30,30,0.4); }
+        .bet-zone.active-p { border-color: var(--player-blue); box-shadow: inset 0 0 10px rgba(30,90,168,0.4); }
+        .bet-zone.active-t { border-color: var(--tie-green); box-shadow: inset 0 0 10px rgba(26,82,32,0.4); }
+        .zone-title { font-family: sans-serif; font-size: 1.1rem; font-weight: bold; letter-spacing: 1px; }
+        .zone-payout { font-size: 0.75rem; color: var(--gold); font-family: sans-serif; margin-bottom: 8px; }
+        .zone-wager { font-family: sans-serif; font-size: 1.3rem; font-weight: bold; color: #fff; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 4px; min-height: 24px; display: inline-block; margin: 0 auto; width: 80%; }
+
+        .side-bets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; box-sizing: border-box; }
+        .side-zone { background: #091a11; border: 1px solid #163321; border-radius: 6px; padding: 10px 5px; text-align: center; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 70px; }
+        .side-zone:hover { border-color: var(--gold); }
+        .side-zone.active-side { border-color: var(--gold); box-shadow: inset 0 0 8px rgba(212,175,55,0.2); }
+        .side-title { font-size: 0.85rem; font-weight: bold; font-family: sans-serif; }
+        .side-payout { font-size: 0.65rem; color: #8cb89d; margin-bottom: 4px; }
+        .side-wager { font-size: 1rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 3px; min-height: 18px; width: 85%; margin: 0 auto; }
+
+        .controls-panel { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-top: 5px; }
+        .chip-rack { display: flex; justify-content: center; gap: 12px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 30px; border: 1px solid #222; width: fit-content; margin: 0 auto; }
+        .chip { width: 46px; height: 46px; border-radius: 50%; border: 3px dashed white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-family: sans-serif; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.4); transition: transform 0.1s, border-style 0.1s; color: white; text-shadow: 1px 1px 2px black; }
+        .chip:active { transform: scale(0.92); }
+        .chip.selected { border-style: solid; border-color: var(--gold); transform: translateY(-4px); box-shadow: 0 8px 12px rgba(0,0,0,0.6); }
+
+        .action-row { display: flex; justify-content: center; gap: 12px; width: 100%; flex-wrap: wrap; }
+        .btn { background: linear-gradient(180deg, #2a5c3e, #143520); border: 1px solid #387c53; color: white; padding: 12px 24px; font-size: 1rem; font-family: sans-serif; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; min-width: 110px; transition: background 0.1s; }
+        .btn:hover { background: linear-gradient(180deg, #326e4a, #194228); }
+        .btn:active { transform: scale(0.98); }
+        .btn-danger { background: linear-gradient(180deg, #8b1e1e, #501010); border: 1px solid #b32a2a; }
+        .btn-danger:hover { background: linear-gradient(180deg, #a72424, #631313); }
+        .btn-gold { background: linear-gradient(180deg, #c5a028, #876c16); border: 1px solid var(--gold); color: black; text-shadow: none; }
+        .btn-gold:hover { background: linear-gradient(180deg, #d4af37, #9c7d1a); }
+
+        .shoe-preview { display: flex; gap: 4px; background: #000; padding: 6px; border-radius: 4px; overflow-x: auto; width: 100%; box-sizing: border-box; min-height: 36px; border: 1px solid #222; }
+        .preview-card { background: white; color: black; font-family: sans-serif; font-weight: bold; font-size: 0.75rem; padding: 2px 5px; border-radius: 2px; min-width: 14px; text-align: center; }
+        .preview-card.next-card { background: var(--gold); color: black; }
+
+        .game-logs { background: #040d08; border: 1px solid #11291b; border-radius: 6px; padding: 10px; height: 90px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #8cb89d; width: 100%; box-sizing: border-box; }
+        .log-entry { margin-bottom: 4px; border-bottom: 1px solid #08170f; padding-bottom: 2px; }
+
+        @media (max-width: 768px) {
+            .financial-panel { width: 100%; }
+            .side-bets-grid { grid-template-columns: repeat(2, 1fr); }
+            .dashboard { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="setup-overlay" class="overlay">
+        <div class="modal">
+            <h2>INITIALIZE BANKROLL</h2>
+            <p style="font-family:sans-serif; color:#8cb89d; font-size:0.9rem;">Set your starting bankroll amount to begin simulation.</p>
+            <input type="number" id="init-bankroll-input" value="10000" min="1" max="10000000">
+            <button onclick="confirmSetup()">Start Simulation</button>
+        </div>
+    </div>
+
+    <header>
+        DRAGONFLY TO TIE
+        <span class="subtitle">BACCARAT SIMULATION ENGINE v2.66</span>
+    </header>
+
+    <div class="main-container">
+        <div class="dashboard">
+            <div class="dash-item">
+                <span class="dash-label">Available Balance</span>
+                <span class="dash-val balance-label">$0.00</span>
+            </div>
+            <div class="dash-item">
+                <span class="dash-label">Session P/L</span>
+                <span class="dash-val session-pl-label">$0.00</span>
+            </div>
+            <div class="dash-item">
+                <span class="dash-label">Shoe Remaining</span>
+                <span class="dash-val shoe-count-label">0</span>
+            </div>
+            <div class="dash-item">
+                <span class="dash-label">Hand Count</span>
+                <span id="hand-count-el" class="dash-val">0</span>
+            </div>
+        </div>
+
+        <div class="gameplay-layout">
+            
+            <div class="roads-section">
+                <div class="board-container">
+                    <div id="bead-plate-grid" class="road-grid bead-plate"></div>
+                </div>
+                <div class="board-container">
+                    <div id="big-road-grid" class="road-grid big-road"></div>
+                </div>
+            </div>
+
+            <div class="financial-panel">
+                <h3>Financial Statistics</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Total Stakes</span>
+                    <span id="stat-total-stakes" class="stat-value">$0.00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Max Session Win (Peak)</span>
+                    <span id="stat-max-win" class="stat-value win">$0.00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Max Session Loss (Trough)</span>
+                    <span id="stat-max-loss" class="stat-value loss">$0.00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Win Rate (Hands)</span>
+                    <span id="stat-win-rate" class="stat-value">0.0%</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Tie Ratio</span>
+                    <span id="stat-tie-ratio" class="stat-value">0.0%</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Tie Frequency Counter</span>
+                    <span id="stat-tie-count" class="stat-value">0 / 0</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="betting-table">
+            <div class="bet-zone" id="zone-P" onclick="placeBet('P')">
+                <span class="zone-title" style="color:var(--player-blue);">PLAYER</span>
+                <span class="zone-payout">1:1</span>
+                <span class="zone-wager" id="wager-P">$0</span>
+            </div>
+            <div class="bet-zone" id="zone-T" onclick="placeBet('T')">
+                <span class="zone-title" style="color:var(--tie-green);">TIE</span>
+                <span class="zone-payout">8:1</span>
+                <span class="zone-wager" id="wager-T">$0</span>
+            </div>
+            <div class="bet-zone" id="zone-B" onclick="placeBet('B')">
+                <span class="zone-title" style="color:var(--banker-red);">BANKER</span>
+                <span class="zone-payout">1:1 (0.95:1)</span>
+                <span class="zone-wager" id="wager-B">$0</span>
+            </div>
+        </div>
+
+        <div class="side-bets-grid">
+            <div class="side-zone" id="zone-PPAIR" onclick="placeBet('PPAIR')">
+                <span class="side-title">P PAIR</span>
+                <span class="side-payout">11:1</span>
+                <span class="side-wager" id="wager-PPAIR">$0</span>
+            </div>
+            <div class="side-zone" id="zone-BPAIR" onclick="placeBet('BPAIR')">
+                <span class="side-title">B PAIR</span>
+                <span class="side-payout">11:1</span>
+                <span class="side-wager" id="wager-BPAIR">$0</span>
+            </div>
+            <div class="side-zone" id="zone-PANDA" onclick="placeBet('PANDA')">
+                <span class="side-title" style="color:#c39be3;">PANDA 8</span>
+                <span class="side-payout">25:1</span>
+                <span class="side-wager" id="wager-PANDA">$0</span>
+            </div>
+            <div class="side-zone" id="zone-DRAGON" onclick="placeBet('DRAGON')">
+                <span class="side-title" style="color:#ffb366;">DRAGON 7</span>
+                <span class="side-payout">40:1</span>
+                <span class="side-wager" id="wager-DRAGON">$0</span>
+            </div>
+        </div>
+
+        <div class="chip-rack">
+            <div class="chip" style="background:#616161;" id="chip-5" onclick="selectChip(5)">5</div>
+            <div class="chip" style="background:#1e5aa8;" id="chip-25" onclick="selectChip(25)">25</div>
+            <div class="chip" style="background:#8b1e1e;" id="chip-100" onclick="selectChip(100)">100</div>
+            <div class="chip" style="background:#1a5220;" id="chip-500" onclick="selectChip(500)">500</div>
+            <div class="chip" style="background:#b86200;" id="chip-1000" onclick="selectChip(1000)">1k</div>
+            <div class="chip" style="background:#511f73;" id="chip-5000" onclick="selectChip(5000)">5k</div>
+        </div>
+
+        <div class="action-row">
+            <button class="btn btn-danger" onclick="clearAllBets()">Clear Bets</button>
+            <button class="btn" onclick="handleUndoBet()">Undo</button>
+            <button class="btn btn-gold" onclick="dealHand()">Deal Hand</button>
+            <button class="btn" id="toggle-shoe-btn" onclick="toggleShoeVisibility()">Show Shoe</button>
+            <button class="btn btn-danger" onclick="resetEngine()">Reset Engine</button>
+        </div>
+
+        <div id="shoe-preview-el" class="shoe-preview" style="display: none;"></div>
+
+        <div class="game-logs" id="log-box">
+            <div class="log-entry" style="color:var(--gold);">[ENGINE INITIALIZED] Welcome to Dragonfly To Tie v2.66. Setup Initial Bankroll to begin betting.</div>
+        </div>
+    </div>
+
+    <script>
+        // ══════════════════════════════════════════════════════════
+        //  ENGINE STATE MANAGEMENT
+        // ══════════════════════════════════════════════════════════
+        let bankroll = 10000;
+        let initialBankroll = 10000;
+        let selectedChipVal = 100;
+        let shoeSize = 8; 
+        let shoe = [];
+        let handHistory = []; 
+        let currentBets = { P: 0, T: 0, B: 0, PPAIR: 0, BPAIR: 0, PANDA: 0, DRAGON: 0 };
+        let lastBets = null;
+        let betHistoryStack = [];
+        let shoeVisible = false;
+
+        // Financial Tracker Extensions (v2.66)
+        let totalStakesCount = 0;
+        let maxSessionWin = 0;
+        let maxSessionLoss = 0;
+        let totalHandsWon = 0;
+        let totalTiesCount = 0;
+
+        const currentVersion = "2.66";
+
+        window.onload = function() {
+            selectChip(100);
+            document.getElementById('init-bankroll-input').focus();
+        };
+
+        function confirmSetup() {
+            const val = parseFloat(document.getElementById('init-bankroll-input').value);
+            if(isNaN(val) || val <= 0) {
+                alert("Please input a standard positive valid starting bankroll.");
+                return;
+            }
+            bankroll = val;
+            initialBankroll = val;
+            
+            // Reset statistics peak records
+            maxSessionWin = 0;
+            maxSessionLoss = 0;
+            totalStakesCount = 0;
+            totalHandsWon = 0;
+            totalTiesCount = 0;
+
+            document.getElementById('setup-overlay').classList.add('hidden');
+            generateShoe();
+            clearAllBets();
+            updateUI();
+            logMessage(`[NEW SESSION] Bankroll starting balance configured to $${bankroll.toLocaleString()}`);
+        }
