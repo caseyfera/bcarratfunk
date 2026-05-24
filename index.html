@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Dragonfly To Tie v2.6</title>
     <style>
         :root {
@@ -86,76 +86,107 @@
             box-sizing: border-box;
         }
 
-        .roads-section { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        .roads-top-row { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
-        .roads-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        /* ── Roads: every scoreboard on its own clearly visible row ── */
+        .roads-section { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .road-row-bead  { width: 100%; }
+        .road-row-big   { width: 100%; }
+        .road-row-derived { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 100%; }
 
         .road-box { background: rgba(0,0,0,0.4); border: 2px solid var(--gold); border-radius: 8px; padding: 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 5px; }
         .road-title { text-align: center; color: var(--gold); font-weight: bold; font-size: 0.85rem; letter-spacing: 1px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 4px; flex-shrink: 0; }
-        .road-canvas-wrap { background: var(--road-bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--road-b); position: relative; }
+        /* Zoomable scoreboard */
+        .road-zoom-container {
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            cursor: zoom-in;
+            border-radius: 4px;
+            width: 100%;
+            height: 100%;
+        }
+        .road-zoom-container.zoomed { cursor: grab; }
+        .road-zoom-container.zoomed:active { cursor: grabbing; }
+        .road-zoom-inner {
+            transform-origin: 0 0;
+            will-change: transform;
+            display: inline-block;
+            min-width: 100%;
+        }
+        .zoom-hint {
+            position: absolute;
+            bottom: 3px;
+            right: 4px;
+            font-size: 0.55rem;
+            color: rgba(212,175,55,0.5);
+            pointer-events: none;
+            letter-spacing: 0.5px;
+            z-index: 2;
+        }
+        .road-canvas-wrap { background: var(--road-bg); border-radius: 4px; border: 1px solid var(--road-b); position: relative; overflow: hidden; display: flex; }
 
-        .bead-plate { display: grid; grid-template-rows: repeat(6, 18px); grid-auto-flow: column; grid-auto-columns: 18px; gap: 2px; padding: 4px; overflow-x: auto; height: 124px; box-sizing: border-box; }
-        .bead { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: white; flex-shrink: 0; }
+        .bead-plate { display: grid; grid-template-rows: repeat(6, 14px); grid-auto-flow: column; grid-auto-columns: 14px; gap: 1px; padding: 3px; overflow-x: auto; height: 96px; box-sizing: border-box; }
+        .bead { width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 6px; font-weight: bold; color: white; flex-shrink: 0; }
         .bead.banker { background: var(--banker-red); }
         .bead.player { background: var(--player-blue); }
         .bead.tie { background: #1a8c22; }
         .bead.panda-win { background: var(--panda-purple); border: 1px solid white; }
         .bead.dragon-win { background: var(--dragon-orange); color: black; border: 1px solid black; }
 
-        .big-road-wrap { overflow-x: auto; height: 124px; padding: 4px; box-sizing: border-box; position: relative; }
-        .big-road-grid { display: grid; grid-template-rows: repeat(6, 18px); grid-auto-flow: column; grid-auto-columns: 20px; gap: 2px; height: 118px; }
-        .br-cell { width: 20px; height: 18px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .br-circle { width: 15px; height: 15px; border-radius: 50%; border: 2px solid; box-sizing: border-box; }
+        .big-road-wrap { overflow-x: auto; height: 96px; padding: 3px; box-sizing: border-box; position: relative; }
+        .big-road-grid { display: grid; grid-template-rows: repeat(6, 14px); grid-auto-flow: column; grid-auto-columns: 15px; gap: 1px; height: 90px; }
+        .br-cell { width: 15px; height: 14px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .br-circle { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid; box-sizing: border-box; }
         .br-circle.banker { background: var(--banker-red); border-color: #6a0000; }
         .br-circle.player { background: var(--player-blue); border-color: #0d3c7a; }
-        .br-circle.has-tie::after { content: ''; position: absolute; width: 2px; height: 11px; background: #1a8c22; top: 3px; left: 50%; transform: translateX(-50%); }
+        .br-circle.has-tie::after { content: ''; position: absolute; width: 1.5px; height: 9px; background: #1a8c22; top: 2px; left: 50%; transform: translateX(-50%); }
 
         @media (max-width: 768px) {
-            .big-road-wrap { height: 88px; padding: 2px; }
+            .big-road-wrap { height: 78px; padding: 2px; }
             .big-road-grid {
-                grid-template-rows: repeat(6, 12px);
-                grid-auto-columns: 13px;
-                gap: 1px;
-                height: 82px;
-            }
-            .br-cell { width: 13px; height: 12px; }
-            .br-circle { width: 10px; height: 10px; border-width: 1.5px; }
-            .br-circle.has-tie::after { width: 1.5px; height: 7px; top: 1px; }
-
-            .bead-plate {
-                grid-template-rows: repeat(6, 12px);
+                grid-template-rows: repeat(6, 11px);
                 grid-auto-columns: 12px;
                 gap: 1px;
-                height: 88px;
+                height: 72px;
+            }
+            .br-cell { width: 12px; height: 11px; }
+            .br-circle { width: 9px; height: 9px; border-width: 1px; }
+            .br-circle.has-tie::after { width: 1px; height: 6px; top: 1px; }
+
+            .bead-plate {
+                grid-template-rows: repeat(6, 11px);
+                grid-auto-columns: 11px;
+                gap: 1px;
+                height: 78px;
                 padding: 2px;
             }
-            .bead { width: 12px; height: 12px; font-size: 6px; }
+            .bead { width: 11px; height: 11px; font-size: 5px; }
 
-            .derived-road-wrap { height: 58px; padding: 2px; }
+            .derived-road-wrap { height: 52px; padding: 2px; }
             .derived-road-grid {
-                grid-template-rows: repeat(4, 12px);
-                grid-auto-columns: 13px;
+                grid-template-rows: repeat(4, 11px);
+                grid-auto-columns: 12px;
                 gap: 1px;
-                height: 52px;
+                height: 46px;
             }
-            .dr-cell { width: 13px; height: 12px; }
-            .dr-circle { width: 9px; height: 9px; }
-            .dr-circle-sm { width: 8px; height: 8px; border-width: 1.5px; }
-            .dr-slash { width: 9px; height: 9px; }
-            .dr-slash::before { width: 11px; height: 1.5px; top: 4px; left: -1px; }
+            .dr-cell { width: 12px; height: 11px; }
+            .dr-circle { width: 8px; height: 8px; }
+            .dr-circle-sm { width: 7px; height: 7px; border-width: 1px; }
+            .dr-slash { width: 8px; height: 8px; }
+            .dr-slash::before { width: 10px; height: 1px; top: 3px; left: -1px; }
+            .road-row-derived { gap: 5px; }
         }
 
-        .derived-road-wrap { overflow-x: auto; height: 76px; padding: 4px; box-sizing: border-box; }
-        .derived-road-grid { display: grid; grid-template-rows: repeat(4, 16px); grid-auto-flow: column; grid-auto-columns: 18px; gap: 2px; height: 70px; }
-        .dr-cell { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
-        .dr-circle { width: 12px; height: 12px; border-radius: 50%; }
+        .derived-road-wrap { overflow-x: auto; height: 64px; padding: 3px; box-sizing: border-box; }
+        .derived-road-grid { display: grid; grid-template-rows: repeat(4, 14px); grid-auto-flow: column; grid-auto-columns: 15px; gap: 1px; height: 58px; }
+        .dr-cell { width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; }
+        .dr-circle { width: 10px; height: 10px; border-radius: 50%; }
         .dr-circle.rep { background: #e02020; }
         .dr-circle.non { background: var(--player-blue); }
-        .dr-circle-sm { width: 11px; height: 11px; border-radius: 50%; border: 2px solid; background: transparent; box-sizing: border-box; }
+        .dr-circle-sm { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid; background: transparent; box-sizing: border-box; }
         .dr-circle-sm.rep { border-color: #e02020; }
         .dr-circle-sm.non { border-color: var(--player-blue); }
-        .dr-slash { width: 12px; height: 12px; position: relative; }
-        .dr-slash::before { content: ''; position: absolute; width: 14px; height: 2px; border-radius: 1px; top: 5px; left: -1px; transform: rotate(-45deg); }
+        .dr-slash { width: 10px; height: 10px; position: relative; }
+        .dr-slash::before { content: ''; position: absolute; width: 12px; height: 1.5px; border-radius: 1px; top: 4px; left: -1px; transform: rotate(-45deg); }
         .dr-slash.rep::before { background: #e02020; }
         .dr-slash.non::before { background: var(--player-blue); }
 
@@ -261,8 +292,7 @@
             .game-content { padding: 10px; gap: 10px; }
             .header-title { font-size: 1.6rem; }
             .top-dashboards { grid-template-columns: 1fr; }
-            .roads-top-row { grid-template-columns: 1fr 2fr; }
-            .roads-bottom-row { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+            .road-row-derived { gap: 5px; }
             .casino-table { background: #092414; border: none; border-radius: 12px; box-shadow: none; padding: 15px 10px; }
             .table-score-header { width: 100%; justify-content: space-around; font-size: 1.1rem; background: rgba(0,0,0,0.4); padding: 8px 0; border-radius: 4px; }
             .cards-felt-area { flex-direction: row; justify-content: space-around; gap: 10px; margin-bottom: 15px; }
@@ -434,38 +464,74 @@
         </div>
 
         <div class="roads-section">
-            <div class="roads-top-row">
+
+            <!-- Row 1: Bead Plate — full width -->
+            <div class="road-row-bead">
                 <div class="road-box">
                     <div class="road-title">🔵 ROAD (珠盘路)</div>
-                    <div class="road-canvas-wrap"><div class="bead-plate" id="road-bead"></div></div>
-                </div>
-                <div class="road-box">
-                    <div class="road-title">🔴 BIG ROAD (大路)</div>
                     <div class="road-canvas-wrap">
-                        <div class="big-road-wrap"><div class="big-road-grid" id="road-big"></div></div>
+                        <div class="road-zoom-container" id="zoom-bead">
+                            <div class="road-zoom-inner">
+                                <div class="bead-plate" id="road-bead"></div>
+                            </div>
+                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="roads-bottom-row">
+
+            <!-- Row 2: Big Road — full width -->
+            <div class="road-row-big">
+                <div class="road-box">
+                    <div class="road-title">🔴 BIG ROAD (大路)</div>
+                    <div class="road-canvas-wrap">
+                        <div class="road-zoom-container" id="zoom-big">
+                            <div class="road-zoom-inner">
+                                <div class="big-road-wrap"><div class="big-road-grid" id="road-big"></div></div>
+                            </div>
+                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: Derived roads — 3 equal columns -->
+            <div class="road-row-derived">
                 <div class="road-box">
                     <div class="road-title">👁 BIG EYE BOY (大眼仔)</div>
                     <div class="road-canvas-wrap">
-                        <div class="derived-road-wrap"><div class="derived-road-grid" id="road-beb"></div></div>
+                        <div class="road-zoom-container" id="zoom-beb">
+                            <div class="road-zoom-inner">
+                                <div class="derived-road-wrap"><div class="derived-road-grid" id="road-beb"></div></div>
+                            </div>
+                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                        </div>
                     </div>
                 </div>
                 <div class="road-box">
                     <div class="road-title">📍 SMALL ROAD (小路)</div>
                     <div class="road-canvas-wrap">
-                        <div class="derived-road-wrap"><div class="derived-road-grid" id="road-small"></div></div>
+                        <div class="road-zoom-container" id="zoom-small">
+                            <div class="road-zoom-inner">
+                                <div class="derived-road-wrap"><div class="derived-road-grid" id="road-small"></div></div>
+                            </div>
+                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                        </div>
                     </div>
                 </div>
                 <div class="road-box">
                     <div class="road-title">🪳 COCKROACH PIG (曱甴路)</div>
                     <div class="road-canvas-wrap">
-                        <div class="derived-road-wrap"><div class="derived-road-grid" id="road-cock"></div></div>
+                        <div class="road-zoom-container" id="zoom-cock">
+                            <div class="road-zoom-inner">
+                                <div class="derived-road-wrap"><div class="derived-road-grid" id="road-cock"></div></div>
+                            </div>
+                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
 
         <div class="coffee-link-wrapper" style="width:100%;max-width:240px;margin:6px auto 0 auto;">
@@ -803,6 +869,8 @@
         document.getElementById('game-container').style.display = 'flex';
         renderAllRoads();
         updateUI();
+        // Init zoom on all scoreboards (small delay to ensure layout is ready)
+        setTimeout(initAllZoom, 100);
     }
 
     // ══════════════════════════════════════════════════════════
@@ -1199,10 +1267,20 @@
             }
         } else {
             const isNewType = bigRoadLastNonTie !== outcomeType;
-            if (bigRoadColumns.length === 0 || isNewType || bigRoadColumns[bigRoadColumns.length-1].length >= 6) {
-                bigRoadColumns.push([{ type: outcomeType, tieCount: 0 }]);
+            if (bigRoadColumns.length === 0 || isNewType) {
+                // New streak: start a new column at row 0
+                bigRoadColumns.push([{ type: outcomeType, tieCount: 0, col: bigRoadColumns.length, row: 0 }]);
             } else {
-                bigRoadColumns[bigRoadColumns.length-1].push({ type: outcomeType, tieCount: 0 });
+                // Same streak: continue downward, or dragon-tail right if at row 6
+                const lastCol = bigRoadColumns[bigRoadColumns.length-1];
+                const lastEntry = lastCol[lastCol.length-1];
+                if (lastEntry.row < 5) {
+                    // Normal: go down in same column
+                    lastCol.push({ type: outcomeType, tieCount: 0, col: lastEntry.col, row: lastEntry.row + 1 });
+                } else {
+                    // Dragon tail: go right at row 5
+                    bigRoadColumns.push([{ type: outcomeType, tieCount: 0, col: lastEntry.col + 1, row: 5, dragonTail: true }]);
+                }
             }
             bigRoadLastNonTie = outcomeType;
             computeDerivedRoads(outcomeType);
@@ -1210,13 +1288,31 @@
         renderAllRoads();
     }
 
+    // Build logical streak columns: each streak is one logical column
+    // bigRoadColumns array entries with dragonTail=true are continuations of the same streak
+    function getLogicalStreakCols() {
+        const streakCols = []; // each item = array of entries in that streak
+        bigRoadColumns.forEach(col => {
+            col.forEach(entry => {
+                if (entry.row === 0 && !entry.dragonTail) {
+                    streakCols.push([entry]);
+                } else {
+                    if (streakCols.length > 0) {
+                        streakCols[streakCols.length - 1].push(entry);
+                    }
+                }
+            });
+        });
+        return streakCols;
+    }
+
     function computeDerivedRoads(outcomeType) {
-        const cols = bigRoadColumns;
-        const colIdx = cols.length - 1;
-        const rowIdx = cols[colIdx].length - 1;
-        derivedEntry(cols, colIdx, rowIdx, 1, bebEntries);
-        derivedEntry(cols, colIdx, rowIdx, 2, smallEntries);
-        derivedEntry(cols, colIdx, rowIdx, 3, cockEntries);
+        const logicalCols = getLogicalStreakCols();
+        const colIdx = logicalCols.length - 1;
+        const rowIdx = logicalCols[colIdx].length - 1;
+        derivedEntry(logicalCols, colIdx, rowIdx, 1, bebEntries);
+        derivedEntry(logicalCols, colIdx, rowIdx, 2, smallEntries);
+        derivedEntry(logicalCols, colIdx, rowIdx, 3, cockEntries);
     }
 
     function derivedEntry(cols, colIdx, rowIdx, lookback, entries) {
@@ -1259,18 +1355,41 @@
     function renderBigRoad() {
         const container = document.getElementById('road-big');
         container.innerHTML = '';
+
+        // Build a 2D map of col -> row -> entry using the explicit col/row stored on each entry
+        // For dragon tail entries, they share the same row (5) but have incrementing col values
         const ROWS = 6;
+        let maxCol = 0;
+
+        // Flatten all entries and find the rightmost column
+        const allEntries = [];
         bigRoadColumns.forEach(col => {
+            col.forEach(entry => {
+                allEntries.push(entry);
+                if (entry.col > maxCol) maxCol = entry.col;
+            });
+        });
+
+        const totalCols = maxCol + 1;
+        // Create a sparse grid: grid[col][row] = entry
+        const grid = {};
+        allEntries.forEach(entry => {
+            if (!grid[entry.col]) grid[entry.col] = {};
+            grid[entry.col][entry.row] = entry;
+        });
+
+        // Render column by column
+        for (let c = 0; c < totalCols; c++) {
             for (let r = 0; r < ROWS; r++) {
                 const cell = document.createElement('div');
                 cell.className = 'br-cell';
-                if (r < col.length) {
-                    const entry = col[r];
+                const entry = grid[c] && grid[c][r];
+                if (entry) {
                     const circle = document.createElement('div');
                     circle.className = `br-circle ${entry.type}`;
+                    circle.style.position = 'relative';
                     if (entry.tieCount > 0) {
                         circle.classList.add('has-tie');
-                        circle.style.position = 'relative';
                         const tieLine = document.createElement('div');
                         tieLine.style.cssText = 'position:absolute;width:2px;height:11px;background:#1a8c22;top:0;left:50%;transform:translateX(-50%);border-radius:1px;';
                         circle.appendChild(tieLine);
@@ -1279,7 +1398,7 @@
                 }
                 container.appendChild(cell);
             }
-        });
+        }
         const wrap = container.parentElement;
         if (wrap) wrap.scrollLeft = wrap.scrollWidth;
     }
@@ -1351,6 +1470,129 @@
         document.querySelectorAll('.session-pl-label').forEach(el=>{el.textContent=fmtPL;el.style.color=plColor;});
         document.querySelectorAll('.shoe-count-label').forEach(el=>el.textContent=rawCount);
         renderShoePreview();
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  SCOREBOARD ZOOM ENGINE
+    //  Supports: pinch-to-zoom, double-tap to zoom in/out, pan when zoomed
+    // ══════════════════════════════════════════════════════════
+    function initRoadZoom(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const inner = container.querySelector('.road-zoom-inner');
+
+        let scale = 1, minScale = 1, maxScale = 4;
+        let originX = 0, originY = 0;
+        let isPinching = false, lastDist = 0;
+        let isPanning = false, panStartX = 0, panStartY = 0, panOriginX = 0, panOriginY = 0;
+        let lastTap = 0;
+
+        function clampOrigin(ox, oy, s) {
+            const cw = container.clientWidth, ch = container.clientHeight;
+            const iw = inner.scrollWidth * s, ih = inner.scrollHeight * s;
+            const maxOx = 0, minOx = Math.min(0, cw - iw);
+            const maxOy = 0, minOy = Math.min(0, ch - ih);
+            return [
+                Math.max(minOx, Math.min(maxOx, ox)),
+                Math.max(minOy, Math.min(maxOy, oy))
+            ];
+        }
+
+        function applyTransform(s, ox, oy) {
+            [ox, oy] = clampOrigin(ox, oy, s);
+            originX = ox; originY = oy; scale = s;
+            inner.style.transform = `translate(${ox}px, ${oy}px) scale(${s})`;
+            container.classList.toggle('zoomed', s > 1);
+        }
+
+        function getTouchDist(t) {
+            const dx = t[0].clientX - t[1].clientX;
+            const dy = t[0].clientY - t[1].clientY;
+            return Math.sqrt(dx*dx + dy*dy);
+        }
+        function getTouchMid(t, rect) {
+            return {
+                x: ((t[0].clientX + t[1].clientX) / 2) - rect.left,
+                y: ((t[0].clientY + t[1].clientY) / 2) - rect.top
+            };
+        }
+
+        container.addEventListener('touchstart', e => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                isPinching = true; isPanning = false;
+                lastDist = getTouchDist(e.touches);
+            } else if (e.touches.length === 1) {
+                if (scale > 1) {
+                    isPanning = true;
+                    panStartX = e.touches[0].clientX;
+                    panStartY = e.touches[0].clientY;
+                    panOriginX = originX;
+                    panOriginY = originY;
+                }
+                // Double-tap detection
+                const now = Date.now();
+                if (now - lastTap < 300) {
+                    e.preventDefault();
+                    if (scale > 1) {
+                        applyTransform(1, 0, 0);
+                    } else {
+                        const rect = container.getBoundingClientRect();
+                        const tx = e.touches[0].clientX - rect.left;
+                        const ty = e.touches[0].clientY - rect.top;
+                        const newScale = 2.5;
+                        const newOx = -(tx * (newScale - 1));
+                        const newOy = -(ty * (newScale - 1));
+                        applyTransform(newScale, newOx, newOy);
+                    }
+                }
+                lastTap = now;
+            }
+        }, { passive: false });
+
+        container.addEventListener('touchmove', e => {
+            if (isPinching && e.touches.length === 2) {
+                e.preventDefault();
+                const dist = getTouchDist(e.touches);
+                const rect = container.getBoundingClientRect();
+                const mid = getTouchMid(e.touches, rect);
+                const ratio = dist / lastDist;
+                const newScale = Math.max(minScale, Math.min(maxScale, scale * ratio));
+                // Zoom toward pinch midpoint
+                const newOx = mid.x - (mid.x - originX) * (newScale / scale);
+                const newOy = mid.y - (mid.y - originY) * (newScale / scale);
+                applyTransform(newScale, newOx, newOy);
+                lastDist = dist;
+            } else if (isPanning && e.touches.length === 1 && scale > 1) {
+                e.preventDefault();
+                const dx = e.touches[0].clientX - panStartX;
+                const dy = e.touches[0].clientY - panStartY;
+                applyTransform(scale, panOriginX + dx, panOriginY + dy);
+            }
+        }, { passive: false });
+
+        container.addEventListener('touchend', e => {
+            if (e.touches.length < 2) isPinching = false;
+            if (e.touches.length === 0) isPanning = false;
+        });
+
+        // Mouse wheel zoom for desktop
+        container.addEventListener('wheel', e => {
+            e.preventDefault();
+            const rect = container.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            const delta = e.deltaY > 0 ? 0.85 : 1.18;
+            const newScale = Math.max(minScale, Math.min(maxScale, scale * delta));
+            const newOx = mx - (mx - originX) * (newScale / scale);
+            const newOy = my - (my - originY) * (newScale / scale);
+            applyTransform(newScale, newOx, newOy);
+        }, { passive: false });
+    }
+
+    // Init zoom on all roads after game starts
+    function initAllZoom() {
+        ['zoom-bead','zoom-big','zoom-beb','zoom-small','zoom-cock'].forEach(initRoadZoom);
     }
 
     // ══════════════════════════════════════════════════════════
