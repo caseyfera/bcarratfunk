@@ -68,9 +68,9 @@
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(212,175,55,0.4);
             border-radius: 6px;
-            padding: 5px 12px;
+            padding: 2px 8px;
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.62rem;
             color: rgba(255,255,255,0.7);
             letter-spacing: 1px;
         }
@@ -81,19 +81,20 @@
             max-width: 1400px;
             display: flex;
             flex-direction: column;
-            padding: 10px;
-            gap: 10px;
+            padding: 4px 8px;
+            gap: 4px;
             box-sizing: border-box;
         }
 
-        /* ── Roads: every scoreboard on its own clearly visible row ── */
-        .roads-section { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        .road-row-bead  { width: 100%; }
-        .road-row-big   { width: 100%; }
-        .road-row-derived { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 100%; }
+        .roads-section { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+        .road-row-top { display: grid; grid-template-columns: 1fr 2fr; gap: 4px; width: 100%; }
+        .road-row-derived { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; width: 100%; }
 
-        .road-box { background: rgba(0,0,0,0.4); border: 2px solid var(--gold); border-radius: 8px; padding: 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 5px; }
-        .road-title { text-align: center; color: var(--gold); font-weight: bold; font-size: 0.85rem; letter-spacing: 1px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 4px; flex-shrink: 0; }
+        .road-box { background: rgba(0,0,0,0.4); border: 1.5px solid var(--gold); border-radius: 5px; padding: 3px 4px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; }
+        .road-title { display: flex; justify-content: space-between; align-items: center; color: var(--gold); font-weight: bold; font-size: 0.6rem; letter-spacing: 1px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 2px; flex-shrink: 0; cursor: pointer; user-select: none; }
+        .road-title .toggle-arrow { font-size: 0.55rem; opacity: 0.7; transition: transform 0.2s; }
+        .road-box.collapsed .road-canvas-wrap { display: none; }
+        .road-box.collapsed .toggle-arrow { transform: rotate(180deg); }
         /* Zoomable scoreboard */
         .road-zoom-container {
             position: relative;
@@ -124,21 +125,21 @@
         }
         .road-canvas-wrap { background: var(--road-bg); border-radius: 4px; border: 1px solid var(--road-b); position: relative; overflow: hidden; display: flex; }
 
-        .bead-plate { display: grid; grid-template-rows: repeat(6, 14px); grid-auto-flow: column; grid-auto-columns: 14px; gap: 1px; padding: 3px; overflow-x: auto; height: 96px; box-sizing: border-box; }
-        .bead { width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 6px; font-weight: bold; color: white; flex-shrink: 0; }
+        .bead-plate { display: grid; grid-template-rows: repeat(6, 11px); grid-auto-flow: column; grid-auto-columns: 11px; gap: 1px; padding: 2px; overflow-x: auto; height: 72px; box-sizing: border-box; }
+        .bead { width: 11px; height: 11px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 5px; font-weight: bold; color: white; flex-shrink: 0; }
         .bead.banker { background: var(--banker-red); }
         .bead.player { background: var(--player-blue); }
         .bead.tie { background: #1a8c22; }
         .bead.panda-win { background: var(--panda-purple); border: 1px solid white; }
         .bead.dragon-win { background: var(--dragon-orange); color: black; border: 1px solid black; }
 
-        .big-road-wrap { overflow-x: auto; height: 96px; padding: 3px; box-sizing: border-box; position: relative; }
-        .big-road-grid { display: grid; grid-template-rows: repeat(6, 14px); grid-auto-flow: column; grid-auto-columns: 15px; gap: 1px; height: 90px; }
-        .br-cell { width: 15px; height: 14px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .br-circle { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid; box-sizing: border-box; }
+        .big-road-wrap { overflow-x: auto; height: 72px; padding: 2px; box-sizing: border-box; position: relative; }
+        .big-road-grid { display: grid; grid-template-rows: repeat(6, 11px); grid-auto-flow: column; grid-auto-columns: 12px; gap: 1px; height: 68px; }
+        .br-cell { width: 12px; height: 11px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .br-circle { width: 9px; height: 9px; border-radius: 50%; border: 1px solid; box-sizing: border-box; }
         .br-circle.banker { background: var(--banker-red); border-color: #6a0000; }
         .br-circle.player { background: var(--player-blue); border-color: #0d3c7a; }
-        .br-circle.has-tie::after { content: ''; position: absolute; width: 1.5px; height: 9px; background: #1a8c22; top: 2px; left: 50%; transform: translateX(-50%); }
+        .br-circle.has-tie::after { content: ''; position: absolute; width: 1px; height: 7px; background: #1a8c22; top: 1px; left: 50%; transform: translateX(-50%); }
 
         @media (max-width: 768px) {
             .big-road-wrap { height: 78px; padding: 2px; }
@@ -176,9 +177,9 @@
             .road-row-derived { gap: 5px; }
         }
 
-        .derived-road-wrap { overflow-x: auto; height: 64px; padding: 3px; box-sizing: border-box; }
-        .derived-road-grid { display: grid; grid-template-rows: repeat(4, 14px); grid-auto-flow: column; grid-auto-columns: 15px; gap: 1px; height: 58px; }
-        .dr-cell { width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; }
+        .derived-road-wrap { overflow-x: auto; height: 54px; padding: 2px; box-sizing: border-box; }
+        .derived-road-grid { display: grid; grid-template-rows: repeat(4, 12px); grid-auto-flow: column; grid-auto-columns: 13px; gap: 1px; height: 50px; }
+        .dr-cell { width: 13px; height: 12px; display: flex; align-items: center; justify-content: center; }
         .dr-circle { width: 10px; height: 10px; border-radius: 50%; }
         .dr-circle.rep { background: #e02020; }
         .dr-circle.non { background: var(--player-blue); }
@@ -190,130 +191,181 @@
         .dr-slash.rep::before { background: #e02020; }
         .dr-slash.non::before { background: var(--player-blue); }
 
-        .top-dashboards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
-        .dashboard-box { background: rgba(0,0,0,0.4); border: 2px solid var(--gold); border-radius: 8px; padding: 12px; box-sizing: border-box; }
-        .dashboard-title { text-align: center; color: var(--gold); font-weight: bold; font-size: 1.05rem; letter-spacing: 1px; margin-bottom: 8px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 4px; position: relative; }
-        .fin-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 4px 0; font-family: monospace; }
+        /* ── Dashboards ── */
+        .top-dashboards { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+        .dashboard-box { background: rgba(0,0,0,0.4); border: 1.5px solid var(--gold); border-radius: 6px; padding: 5px 8px; box-sizing: border-box; }
+        .dashboard-title { text-align: center; color: var(--gold); font-weight: bold; font-size: 0.72rem; letter-spacing: 1px; margin-bottom: 3px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 2px; position: relative; }
+        .fin-row { display: flex; justify-content: space-between; font-size: 0.7rem; margin: 1px 0; font-family: monospace; }
+        .fin-divider { border-top: 1px solid rgba(212,175,55,0.2); margin: 3px 0 2px; }
 
-        .header-area { display: flex; justify-content: center; align-items: center; width: 100%; position: relative; margin-bottom: 5px; }
-        .header-title { font-size: 2rem; color: var(--gold); letter-spacing: 3px; text-align: center; font-weight: bold; text-shadow: 2px 2px 4px #000; margin: 0; }
-        .settings-btn { position: absolute; right: 10px; background: none; border: 1px solid var(--gold); color: var(--gold); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+        /* ── Header ── */
+        .header-area { display: flex; justify-content: center; align-items: center; width: 100%; position: relative; margin-bottom: 2px; }
+        .header-title { font-size: 1.15rem; color: var(--gold); letter-spacing: 2px; text-align: center; font-weight: bold; text-shadow: 1px 1px 3px #000; margin: 0; }
+        .settings-btn { position: absolute; right: 10px; background: none; border: 1px solid var(--gold); color: var(--gold); border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
 
+        /* ── Table: flat rectangle, no wasted oval space ── */
         .casino-table {
             background: var(--felt-green);
-            border: 16px solid var(--wood-trim);
-            border-radius: 100px 100px 300px 300px;
-            box-shadow: inset 0 0 100px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.7);
-            padding: 20px 30px 25px;
+            border: 7px solid var(--wood-trim);
+            border-radius: 14px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.5);
+            padding: 7px 10px 8px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-direction: row;
+            align-items: stretch;
+            justify-content: center;
             width: 100%;
             box-sizing: border-box;
             transition: background 0.5s, border-color 0.5s;
+            gap: 8px;
         }
-        .table-score-header { display: flex; justify-content: center; gap: 40px; font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 10px; letter-spacing: 1px; }
-        .cards-felt-area { display: flex; justify-content: center; gap: 60px; width: 100%; margin-bottom: 18px; }
-        .card-slots-group { display: flex; gap: 8px; min-height: 80px; justify-content: center; align-items: center; }
-        .card-placeholder-box { width: 52px; height: 76px; border: 2px dashed rgba(255,255,255,0.25); border-radius: 5px; display: flex; align-items: center; justify-content: center; }
 
-        .betting-layout { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 900px; }
-        .row-main-bets { display: flex; width: 100%; justify-content: center; gap: 20px; }
-        .row-side-bets { display: flex; width: 100%; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        /* ── Cards panel: left side of table ── */
+        .cards-felt-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .table-score-header { display: flex; justify-content: space-around; width: 100%; font-size: 0.78rem; font-weight: bold; color: #fff; letter-spacing: 1px; }
+        .card-rows { display: flex; gap: 10px; }
+        .card-group { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .card-group-label { font-size: 0.6rem; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; }
+        .card-slots-group { display: flex; gap: 3px; justify-content: center; align-items: center; }
+        .card-placeholder-box { width: 30px; height: 42px; border: 1.5px dashed rgba(255,255,255,0.2); border-radius: 3px; }
 
-        .bet-zone { border-radius: 8px; cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; box-shadow: 0 6px 12px rgba(0,0,0,0.4); transition: transform 0.1s, filter 0.1s; border: 2px solid var(--gold); padding: 10px; }
-        .bet-zone:active { transform: scale(0.98); }
+        /* ── Betting panel: right side of table, fills remaining width ── */
+        .betting-layout { display: flex; flex-direction: column; justify-content: center; gap: 4px; flex: 1; }
+        .row-main-bets { display: flex; width: 100%; gap: 4px; }
+        .row-side-bets { display: flex; width: 100%; gap: 4px; flex-wrap: wrap; }
+
+        .bet-zone { border-radius: 5px; cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; transition: transform 0.1s; border: 1.5px solid var(--gold); padding: 4px 3px; flex: 1; min-width: 0; min-height: 48px; }
+        .bet-zone:active { transform: scale(0.97); }
         .bet-zone.disabled-bet { opacity: 0.25; pointer-events: none; }
-        .zone-player { background: var(--player-blue); width: 220px; height: 80px; }
-        .zone-banker { background: var(--banker-red); width: 220px; height: 80px; }
-        .zone-tie { background: var(--tie-green); border: 4px double var(--gold); width: 160px; height: 80px; }
-        .zone-panda { background: var(--panda-purple); width: 155px; height: 64px; }
-        .zone-dragon { background: var(--dragon-orange); width: 155px; height: 64px; }
-        .zone-lucky6 { background: linear-gradient(135deg, #1a4a6b, #0d6b5e); width: 155px; height: 64px; }
-        .zone-tiger { background: linear-gradient(135deg, #5a1a00, #b84000); width: 155px; height: 64px; }
-        .zone-super6 { background: linear-gradient(135deg, #1b5e20, #388e3c); width: 155px; height: 64px; }
-        .zone-bonus { background: linear-gradient(135deg, #4a148c, #7b1fa2); width: 155px; height: 64px; }
-        .zone-natural { background: linear-gradient(135deg, #bf360c, #e64a19); width: 155px; height: 64px; }
+        .zone-player { background: var(--player-blue); }
+        .zone-banker { background: var(--banker-red); }
+        .zone-tie { background: var(--tie-green); border: 2px double var(--gold); }
+        .zone-panda  { background: var(--panda-purple); }
+        .zone-dragon { background: var(--dragon-orange); }
+        .zone-lucky6 { background: linear-gradient(135deg, #1a4a6b, #0d6b5e); }
+        .zone-tiger  { background: linear-gradient(135deg, #5a1a00, #b84000); }
+        .zone-super6 { background: linear-gradient(135deg, #1b5e20, #388e3c); }
+        .zone-bonus  { background: linear-gradient(135deg, #4a148c, #7b1fa2); }
+        .zone-natural{ background: linear-gradient(135deg, #bf360c, #e64a19); }
 
-        .bet-title-text { font-size: 1.4rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 2px; }
-        .bet-sub-text { font-size: 0.7rem; opacity: 0.85; margin-bottom: 3px; line-height: 1.2; }
-        .bet-value-text { font-size: 1.1rem; font-weight: bold; color: #fff; }
+        .bet-title-text { font-size: 0.75rem; font-weight: bold; letter-spacing: 0.3px; line-height: 1.1; }
+        .bet-sub-text { font-size: 0.52rem; opacity: 0.85; line-height: 1.1; }
+        .bet-value-text { font-size: 0.7rem; font-weight: bold; color: #fff; }
 
-        .card { width: 54px; height: 80px; background: white; border-radius: 5px; color: black; display: flex; flex-direction: column; justify-content: space-between; padding: 4px; font-size: 0.9rem; box-shadow: 3px 3px 8px rgba(0,0,0,0.5); font-weight: bold; box-sizing: border-box; }
+        .card { width: 30px; height: 42px; background: white; border-radius: 3px; color: black; display: flex; flex-direction: column; justify-content: space-between; padding: 2px; font-size: 0.6rem; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); font-weight: bold; box-sizing: border-box; }
         .card.red { color: #d32f2f; }
 
-        .controls-row { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 0; width: 100%; }
-        .chip-tray { display: flex; gap: 10px; background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 50px; border: 2px solid var(--gold); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .chip { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border: 3px dashed rgba(255,255,255,0.4); font-size: 0.8rem; transition: transform 0.2s, box-shadow 0.2s; }
-        .chip.active { transform: translateY(-8px) scale(1.08); box-shadow: 0 8px 20px var(--gold); border-style: solid; }
+        /* ── Controls: chips + buttons in ONE compact row ── */
+        .controls-row { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; flex-wrap: wrap; }
+        .chip-tray { display: flex; gap: 4px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 50px; border: 1.5px solid var(--gold); }
+        .chip { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border: 2px dashed rgba(255,255,255,0.4); font-size: 0.55rem; transition: transform 0.15s, box-shadow 0.15s; }
+        .chip.active { transform: translateY(-4px) scale(1.1); box-shadow: 0 4px 10px var(--gold); border-style: solid; }
         .c1{background:#eee;color:#333}.c5{background:#d32f2f}.c25{background:#2e7d32}.c50{background:#1976d2}.c100{background:#333;color:var(--gold)}.c500{background:#6a1b9a}.c1000{background:#ff8f00;color:black}
 
-        .action-buttons-group { display: flex; gap: 20px; width: 100%; justify-content: center; }
-        .main-deal-btn { background: linear-gradient(180deg,#ffe066 0%,var(--gold) 100%); color: black; padding: 12px 60px; font-size: 1.4rem; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.4); text-transform: uppercase; letter-spacing: 1px; }
+        .action-buttons-group { display: flex; gap: 5px; align-items: center; }
+        .main-deal-btn { background: linear-gradient(180deg,#ffe066 0%,var(--gold) 100%); color: black; padding: 6px 22px; font-size: 0.9rem; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.4); text-transform: uppercase; letter-spacing: 1px; }
         .main-deal-btn:active { transform: scale(0.97); }
-        .clear-btn { background: none; border: 2px solid var(--gold); color: var(--gold); padding: 10px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+        .clear-btn { background: none; border: 1.5px solid var(--gold); color: var(--gold); padding: 5px 10px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 0.68rem; }
+        .aux-btn { background: none; border: 1.5px solid var(--gold); color: var(--gold); padding: 5px 9px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 0.65rem; transition: background 0.15s; white-space: nowrap; }
+        .aux-btn:hover { background: rgba(212,175,55,0.15); }
+        .aux-btn:disabled { opacity: 0.3; cursor: default; }
 
-        .win-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; animation: bounce 0.5s infinite alternate; }
+        .win-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; animation: bounce 0.5s infinite alternate; }
         @keyframes bounce { from{transform:translateY(0)}to{transform:translateY(-3px)} }
         .win-flash { animation: flash 0.3s 3; }
         @keyframes flash { 50%{background:white;color:black;box-shadow:0 0 20px white} }
 
-        .coffee-link-wrapper { text-align: center; margin-top: auto; padding-top: 5px; }
-        .coffee-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg,#FFDD00 0%,var(--gold) 100%); color: #000; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.8rem; width: 100%; box-sizing: border-box; box-shadow: 0 3px 6px rgba(0,0,0,0.3); }
+        .coffee-link-wrapper { text-align: center; padding-top: 2px; }
+        .coffee-link { display: inline-flex; align-items: center; justify-content: center; gap: 5px; background: linear-gradient(135deg,#FFDD00 0%,var(--gold) 100%); color: #000; padding: 4px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 0.7rem; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
         #result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); display: none; justify-content: center; align-items: center; z-index: 500; cursor: pointer; animation: fadeInOverlay 0.25s ease; }
         @keyframes fadeInOverlay { from{opacity:0} to{opacity:1} }
-        .result-card { border-radius: 24px; padding: 36px 50px; text-align: center; box-shadow: 0 0 80px rgba(0,0,0,0.9); animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); min-width: 260px; }
+        .result-card { border-radius: 20px; padding: 24px 40px; text-align: center; box-shadow: 0 0 60px rgba(0,0,0,0.9); animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); min-width: 220px; }
         @keyframes popIn { from{transform:scale(0.6);opacity:0} to{transform:scale(1);opacity:1} }
-        .result-title { font-size: 3rem; font-weight: bold; letter-spacing: 3px; margin-bottom: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
-        .result-amount { font-size: 1.8rem; font-weight: bold; margin-bottom: 8px; }
-        .result-tap { font-size: 0.85rem; opacity: 0.6; margin-top: 14px; letter-spacing: 1px; }
+        .result-title { font-size: 2.2rem; font-weight: bold; letter-spacing: 3px; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .result-amount { font-size: 1.4rem; font-weight: bold; margin-bottom: 6px; }
+        .result-tap { font-size: 0.75rem; opacity: 0.6; margin-top: 10px; letter-spacing: 1px; }
 
-        .aux-btn { background: none; border: 2px solid var(--gold); color: var(--gold); padding: 10px 22px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: background 0.15s; }
-        .aux-btn:hover { background: rgba(212,175,55,0.15); }
-        .aux-btn:disabled { opacity: 0.3; cursor: default; }
-
-        .inspector-placeholder-label { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.85rem; margin-top: 10px; }
-        .shoe-preview-container { flex-wrap: wrap; gap: 3px; font-size: 10px; font-family: monospace; margin-top: 5px; max-height: 80px; overflow-y: auto; background: #000; padding: 6px; border-radius: 4px; }
-        .preview-card { color: white; border: 1px solid #333; padding: 1px 3px; min-width: 14px; text-align: center; }
+        .inspector-placeholder-label { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.75rem; margin-top: 6px; }
+        .shoe-preview-container { flex-wrap: wrap; gap: 2px; font-size: 9px; font-family: monospace; margin-top: 4px; max-height: 60px; overflow-y: auto; background: #000; padding: 4px; border-radius: 3px; }
+        .preview-card { color: white; border: 1px solid #333; padding: 1px 2px; min-width: 12px; text-align: center; }
         .next-card { color: var(--gold) !important; border-color: var(--gold) !important; font-weight: bold; }
+        .section-label { font-size: 0.65rem; color: rgba(212,175,55,0.6); text-transform: uppercase; letter-spacing: 2px; }
 
-        .section-label { font-size: 0.7rem; color: rgba(212,175,55,0.6); text-transform: uppercase; letter-spacing: 2px; text-align: left; margin-bottom: 2px; padding-left: 2px; }
-
-        /* Session checking spinner */
         #session-check-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.97); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
-        .session-spinner { width: 48px; height: 48px; border: 4px solid rgba(212,175,55,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+        .session-spinner { width: 40px; height: 40px; border: 4px solid rgba(212,175,55,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 14px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        #session-check-overlay p { color: var(--gold); font-size: 0.9rem; letter-spacing: 2px; }
+        #session-check-overlay p { color: var(--gold); font-size: 0.85rem; letter-spacing: 2px; }
 
-        @media (max-width: 768px) {
-            .aux-btn { padding: 8px 14px; font-size: 0.8rem; }
-            body { padding: 0; background: #08110b; }
-            .game-content { padding: 10px; gap: 10px; }
-            .header-title { font-size: 1.6rem; }
-            .top-dashboards { grid-template-columns: 1fr; }
-            .road-row-derived { gap: 5px; }
-            .casino-table { background: #092414; border: none; border-radius: 12px; box-shadow: none; padding: 15px 10px; }
-            .table-score-header { width: 100%; justify-content: space-around; font-size: 1.1rem; background: rgba(0,0,0,0.4); padding: 8px 0; border-radius: 4px; }
-            .cards-felt-area { flex-direction: row; justify-content: space-around; gap: 10px; margin-bottom: 15px; }
-            .card-slots-group { min-height: 70px; }
-            .card-placeholder-box,.card { width: 44px; height: 68px; font-size: 0.8rem; }
-            .betting-layout { width: 100%; gap: 10px; }
-            .row-main-bets { flex-direction: column; width: 100%; gap: 10px; align-items: center; }
-            .row-side-bets { width: 100%; gap: 8px; justify-content: center; }
-            .bet-zone { width: 100% !important; height: auto !important; padding: 12px 10px; }
-            .zone-panda,.zone-dragon,.zone-lucky6,.zone-tiger,.zone-super6,.zone-bonus,.zone-natural { width: calc(50% - 4px) !important; }
-            .bet-title-text { font-size: 1.25rem; }
-            .bet-value-text { font-size: 1rem; }
-            .controls-row { margin-top: 10px; gap: 12px; }
-            .chip-tray { width: 100%; justify-content: space-between; box-sizing: border-box; padding: 8px 12px; }
-            .chip { width: 38px; height: 38px; font-size: 0.7rem; }
-            .chip.active { transform: translateY(-4px); }
-            .action-buttons-group { flex-wrap: wrap; gap: 8px; width: 100%; align-items: center; justify-content: center; }
-            .main-deal-btn { width: 100%; max-width: 280px; padding: 14px 0; font-size: 1.3rem; }
-            .clear-btn { max-width: 100px; padding: 8px 0; }
+        /* ── Responsive: stack table vertically on narrow screens ── */
+        @media (max-width: 700px) {
+            .casino-table { flex-direction: column; border-radius: 10px; border-width: 5px; padding: 8px; gap: 5px; }
+            .cards-felt-area { flex-direction: row; justify-content: center; gap: 12px; }
+            .card-rows { gap: 14px; }
+            .betting-layout { gap: 4px; }
+            .row-main-bets { gap: 4px; }
+            .row-side-bets { gap: 4px; }
+            .bet-zone { min-height: 38px; padding: 3px 2px; }
+            .bet-title-text { font-size: 0.68rem; }
+            .bet-sub-text { font-size: 0.48rem; }
+            .bet-value-text { font-size: 0.62rem; }
+            .top-dashboards { grid-template-columns: 1fr 1fr; }
+            .controls-row { gap: 5px; }
+            .chip-tray { padding: 4px 8px; gap: 3px; }
+            .chip { width: 28px; height: 28px; font-size: 0.5rem; }
+            .main-deal-btn { padding: 6px 18px; font-size: 0.85rem; }
+            .header-title { font-size: 1rem; letter-spacing: 1px; }
+            .game-content { padding: 4px 6px; gap: 5px; }
+            .road-row-derived { gap: 4px; }
             .casino-mode-grid { grid-template-columns: 1fr; }
         }
+        /* ── Shoe End Overlay ── */
+        #shoe-end-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88); display: flex; justify-content: center;
+            align-items: center; z-index: 600; animation: fadeInOverlay 0.3s ease;
+        }
+        .shoe-end-card {
+            background: linear-gradient(160deg, #0b2e1a 0%, #051a0e 100%);
+            border: 2px solid var(--gold); border-radius: 16px;
+            padding: 28px 32px; text-align: center; min-width: 280px; max-width: 380px;
+            box-shadow: 0 0 60px rgba(0,0,0,0.9), 0 0 30px rgba(212,175,55,0.15);
+            animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .shoe-end-icon { font-size: 2.5rem; margin-bottom: 6px; }
+        .shoe-end-title {
+            font-size: 1.6rem; font-weight: bold; color: var(--gold);
+            letter-spacing: 3px; margin-bottom: 16px; text-shadow: 0 0 12px rgba(212,175,55,0.4);
+        }
+        .shoe-end-stats {
+            background: rgba(0,0,0,0.4); border-radius: 8px; padding: 10px 14px;
+            margin-bottom: 18px; text-align: left; font-size: 0.78rem; font-family: monospace;
+        }
+        .shoe-end-stat-row {
+            display: flex; justify-content: space-between; padding: 2px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .shoe-end-stat-row:last-child { border-bottom: none; }
+        .shoe-end-buttons { display: flex; flex-direction: column; gap: 8px; }
+        .shoe-end-btn {
+            border: none; border-radius: 8px; padding: 10px 16px; font-size: 0.9rem;
+            font-weight: bold; cursor: pointer; letter-spacing: 0.5px; transition: filter 0.15s;
+        }
+        .shoe-end-btn:hover { filter: brightness(1.15); }
+        .save-btn { background: linear-gradient(135deg, #1a5220, #2e7d32); color: #fff; border: 1px solid #4caf50; }
+        .new-btn  { background: linear-gradient(135deg, #1a3a6b, #1976d2); color: #fff; border: 1px solid #42a5f5; }
+        .exit-btn { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.2); font-size: 0.78rem; }
+
+        /* Low cards warning pulse */
+        @keyframes warningPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .low-cards-warn { animation: warningPulse 1s infinite; color: #ff9e9e !important; }
     </style>
 </head>
 <body>
@@ -377,31 +429,57 @@
         </div>
     </div>
 
+    <!-- Shoe End Overlay -->
+    <div id="shoe-end-overlay" style="display:none;">
+        <div class="shoe-end-card">
+            <div class="shoe-end-icon">🃏</div>
+            <div class="shoe-end-title">SHOE COMPLETE</div>
+            <div class="shoe-end-stats" id="shoe-end-stats"></div>
+            <div class="shoe-end-buttons">
+                <button class="shoe-end-btn save-btn" onclick="saveShoe()">💾 Save Shoe Results</button>
+                <button class="shoe-end-btn new-btn" onclick="startNewShoe()">🔀 New Shoe</button>
+                <button class="shoe-end-btn exit-btn" onclick="newGame()">🚪 New Game</button>
+            </div>
+        </div>
+    </div>
+
     <div class="game-content" id="game-container" style="display:none;">
 
         <div class="header-area">
             <div class="header-title">DRAGONFLY TO TIE <span style="font-size:0.9rem;vertical-align:middle;opacity:0.7;">v2.6</span></div>
-            <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
-            <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" style="right:54px;" title="Toggle Sound">🔊</button>
+            <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" style="right:80px;" title="Toggle Sound">🔊</button>
+            <button class="settings-btn" onclick="toggleSettings()" title="Settings" style="right:46px;">⚙️</button>
+            <button class="settings-btn" onclick="newGame()" title="New Game" style="right:10px; font-size:0.6rem; letter-spacing:0.5px; width:34px; border-radius:8px;">NEW</button>
         </div>
 
         <div class="casino-banner" id="casino-banner"></div>
 
         <div class="casino-table" id="casino-table-el">
-            <div class="table-score-header">
-                <span style="color:#9ec2ff;">PLAYER: <span id="p-score">0</span></span>
-                <span style="color:#ff9e9e;">BANKER: <span id="b-score">0</span></span>
-            </div>
+            <!-- Left: cards + scores -->
             <div class="cards-felt-area">
-                <div class="card-slots-group" id="p-cards">
-                    <div class="card-placeholder-box"></div>
-                    <div class="card-placeholder-box"></div>
+                <div class="table-score-header">
+                    <span style="color:#9ec2ff;">P: <span id="p-score">0</span></span>
+                    <span style="color:#ff9e9e;">B: <span id="b-score">0</span></span>
                 </div>
-                <div class="card-slots-group" id="b-cards">
-                    <div class="card-placeholder-box"></div>
-                    <div class="card-placeholder-box"></div>
+                <div class="card-rows">
+                    <div class="card-group">
+                        <div class="card-group-label">PLAYER</div>
+                        <div class="card-slots-group" id="p-cards">
+                            <div class="card-placeholder-box"></div>
+                            <div class="card-placeholder-box"></div>
+                        </div>
+                    </div>
+                    <div class="card-group">
+                        <div class="card-group-label">BANKER</div>
+                        <div class="card-slots-group" id="b-cards">
+                            <div class="card-placeholder-box"></div>
+                            <div class="card-placeholder-box"></div>
+                        </div>
+                    </div>
                 </div>
+                <div id="special-notifications" style="font-size:0.65rem;text-align:center;font-weight:bold;color:var(--gold);min-height:0.9rem;"></div>
             </div>
+            <!-- Right: all bet zones -->
             <div class="betting-layout">
                 <div class="row-main-bets">
                     <div id="bet-player-box" class="bet-zone zone-player" onclick="placeBet('player')">
@@ -422,7 +500,6 @@
                 </div>
                 <div class="row-side-bets" id="side-bets-row"></div>
             </div>
-            <div id="special-notifications" style="min-height:1.2rem;text-align:center;margin-top:8px;font-weight:bold;font-size:1rem;"></div>
         </div>
 
         <div class="controls-row">
@@ -447,11 +524,20 @@
             <div class="dashboard-box">
                 <div class="dashboard-title">FINANCIALS</div>
                 <div class="fin-row"><span>BANKROLL:</span><span class="balance-label" style="color:#fff;font-weight:bold;">$0.00</span></div>
-                <div class="fin-row"><span>SESSION P/L:</span><span class="session-pl-label">$0.00</span></div>
-                <div class="fin-row"><span>SHOE CARDS:</span><span class="shoe-count-label" style="color:var(--gold);">0</span></div>
-                <div class="fin-row"><span>B:</span><span id="stat-b" style="color:#ff9e9e;">0</span>
-                    &nbsp;<span>P:</span><span id="stat-p" style="color:#9ec2ff;">0</span>
-                    &nbsp;<span>T:</span><span id="stat-t" style="color:#7dff7d;">0</span></div>
+                <div class="fin-row"><span>SESSION P/L:</span><span class="session-pl-label">+$0.00</span></div>
+                <div class="fin-row fin-divider"></div>
+                <div class="fin-row"><span>HANDS:</span><span id="stat-hands" style="color:var(--gold);">0</span></div>
+                <div class="fin-row"><span style="color:#ff9e9e;">BANKER:</span><span id="stat-b" style="color:#ff9e9e;">0</span></div>
+                <div class="fin-row"><span style="color:#9ec2ff;">PLAYER:</span><span id="stat-p" style="color:#9ec2ff;">0</span></div>
+                <div class="fin-row"><span style="color:#7dff7d;">TIE:</span><span id="stat-t" style="color:#7dff7d;">0</span></div>
+                <div class="fin-row fin-divider"></div>
+                <div class="fin-row"><span>BETS WON:</span><span id="stat-bets-won" style="color:#7dff7d;">0</span></div>
+                <div class="fin-row"><span>BETS LOST:</span><span id="stat-bets-lost" style="color:#ff9e9e;">0</span></div>
+                <div class="fin-row"><span>VOL WON:</span><span id="stat-vol-won" style="color:#7dff7d;">$0</span></div>
+                <div class="fin-row"><span>VOL LOST:</span><span id="stat-vol-lost" style="color:#ff9e9e;">$0</span></div>
+                <div class="fin-row fin-divider"></div>
+                <div class="fin-row"><span>LAST BET:</span><span id="stat-last-bet" style="color:rgba(255,255,255,0.6);">—</span></div>
+                <div class="fin-row"><span>CARDS LEFT:</span><span class="shoe-count-label" style="color:var(--gold);">0</span></div>
             </div>
             <div class="dashboard-box">
                 <div class="dashboard-title" style="position:relative;">
@@ -465,31 +551,27 @@
 
         <div class="roads-section">
 
-            <!-- Row 1: Bead Plate — full width -->
-            <div class="road-row-bead">
-                <div class="road-box">
-                    <div class="road-title">🔵 ROAD (珠盘路)</div>
+            <!-- Row 1: Bead Plate + Big Road side by side -->
+            <div class="road-row-top">
+                <div class="road-box" id="rb-bead">
+                    <div class="road-title" onclick="toggleRoad('rb-bead')"><span>🔵 BEAD (珠盘路)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="road-zoom-container" id="zoom-bead">
                             <div class="road-zoom-inner">
                                 <div class="bead-plate" id="road-bead"></div>
                             </div>
-                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                            <span class="zoom-hint">pinch/dbl-tap</span>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Row 2: Big Road — full width -->
-            <div class="road-row-big">
-                <div class="road-box">
-                    <div class="road-title">🔴 BIG ROAD (大路)</div>
+                <div class="road-box" id="rb-big">
+                    <div class="road-title" onclick="toggleRoad('rb-big')"><span>🔴 BIG ROAD (大路)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="road-zoom-container" id="zoom-big">
                             <div class="road-zoom-inner">
                                 <div class="big-road-wrap"><div class="big-road-grid" id="road-big"></div></div>
                             </div>
-                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                            <span class="zoom-hint">pinch/dbl-tap</span>
                         </div>
                     </div>
                 </div>
@@ -497,36 +579,36 @@
 
             <!-- Row 3: Derived roads — 3 equal columns -->
             <div class="road-row-derived">
-                <div class="road-box">
-                    <div class="road-title">👁 BIG EYE BOY (大眼仔)</div>
+                <div class="road-box" id="rb-beb">
+                    <div class="road-title" onclick="toggleRoad('rb-beb')"><span>👁 BIG EYE BOY (大眼仔)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="road-zoom-container" id="zoom-beb">
                             <div class="road-zoom-inner">
                                 <div class="derived-road-wrap"><div class="derived-road-grid" id="road-beb"></div></div>
                             </div>
-                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                            <span class="zoom-hint">pinch/dbl-tap</span>
                         </div>
                     </div>
                 </div>
-                <div class="road-box">
-                    <div class="road-title">📍 SMALL ROAD (小路)</div>
+                <div class="road-box" id="rb-small">
+                    <div class="road-title" onclick="toggleRoad('rb-small')"><span>📍 SMALL ROAD (小路)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="road-zoom-container" id="zoom-small">
                             <div class="road-zoom-inner">
                                 <div class="derived-road-wrap"><div class="derived-road-grid" id="road-small"></div></div>
                             </div>
-                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                            <span class="zoom-hint">pinch/dbl-tap</span>
                         </div>
                     </div>
                 </div>
-                <div class="road-box">
-                    <div class="road-title">🪳 COCKROACH PIG (曱甴路)</div>
+                <div class="road-box" id="rb-cock">
+                    <div class="road-title" onclick="toggleRoad('rb-cock')"><span>🪳 COCKROACH PIG (曱甴路)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="road-zoom-container" id="zoom-cock">
                             <div class="road-zoom-inner">
                                 <div class="derived-road-wrap"><div class="derived-road-grid" id="road-cock"></div></div>
                             </div>
-                            <span class="zoom-hint">pinch/dbl-tap to zoom</span>
+                            <span class="zoom-hint">pinch/dbl-tap</span>
                         </div>
                     </div>
                 </div>
@@ -697,7 +779,7 @@
     let bankroll = 0, initialBankroll = 0, selectedChipValue = 25, userEmail = "";
     let currentBets = {};
     let lastBets = {};
-    let stats = { banker:0, player:0, tie:0 };
+    let stats = { banker:0, player:0, tie:0, hands:0, betsWon:0, betsLost:0, volWon:0, volLost:0 };
     let shoe = [], shoeSize = 8, shoeVisible = false;
     let selectedCasino = CASINO_MODES[0];
 
@@ -863,14 +945,184 @@
         initShoe();
         beadHistory = []; bigRoadColumns = []; bigRoadCurrentCol = 0; bigRoadLastNonTie = null;
         bebEntries = []; smallEntries = []; cockEntries = [];
-        stats = { banker:0, player:0, tie:0 };
+        stats = { banker:0, player:0, tie:0, hands:0, betsWon:0, betsLost:0, volWon:0, volLost:0 };
+        shoeEnded = false;
         updateAuxButtons();
         document.getElementById('setup-overlay').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
         renderAllRoads();
         updateUI();
-        // Init zoom on all scoreboards (small delay to ensure layout is ready)
+        saveGameState();
         setTimeout(initAllZoom, 100);
+    }
+
+    function newGame() {
+        if (!confirm('Start a new game? Current progress will be lost.')) return;
+        clearGameState();
+        bankroll = 0; initialBankroll = 0;
+        currentBets = {}; lastBets = {};
+        stats = { banker:0, player:0, tie:0, hands:0, betsWon:0, betsLost:0, volWon:0, volLost:0 };
+        shoe = []; shoeEnded = false;
+        beadHistory = []; bigRoadColumns = []; bigRoadCurrentCol = 0; bigRoadLastNonTie = null;
+        bebEntries = []; smallEntries = []; cockEntries = [];
+        document.getElementById('game-container').style.display = 'none';
+        document.getElementById('shoe-end-overlay').style.display = 'none';
+        buildCasinoGrid();
+        document.getElementById('setup-overlay').style.display = 'flex';
+    }
+
+    function endShoe() {
+        if (shoeEnded) return;
+        shoeEnded = true;
+        dismissResult(); // close any open result card
+        clearBets();
+        clearGameState(); // shoe is done, clear auto-restore
+
+        // Disable DEAL button
+        const dealBtn = document.querySelector('.main-deal-btn');
+        if (dealBtn) { dealBtn.disabled = true; dealBtn.style.opacity = '0.4'; }
+
+        // Build summary stats
+        const pl = bankroll - initialBankroll;
+        const plSign = pl >= 0 ? '+' : '';
+        const plColor = pl >= 0 ? '#7dff7d' : '#ff9e9e';
+        const statsHTML = `
+            <div class="shoe-end-stat-row"><span>Hands Played</span><span style="color:var(--gold);">${stats.hands}</span></div>
+            <div class="shoe-end-stat-row"><span style="color:#ff9e9e;">Banker</span><span style="color:#ff9e9e;">${stats.banker}</span></div>
+            <div class="shoe-end-stat-row"><span style="color:#9ec2ff;">Player</span><span style="color:#9ec2ff;">${stats.player}</span></div>
+            <div class="shoe-end-stat-row"><span style="color:#7dff7d;">Tie</span><span style="color:#7dff7d;">${stats.tie}</span></div>
+            <div class="shoe-end-stat-row" style="margin-top:4px;"><span>Bets Won</span><span style="color:#7dff7d;">${stats.betsWon}</span></div>
+            <div class="shoe-end-stat-row"><span>Bets Lost</span><span style="color:#ff9e9e;">${stats.betsLost}</span></div>
+            <div class="shoe-end-stat-row"><span>Volume Won</span><span style="color:#7dff7d;">$${stats.volWon.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+            <div class="shoe-end-stat-row"><span>Volume Lost</span><span style="color:#ff9e9e;">-$${stats.volLost.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+            <div class="shoe-end-stat-row" style="margin-top:4px;border-top:1px solid rgba(212,175,55,0.3);padding-top:4px;">
+                <span>Final Bankroll</span><span style="font-weight:bold;">$${bankroll.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+            </div>
+            <div class="shoe-end-stat-row">
+                <span>Session P/L</span>
+                <span style="color:${plColor};font-weight:bold;">${plSign}$${Math.abs(pl).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+            </div>`;
+        document.getElementById('shoe-end-stats').innerHTML = statsHTML;
+        document.getElementById('shoe-end-overlay').style.display = 'flex';
+    }
+
+    function saveShoe() {
+        // Build a downloadable JSON summary of the completed shoe
+        const pl = bankroll - initialBankroll;
+        const timestamp = new Date().toISOString().replace('T',' ').substring(0,19);
+        const summary = {
+            savedAt: timestamp,
+            casino: selectedCasino.name,
+            shoeDecks: shoeSize,
+            startBankroll: initialBankroll,
+            endBankroll: bankroll,
+            sessionPL: pl,
+            stats: {
+                hands: stats.hands,
+                banker: stats.banker,
+                player: stats.player,
+                tie: stats.tie,
+                betsWon: stats.betsWon,
+                betsLost: stats.betsLost,
+                volumeWon: stats.volWon,
+                volumeLost: stats.volLost
+            },
+            // Save full bead road as sequence of outcomes
+            results: beadHistory.map(h => ({
+                outcome: h.cls,
+                label: h.label,
+                score: h.score
+            }))
+        };
+        const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dragonfly-shoe-${timestamp.replace(/[: ]/g,'-')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function startNewShoe() {
+        // Keep bankroll, reset shoe and road data only
+        shoeEnded = false;
+        beadHistory = []; bigRoadColumns = []; bigRoadCurrentCol = 0; bigRoadLastNonTie = null;
+        bebEntries = []; smallEntries = []; cockEntries = [];
+        stats = { banker:0, player:0, tie:0, hands:0, betsWon:0, betsLost:0, volWon:0, volLost:0 };
+        initShoe();
+        initBetKeys();
+        // Re-enable DEAL button
+        const dealBtn = document.querySelector('.main-deal-btn');
+        if (dealBtn) { dealBtn.disabled = false; dealBtn.style.opacity = '1'; }
+        document.getElementById('shoe-end-overlay').style.display = 'none';
+        renderAllRoads();
+        updateUI();
+        updateAuxButtons();
+        // Reset stat display
+        ['stat-b','stat-p','stat-t','stat-hands','stat-bets-won','stat-bets-lost'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '0';
+        });
+        ['stat-vol-won','stat-vol-lost'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '$0.00';
+        });
+        const lbEl = document.getElementById('stat-last-bet');
+        if (lbEl) lbEl.textContent = '—';
+        saveGameState();
+        sfxShuffle();
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  SESSION STORAGE — persist game across accidental refresh
+    // ══════════════════════════════════════════════════════════
+    const SAVE_KEY = 'dragonfly_game_state';
+
+    function saveGameState() {
+        try {
+            const state = {
+                bankroll, initialBankroll, shoeSize,
+                currentBets, lastBets, stats,
+                shoe, beadHistory, bigRoadColumns,
+                bigRoadCurrentCol, bigRoadLastNonTie,
+                bebEntries, smallEntries, cockEntries,
+                casinoId: selectedCasino.id,
+                ts: Date.now()
+            };
+            sessionStorage.setItem(SAVE_KEY, JSON.stringify(state));
+        } catch(e) {}
+    }
+
+    function loadGameState() {
+        try {
+            const raw = sessionStorage.getItem(SAVE_KEY);
+            if (!raw) return false;
+            const s = JSON.parse(raw);
+            // Only restore if saved in last 8 hours
+            if (Date.now() - s.ts > 8 * 3600 * 1000) { clearGameState(); return false; }
+            bankroll = s.bankroll;
+            initialBankroll = s.initialBankroll;
+            shoeSize = s.shoeSize;
+            currentBets = s.currentBets || {};
+            lastBets = s.lastBets || {};
+            stats = s.stats || { banker:0, player:0, tie:0 };
+            shoe = s.shoe || [];
+            beadHistory = s.beadHistory || [];
+            bigRoadColumns = s.bigRoadColumns || [];
+            bigRoadCurrentCol = s.bigRoadCurrentCol || 0;
+            bigRoadLastNonTie = s.bigRoadLastNonTie || null;
+            bebEntries = s.bebEntries || [];
+            smallEntries = s.smallEntries || [];
+            cockEntries = s.cockEntries || [];
+            // Restore casino
+            const casino = CASINO_MODES.find(c => c.id === s.casinoId);
+            if (casino) selectedCasino = casino;
+            return true;
+        } catch(e) { return false; }
+    }
+
+    function clearGameState() {
+        try { sessionStorage.removeItem(SAVE_KEY); } catch(e) {}
     }
 
     // ══════════════════════════════════════════════════════════
@@ -884,10 +1136,32 @@
         for (let i=shoe.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [shoe[i],shoe[j]]=[shoe[j],shoe[i]]; }
     }
 
+    // Cut card: shoe ends after this many cards remain (approx 1 deck = 52)
+    let cutCardThreshold = 52;
+    let shoeEnded = false;
+
     function getNextCard() {
-        if (shoeSize===0) return Math.floor(Math.random()*13)+1;
-        if (shoe.length < 10) initShoe();
+        if (shoeSize === 0) return Math.floor(Math.random()*13)+1;
+        if (shoe.length === 0) return 1; // safety — should not happen after endShoe check
         return shoe.pop();
+    }
+
+    // Check BEFORE a hand is dealt whether enough cards remain
+    function canDealHand() {
+        if (shoeSize === 0) return true; // infinite mode
+        return shoe.length >= 6; // need at least 6 for a max hand
+    }
+
+    // Warn when getting close to cut card
+    function updateCardsWarning() {
+        const countEls = document.querySelectorAll('.shoe-count-label');
+        countEls.forEach(el => {
+            if (shoeSize > 0 && shoe.length <= cutCardThreshold) {
+                el.classList.add('low-cards-warn');
+            } else {
+                el.classList.remove('low-cards-warn');
+            }
+        });
     }
 
     // ══════════════════════════════════════════════════════════
@@ -1054,6 +1328,14 @@
     //  GAME LOGIC
     // ══════════════════════════════════════════════════════════
     function playHand() {
+        // Check if shoe is exhausted
+        if (!canDealHand()) {
+            endShoe();
+            return;
+        }
+        // Check if we hit the cut card mid-shoe (will end after this hand)
+        const hitCutCard = (shoeSize > 0 && shoe.length <= cutCardThreshold);
+
         document.querySelectorAll('.bet-zone').forEach(z=>z.classList.remove('win-flash'));
         document.getElementById('special-notifications').innerHTML='';
         sfxDeal(0); sfxDeal(1); sfxDeal(2); sfxDeal(3);
@@ -1072,6 +1354,10 @@
         } else if(bS<=5&&pS>=6&&pS<8){ b.push(getNextCard()); bS=(bS+gV(b[b.length-1]))%10; }
         renderHand(p,b,pS,bS);
         resolve(p,b,pS,bS);
+        // End the shoe after this hand if cut card was reached
+        if (hitCutCard && shoeSize > 0) {
+            setTimeout(endShoe, 2800); // wait for result overlay to show first
+        }
     }
 
     function renderHand(p,b,pS,bS) {
@@ -1209,7 +1495,24 @@
             document.getElementById('special-notifications').innerHTML = notifications.join(' ');
         }
 
-        addToRoads(outcomeType, beadClass, beadLabel);
+        const winScore = outcomeType==='banker' ? bS : outcomeType==='player' ? pS : Math.max(pS,bS);
+        addToRoads(outcomeType, beadClass, beadLabel, winScore);
+
+        // Track extended stats
+        stats.hands++;
+        if (totalWagered > 0) {
+            const netPL = win - totalWagered;
+            if (netPL > 0) { stats.betsWon++; stats.volWon += netPL; }
+            else if (netPL < 0) { stats.betsLost++; stats.volLost += Math.abs(netPL); }
+        }
+
+        // Build last-bet summary
+        const lastBetParts = [];
+        if (lastBets.player > 0) lastBetParts.push(`P:$${lastBets.player}`);
+        if (lastBets.banker > 0) lastBetParts.push(`B:$${lastBets.banker}`);
+        if (lastBets.tie > 0) lastBetParts.push(`T:$${lastBets.tie}`);
+        const lastBetEl = document.getElementById('stat-last-bet');
+        if (lastBetEl) lastBetEl.textContent = lastBetParts.length ? lastBetParts.join(' ') : '—';
 
         for (let k in currentBets) {
             currentBets[k] = 0;
@@ -1221,6 +1524,17 @@
         document.getElementById('stat-b').textContent = stats.banker;
         document.getElementById('stat-p').textContent = stats.player;
         document.getElementById('stat-t').textContent = stats.tie;
+        const handsEl = document.getElementById('stat-hands');
+        if (handsEl) handsEl.textContent = stats.hands;
+        const wonEl = document.getElementById('stat-bets-won');
+        if (wonEl) wonEl.textContent = stats.betsWon;
+        const lostEl = document.getElementById('stat-bets-lost');
+        if (lostEl) lostEl.textContent = stats.betsLost;
+        const vwEl = document.getElementById('stat-vol-won');
+        if (vwEl) vwEl.textContent = '$' + stats.volWon.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+        const vlEl = document.getElementById('stat-vol-lost');
+        if (vlEl) vlEl.textContent = '-$' + stats.volLost.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+        saveGameState();
     }
 
     function showResult(netPL, outcomeType, pS, bS, specialMsg) {
@@ -1258,8 +1572,8 @@
     // ══════════════════════════════════════════════════════════
     //  ROADS
     // ══════════════════════════════════════════════════════════
-    function addToRoads(outcomeType, beadClass, beadLabel) {
-        beadHistory.push({ cls: beadClass, label: beadLabel });
+    function addToRoads(outcomeType, beadClass, beadLabel, winScore) {
+        beadHistory.push({ cls: beadClass, label: beadLabel, score: winScore });
         if (outcomeType === 'tie') {
             if (bigRoadColumns.length > 0) {
                 const lastCol = bigRoadColumns[bigRoadColumns.length-1];
@@ -1346,7 +1660,11 @@
         beadHistory.forEach(entry => {
             const bead = document.createElement('div');
             bead.className = `bead ${entry.cls}`;
-            bead.textContent = entry.label;
+            // Show winning score if available, else label
+            bead.textContent = entry.score !== undefined ? entry.score : entry.label;
+            if (entry.tieScore !== undefined) {
+                bead.title = `T(${entry.tieScore})`;
+            }
             container.appendChild(bead);
         });
         container.scrollLeft = container.scrollWidth;
@@ -1439,8 +1757,12 @@
         if (wrap) wrap.scrollLeft = wrap.scrollWidth;
     }
 
+    function toggleRoad(id) {
+        const box = document.getElementById(id);
+        if (box) box.classList.toggle('collapsed');
+    }
+
     // ══════════════════════════════════════════════════════════
-    //  SHOE INSPECTOR
     // ══════════════════════════════════════════════════════════
     function toggleShoeVisibility() {
         shoeVisible = !shoeVisible;
@@ -1469,6 +1791,7 @@
         document.querySelectorAll('.balance-label').forEach(el=>el.textContent=fmt);
         document.querySelectorAll('.session-pl-label').forEach(el=>{el.textContent=fmtPL;el.style.color=plColor;});
         document.querySelectorAll('.shoe-count-label').forEach(el=>el.textContent=rawCount);
+        updateCardsWarning();
         renderShoePreview();
     }
 
@@ -1599,7 +1922,34 @@
     //  INIT — check session on load
     // ══════════════════════════════════════════════════════════
     window.addEventListener('DOMContentLoaded', () => {
-        checkExistingSession();
+        // Try to restore game in progress first (survives refresh, not tab close)
+        if (loadGameState()) {
+            // We have a saved game — restore it without needing login again
+            hideSplash();
+            initBetKeys();
+            buildSideBetZones();
+            applyCasinoTheme();
+            renderAllRoads();
+            updateUI();
+            updateAuxButtons();
+            document.getElementById('stat-b').textContent = stats.banker;
+            document.getElementById('stat-p').textContent = stats.player;
+            document.getElementById('stat-t').textContent = stats.tie;
+            const handsEl = document.getElementById('stat-hands');
+            if (handsEl) handsEl.textContent = stats.hands || 0;
+            const wonEl = document.getElementById('stat-bets-won');
+            if (wonEl) wonEl.textContent = stats.betsWon || 0;
+            const lostEl = document.getElementById('stat-bets-lost');
+            if (lostEl) lostEl.textContent = stats.betsLost || 0;
+            const vwEl = document.getElementById('stat-vol-won');
+            if (vwEl) vwEl.textContent = '$' + (stats.volWon||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+            const vlEl = document.getElementById('stat-vol-lost');
+            if (vlEl) vlEl.textContent = '-$' + (stats.volLost||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+            document.getElementById('game-container').style.display = 'flex';
+            setTimeout(initAllZoom, 100);
+        } else {
+            checkExistingSession();
+        }
     });
 </script>
 </body>
