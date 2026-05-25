@@ -171,9 +171,10 @@
         .fin-divider { border-top: 1px solid rgba(212,175,55,0.2); margin: 3px 0 2px; }
 
         /* ── Header ── */
-        .header-area { display: flex; justify-content: center; align-items: center; width: 100%; position: relative; margin-bottom: 2px; }
-        .header-title { font-size: 1.15rem; color: var(--gold); letter-spacing: 2px; text-align: center; font-weight: bold; text-shadow: 1px 1px 3px #000; margin: 0; }
-        .settings-btn { position: absolute; right: 10px; background: none; border: 1px solid var(--gold); color: var(--gold); border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
+        .header-area { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; gap: 4px; }
+        .header-title { font-size: 1.15rem; color: var(--gold); letter-spacing: 2px; font-weight: bold; text-shadow: 1px 1px 3px #000; margin: 0; flex: 1; }
+        .header-btns { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .settings-btn { background: none; border: 1px solid var(--gold); color: var(--gold); border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; position: static; flex-shrink: 0; }
 
         /* ── Table: flat rectangle, no wasted oval space ── */
         .casino-table {
@@ -298,7 +299,49 @@
             .road-row-derived { gap: 4px; }
             .casino-mode-grid { grid-template-columns: 1fr; }
         }
-        /* ── Shoe End Overlay ── */
+        /* ── Drag-to-reorder scoreboards ── */
+        .layout-slot { width: 100%; }
+        .layout-slot.drag-over { outline: 2px dashed var(--gold); outline-offset: -2px; border-radius: 6px; background: rgba(212,175,55,0.06); }
+        .drag-handle {
+            display: inline-flex; align-items: center; gap: 4px; cursor: grab;
+            color: rgba(212,175,55,0.5); font-size: 0.6rem; padding: 0 4px;
+            user-select: none; touch-action: none;
+        }
+        .drag-handle:active { cursor: grabbing; }
+        .drag-handle::before { content: '⠿'; font-size: 0.85rem; }
+        .road-box.dragging { opacity: 0.4; transform: scale(0.98); }
+
+        /* Layout customise button in header */
+        #btn-layout { font-size: 0.65rem; }
+
+        /* Layout panel */
+        #layout-panel {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 700;
+            background: #0b2e1a; border: 2px solid var(--gold); border-radius: 14px;
+            padding: 18px 20px; min-width: 280px; max-width: 360px;
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+        }
+        #layout-panel h3 { color: var(--gold); font-size: 0.95rem; letter-spacing: 1px; margin: 0 0 12px; }
+        .layout-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+        .layout-item {
+            display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(212,175,55,0.25); border-radius: 6px; padding: 6px 8px;
+            cursor: grab; user-select: none; font-size: 0.78rem; color: #fff;
+            transition: background 0.15s;
+        }
+        .layout-item:hover { background: rgba(212,175,55,0.1); }
+        .layout-item.li-dragging { opacity: 0.35; }
+        .layout-item .li-icon { font-size: 1rem; flex-shrink: 0; }
+        .layout-item .li-label { flex: 1; }
+        .layout-item .li-arrows { display: flex; flex-direction: column; gap: 1px; }
+        .layout-item .li-arrows button {
+            background: none; border: none; color: rgba(212,175,55,0.6);
+            cursor: pointer; font-size: 0.65rem; padding: 0; line-height: 1;
+        }
+        .layout-item .li-arrows button:hover { color: var(--gold); }
+        .layout-close { position: absolute; top: 10px; right: 12px; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 1.1rem; }
+        .layout-close:hover { color: #fff; }
         #shoe-end-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.88); display: flex; justify-content: center;
@@ -368,6 +411,7 @@
 
     <div id="login-overlay" class="overlay" style="display:none;">
         <div class="setup-card">
+            <button id="login-back-btn" onclick="loginBack()" style="display:none;position:absolute;top:12px;left:14px;background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);border-radius:5px;padding:3px 8px;cursor:pointer;font-size:0.68rem;">← Back to Game</button>
             <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY TO TIE v2.8</h2>
             <div id="email-step">
                 <input type="text" id="user-email" placeholder="Email Address" autocomplete="off" onkeydown="if(event.key==='Enter') handleLogin()">
@@ -484,29 +528,43 @@
         </div>
     </div>
 
+    <!-- Layout Customise Panel -->
+    <div id="layout-panel">
+        <button class="layout-close" onclick="closeLayoutPanel()">✕</button>
+        <h3>🔀 CUSTOMISE LAYOUT</h3>
+        <p style="font-size:0.68rem;color:rgba(255,255,255,0.45);margin:0 0 10px;">Drag or use ▲▼ to reorder sections</p>
+        <div class="layout-list" id="layout-list"></div>
+        <button class="main-deal-btn" onclick="applyLayout();closeLayoutPanel()" style="width:100%;font-size:0.85rem;padding:7px;">✓ Apply</button>
+        <button class="aux-btn" onclick="resetLayout();closeLayoutPanel()" style="width:100%;text-align:center;margin-top:6px;">↺ Reset Default</button>
+    </div>
+
     <div class="game-content" id="game-container" style="display:none;">
 
         <div class="header-area">
             <div class="header-title">DRAGONFLY TO TIE <span style="font-size:0.9rem;vertical-align:middle;opacity:0.7;">v2.8</span></div>
-            <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" style="right:152px;" title="Toggle Sound">🔊</button>
-            <button class="settings-btn" onclick="toggleSettings()" title="Settings" style="right:118px;">⚙️</button>
-            <button id="btn-show-shoe-end" class="settings-btn" onclick="document.getElementById('shoe-end-overlay').style.display='flex'" title="Show shoe summary" style="right:80px;display:none;font-size:0.7rem;">📊</button>
-            <button class="settings-btn" onclick="document.getElementById('load-overlay').style.display='flex'" title="Load saved shoe" style="right:44px;font-size:0.7rem;">📂</button>
-            <button class="settings-btn" onclick="newGame()" title="New Game" style="right:10px;font-size:0.6rem;letter-spacing:0.5px;width:34px;border-radius:8px;">NEW</button>
+            <div class="header-btns">
+                <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
+                <button class="settings-btn" onclick="toggleSettings()" title="Settings">⚙️</button>
+                <button id="btn-show-shoe-end" class="settings-btn" onclick="document.getElementById('shoe-end-overlay').style.display='flex'" title="Show shoe summary" style="display:none;font-size:0.7rem;">📊</button>
+                <button class="settings-btn" onclick="document.getElementById('load-overlay').style.display='flex'" title="Load saved game">📂</button>
+                <button id="btn-layout" class="settings-btn" onclick="openLayoutPanel()" title="Customise Layout">⊞</button>
+                <button class="settings-btn" onclick="newGame()" title="New Game" style="font-size:0.6rem;letter-spacing:0.5px;width:34px;border-radius:8px;">NEW</button>
+            </div>
         </div>
 
+        <div class="layout-slot" data-slot="roads">
         <div class="roads-section">
 
             <!-- Row 1: Bead Plate + Big Road side by side -->
             <div class="road-row-top">
                 <div class="road-box" id="rb-bead">
-                    <div class="road-title" onclick="toggleRoad('rb-bead')"><span>🔵 BEAD (珠盘路)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-title" onclick="toggleRoad('rb-bead')" data-road="rb-bead"><span>🔵 BEAD (珠盘路)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="bead-plate" id="road-bead"></div>
                     </div>
                 </div>
                 <div class="road-box" id="rb-big">
-                    <div class="road-title" onclick="toggleRoad('rb-big')"><span>🔴 BIG ROAD (大路)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-title" onclick="toggleRoad('rb-big')" data-road="rb-big"><span>🔴 BIG ROAD (大路)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="big-road-wrap"><div class="big-road-grid" id="road-big"></div></div>
                     </div>
@@ -516,19 +574,19 @@
             <!-- Row 3: Derived roads — 3 equal columns -->
             <div class="road-row-derived">
                 <div class="road-box" id="rb-beb">
-                    <div class="road-title" onclick="toggleRoad('rb-beb')"><span>👁 BIG EYE BOY (大眼仔)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-title" onclick="toggleRoad('rb-beb')" data-road="rb-beb"><span>👁 BIG EYE BOY (大眼仔)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="derived-road-wrap"><div class="derived-road-grid" id="road-beb"></div></div>
                     </div>
                 </div>
                 <div class="road-box" id="rb-small">
-                    <div class="road-title" onclick="toggleRoad('rb-small')"><span>📍 SMALL ROAD (小路)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-title" onclick="toggleRoad('rb-small')" data-road="rb-small"><span>📍 SMALL ROAD (小路)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="derived-road-wrap"><div class="derived-road-grid" id="road-small"></div></div>
                     </div>
                 </div>
                 <div class="road-box" id="rb-cock">
-                    <div class="road-title" onclick="toggleRoad('rb-cock')"><span>🪳 COCKROACH PIG (曱甴路)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-title" onclick="toggleRoad('rb-cock')" data-road="rb-cock"><span>🪳 COCKROACH PIG (曱甴路)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="derived-road-wrap"><div class="derived-road-grid" id="road-cock"></div></div>
                     </div>
@@ -536,7 +594,9 @@
             </div>
 
         </div>
+        </div><!-- /slot:roads -->
 
+        <div class="layout-slot" data-slot="table">
         <div class="casino-banner" id="casino-banner"></div>
 
         <div class="casino-table" id="casino-table-el">
@@ -600,33 +660,36 @@
             <div class="action-buttons-group">
                 <button id="btn-rebet" class="aux-btn" onclick="reBet()" disabled title="Repeat last bet">↩ REBET</button>
                 <button id="btn-double" class="aux-btn" onclick="doubleBet()" disabled title="Double current bets">✕2 DOUBLE</button>
+                <button class="main-deal-btn" onclick="playHand()">DEAL</button>
                 <button onclick="clearBets()" class="clear-btn">CLEAR</button>
                 <button class="aux-btn" onclick="document.getElementById('add-funds-popup').style.display='block'" title="Add funds to bankroll">+$</button>
                 <button class="aux-btn" onclick="manualSaveGame()" title="Save game now">💾</button>
-                <button class="main-deal-btn" onclick="playHand()">DEAL</button>
             </div>
         </div>
 
 
 
+        </div><!-- /slot:table -->
+
+        <div class="layout-slot" data-slot="financials">
         <div class="top-dashboards" style="grid-template-columns:1fr;">
             <div class="dashboard-box">
-                <div class="dashboard-title">FINANCIALS</div>
-                <div class="fin-row"><span>BANKROLL:</span><span class="balance-label" style="color:#fff;font-weight:bold;">$0.00</span></div>
-                <div class="fin-row"><span>SESSION P/L:</span><span class="session-pl-label">+$0.00</span></div>
+                <div class="dashboard-title fin-title">FINANCIALS</div>
+                <div class="fin-row"><span class="fin-label-bankroll">BANKROLL:</span><span class="balance-label" style="color:#fff;font-weight:bold;">$0.00</span></div>
+                <div class="fin-row"><span class="fin-label-pl">SESSION P/L:</span><span class="session-pl-label">+$0.00</span></div>
                 <div class="fin-row fin-divider"></div>
-                <div class="fin-row"><span>HANDS:</span><span id="stat-hands" style="color:var(--gold);">0</span></div>
-                <div class="fin-row"><span style="color:#ff9e9e;">BANKER:</span><span id="stat-b" style="color:#ff9e9e;">0</span></div>
-                <div class="fin-row"><span style="color:#9ec2ff;">PLAYER:</span><span id="stat-p" style="color:#9ec2ff;">0</span></div>
-                <div class="fin-row"><span style="color:#7dff7d;">TIE:</span><span id="stat-t" style="color:#7dff7d;">0</span></div>
+                <div class="fin-row"><span class="fin-label-hands">HANDS:</span><span id="stat-hands" style="color:var(--gold);">0</span></div>
+                <div class="fin-row"><span class="fin-label-banker" style="color:#ff9e9e;">BANKER:</span><span id="stat-b" style="color:#ff9e9e;">0</span></div>
+                <div class="fin-row"><span class="fin-label-player" style="color:#9ec2ff;">PLAYER:</span><span id="stat-p" style="color:#9ec2ff;">0</span></div>
+                <div class="fin-row"><span class="fin-label-tie" style="color:#7dff7d;">TIE:</span><span id="stat-t" style="color:#7dff7d;">0</span></div>
                 <div class="fin-row fin-divider"></div>
-                <div class="fin-row"><span>BETS WON:</span><span id="stat-bets-won" style="color:#7dff7d;">0</span></div>
-                <div class="fin-row"><span>BETS LOST:</span><span id="stat-bets-lost" style="color:#ff9e9e;">0</span></div>
-                <div class="fin-row"><span>VOL WON:</span><span id="stat-vol-won" style="color:#7dff7d;">$0</span></div>
-                <div class="fin-row"><span>VOL LOST:</span><span id="stat-vol-lost" style="color:#ff9e9e;">$0</span></div>
+                <div class="fin-row"><span class="fin-label-bets-won">BETS WON:</span><span id="stat-bets-won" style="color:#7dff7d;">0</span></div>
+                <div class="fin-row"><span class="fin-label-bets-lost">BETS LOST:</span><span id="stat-bets-lost" style="color:#ff9e9e;">0</span></div>
+                <div class="fin-row"><span class="fin-label-vol-won">VOL WON:</span><span id="stat-vol-won" style="color:#7dff7d;">$0</span></div>
+                <div class="fin-row"><span class="fin-label-vol-lost">VOL LOST:</span><span id="stat-vol-lost" style="color:#ff9e9e;">$0</span></div>
                 <div class="fin-row fin-divider"></div>
-                <div class="fin-row"><span>LAST BET:</span><span id="stat-last-bet" style="color:rgba(255,255,255,0.6);">—</span></div>
-                <div class="fin-row"><span>CARDS LEFT:</span><span class="shoe-count-label" style="color:var(--gold);">0</span></div>
+                <div class="fin-row"><span class="fin-label-last-bet">LAST BET:</span><span id="stat-last-bet" style="color:rgba(255,255,255,0.6);">—</span></div>
+                <div class="fin-row"><span class="fin-label-cards">CARDS LEFT:</span><span class="shoe-count-label" style="color:var(--gold);">0</span></div>
             </div>
 
         </div>
@@ -634,18 +697,25 @@
 
 
 
+        </div><!-- /slot:financials -->
+
+        <div class="layout-slot" data-slot="inspector">
         <div class="dashboard-box" style="margin-top:0;">
             <div class="dashboard-title" style="position:relative;">
-                SHOE INSPECTOR
+                <span class="shoe-inspector-title">SHOE INSPECTOR</span>
                 <button onclick="toggleShoeVisibility()" style="position:absolute;right:0;top:0;background:none;border:none;color:var(--gold);cursor:pointer;font-size:0.75rem;">[TOGGLE]</button>
             </div>
             <div id="shoe-preview-el" class="shoe-preview-container" style="display:none;"></div>
             <div class="inspector-placeholder-label" id="inspector-placeholder">Inspector Engine Standby</div>
         </div>
 
+        </div><!-- /slot:inspector -->
+
+        <div class="layout-slot" data-slot="coffee">
         <div class="coffee-link-wrapper" style="width:100%;max-width:240px;margin:6px auto 0 auto;">
             <a href="https://buymeacoffee.com/baccaratfunk/the-motion-energy" target="_blank" class="coffee-link">☕ Buy me a cup of coffee</a>
         </div>
+        </div><!-- /slot:coffee -->
     </div>
 
 <script>
@@ -710,6 +780,8 @@
         renderAllRoads(); updateUI(); updateAuxButtons();
         refreshAllStatDisplay();
         document.getElementById('game-container').style.display = 'flex';
+        initLayout();
+        initLang();
     }
 
     function showReloginBanner(email) {
@@ -763,7 +835,23 @@
     }
 
     function showLoginOverlay() {
+        // Show "Back to Game" button if a game is in progress
+        const backBtn = document.getElementById('login-back-btn');
+        const inGame = document.getElementById('game-container').style.display !== 'none';
+        const hasSave = !!sessionStorage.getItem('dragonfly_game_state');
+        if (backBtn) backBtn.style.display = (inGame || hasSave) ? 'block' : 'none';
         document.getElementById('login-overlay').style.display = 'flex';
+    }
+
+    function loginBack() {
+        document.getElementById('login-overlay').style.display = 'none';
+        // If game was restored to screen already, just show it
+        if (document.getElementById('game-container').style.display !== 'none') return;
+        // Otherwise try to restore from save
+        if (loadGameState()) {
+            hideSplash();
+            restoreGameToScreen();
+        }
     }
 
     // Save session token returned by backend after successful code verification
@@ -1067,12 +1155,102 @@
     //  MULTILINGUAL (i18n)
     // ══════════════════════════════════════════════════════════
     const TRANSLATIONS = {
-        en: { casinoMode:'CASINO MODE', initialBankroll:'Initial Bankroll:', shoeSize:'Shoe Size:', joinTable:'Join Table', infinite:'Infinite', addFunds:'ADD FUNDS', settings:'Settings' },
-        zh: { casinoMode:'赌场模式', initialBankroll:'初始筹码:', shoeSize:'牌靴大小:', joinTable:'加入牌桌', infinite:'无限', addFunds:'增加筹码', settings:'设置' },
-        ja: { casinoMode:'カジノモード', initialBankroll:'初期バンクロール:', shoeSize:'シューサイズ:', joinTable:'テーブルへ', infinite:'無制限', addFunds:'資金追加', settings:'設定' },
-        ko: { casinoMode:'카지노 모드', initialBankroll:'초기 자금:', shoeSize:'슈 크기:', joinTable:'테이블 참가', infinite:'무한', addFunds:'자금 추가', settings:'설정' },
-        pt: { casinoMode:'MODO CASSINO', initialBankroll:'Banca Inicial:', shoeSize:'Tamanho do Sapatilha:', joinTable:'Entrar na Mesa', infinite:'Infinito', addFunds:'Adicionar Fundos', settings:'Configurações' },
-        es: { casinoMode:'MODO CASINO', initialBankroll:'Banca Inicial:', shoeSize:'Tamaño del Zapato:', joinTable:'Unirse a la Mesa', infinite:'Infinito', addFunds:'Agregar Fondos', settings:'Configuración' },
+        en: {
+            // Setup
+            casinoMode:'CASINO MODE', initialBankroll:'Initial Bankroll:', shoeSize:'Shoe Size:',
+            joinTable:'Join Table', infinite:'Infinite', addFunds:'ADD FUNDS', settings:'Settings',
+            // Table
+            playerLabel:'PLAYER', bankerLabel:'BANKER', tieLabel:'TIE',
+            playerGroup:'PLAYER', bankerGroup:'BANKER',
+            // Buttons
+            deal:'DEAL', clear:'CLEAR', rebet:'↩ REBET', double:'✕2 DOUBLE',
+            addMoney:'+$', save:'💾', newGame:'NEW',
+            // Financials
+            financials:'FINANCIALS', bankroll:'BANKROLL:', sessionPL:'SESSION P/L:',
+            hands:'HANDS:', bankerStat:'BANKER:', playerStat:'PLAYER:', tieStat:'TIE:',
+            betsWon:'BETS WON:', betsLost:'BETS LOST:', volWon:'VOL WON:',
+            volLost:'VOL LOST:', lastBet:'LAST BET:', cardsLeft:'CARDS LEFT:',
+            // Shoe inspector
+            shoeInspector:'SHOE INSPECTOR', inspectorStandby:'Inspector Engine Standby',
+            // Roads
+            beadRoad:'🔵 BEAD', bigRoad:'🔴 BIG ROAD', bigEyeBoy:'👁 BIG EYE BOY',
+            smallRoad:'📍 SMALL ROAD', cockroach:'🪳 COCKROACH PIG',
+        },
+        zh: {
+            casinoMode:'赌场模式', initialBankroll:'初始筹码:', shoeSize:'牌靴大小:',
+            joinTable:'加入牌桌', infinite:'无限', addFunds:'增加筹码', settings:'设置',
+            playerLabel:'闲', bankerLabel:'庄', tieLabel:'和',
+            playerGroup:'闲家', bankerGroup:'庄家',
+            deal:'发牌', clear:'清除', rebet:'↩ 重注', double:'✕2 加倍',
+            addMoney:'+筹', save:'💾', newGame:'新游',
+            financials:'财务', bankroll:'筹码:', sessionPL:'本局盈亏:',
+            hands:'手数:', bankerStat:'庄:', playerStat:'闲:', tieStat:'和:',
+            betsWon:'赢注:', betsLost:'输注:', volWon:'赢额:',
+            volLost:'输额:', lastBet:'上注:', cardsLeft:'余牌:',
+            shoeInspector:'牌靴检视', inspectorStandby:'检视引擎待机',
+            beadRoad:'🔵 珠盘路', bigRoad:'🔴 大路', bigEyeBoy:'👁 大眼仔',
+            smallRoad:'📍 小路', cockroach:'🪳 甴曱路',
+        },
+        ja: {
+            casinoMode:'カジノモード', initialBankroll:'初期残高:', shoeSize:'シューサイズ:',
+            joinTable:'テーブルへ', infinite:'無制限', addFunds:'資金追加', settings:'設定',
+            playerLabel:'プレイヤー', bankerLabel:'バンカー', tieLabel:'タイ',
+            playerGroup:'プレイヤー', bankerGroup:'バンカー',
+            deal:'ディール', clear:'クリア', rebet:'↩ 再ベット', double:'✕2 ダブル',
+            addMoney:'+資金', save:'💾', newGame:'新規',
+            financials:'財務', bankroll:'残高:', sessionPL:'損益:',
+            hands:'ハンド数:', bankerStat:'バンカー:', playerStat:'プレイヤー:', tieStat:'タイ:',
+            betsWon:'勝ち数:', betsLost:'負け数:', volWon:'獲得額:',
+            volLost:'損失額:', lastBet:'前ベット:', cardsLeft:'残りカード:',
+            shoeInspector:'シュー検査', inspectorStandby:'検査エンジン待機中',
+            beadRoad:'🔵 ビーズ', bigRoad:'🔴 ビッグロード', bigEyeBoy:'👁 ビッグアイ',
+            smallRoad:'📍 スモールロード', cockroach:'🪳 コックローチ',
+        },
+        ko: {
+            casinoMode:'카지노 모드', initialBankroll:'초기 자금:', shoeSize:'슈 크기:',
+            joinTable:'테이블 참가', infinite:'무한', addFunds:'자금 추가', settings:'설정',
+            playerLabel:'플레이어', bankerLabel:'뱅커', tieLabel:'타이',
+            playerGroup:'플레이어', bankerGroup:'뱅커',
+            deal:'딜', clear:'클리어', rebet:'↩ 재배팅', double:'✕2 더블',
+            addMoney:'+자금', save:'💾', newGame:'새게임',
+            financials:'재무', bankroll:'자금:', sessionPL:'손익:',
+            hands:'핸드수:', bankerStat:'뱅커:', playerStat:'플레이어:', tieStat:'타이:',
+            betsWon:'승리 배팅:', betsLost:'패배 배팅:', volWon:'수익:',
+            volLost:'손실:', lastBet:'마지막 배팅:', cardsLeft:'남은 카드:',
+            shoeInspector:'슈 검사기', inspectorStandby:'검사 엔진 대기 중',
+            beadRoad:'🔵 비드로드', bigRoad:'🔴 빅로드', bigEyeBoy:'👁 빅아이보이',
+            smallRoad:'📍 스몰로드', cockroach:'🪳 바퀴벌레',
+        },
+        pt: {
+            casinoMode:'MODO CASSINO', initialBankroll:'Banca Inicial:', shoeSize:'Tamanho do Sapatilha:',
+            joinTable:'Entrar na Mesa', infinite:'Infinito', addFunds:'Adicionar Fundos', settings:'Configurações',
+            playerLabel:'JOGADOR', bankerLabel:'BANCO', tieLabel:'EMPATE',
+            playerGroup:'JOGADOR', bankerGroup:'BANCO',
+            deal:'DISTRIBUIR', clear:'LIMPAR', rebet:'↩ REVER', double:'✕2 DOBRAR',
+            addMoney:'+$', save:'💾', newGame:'NOVO',
+            financials:'FINANÇAS', bankroll:'BANCA:', sessionPL:'L/P SESSÃO:',
+            hands:'MÃOS:', bankerStat:'BANCO:', playerStat:'JOGADOR:', tieStat:'EMPATE:',
+            betsWon:'APOSTAS GANHAS:', betsLost:'APOSTAS PERDIDAS:', volWon:'VOL GANHO:',
+            volLost:'VOL PERDIDO:', lastBet:'ÚLTIMA APOSTA:', cardsLeft:'CARTAS REST.:',
+            shoeInspector:'INSPETOR DE SAPATILHA', inspectorStandby:'Motor em Espera',
+            beadRoad:'🔵 CONTAS', bigRoad:'🔴 ESTRADA GRANDE', bigEyeBoy:'👁 OLHO GRANDE',
+            smallRoad:'📍 ESTRADA PEQUENA', cockroach:'🪳 BARATA',
+        },
+        es: {
+            casinoMode:'MODO CASINO', initialBankroll:'Banca Inicial:', shoeSize:'Tamaño del Zapato:',
+            joinTable:'Unirse a la Mesa', infinite:'Infinito', addFunds:'Agregar Fondos', settings:'Configuración',
+            playerLabel:'JUGADOR', bankerLabel:'BANCA', tieLabel:'EMPATE',
+            playerGroup:'JUGADOR', bankerGroup:'BANCA',
+            deal:'REPARTIR', clear:'LIMPIAR', rebet:'↩ REREPARTIR', double:'✕2 DOBLAR',
+            addMoney:'+$', save:'💾', newGame:'NUEVO',
+            financials:'FINANZAS', bankroll:'BANCA:', sessionPL:'G/P SESIÓN:',
+            hands:'MANOS:', bankerStat:'BANCA:', playerStat:'JUGADOR:', tieStat:'EMPATE:',
+            betsWon:'APUESTAS GANADAS:', betsLost:'APUESTAS PERDIDAS:', volWon:'VOL GANADO:',
+            volLost:'VOL PERDIDO:', lastBet:'ÚLTIMA APUESTA:', cardsLeft:'CARTAS REST.:',
+            shoeInspector:'INSPECTOR DE ZAPATO', inspectorStandby:'Motor en Espera',
+            beadRoad:'🔵 CUENTAS', bigRoad:'🔴 CAMINO GRANDE', bigEyeBoy:'👁 OJO GRANDE',
+            smallRoad:'📍 CAMINO PEQUEÑO', cockroach:'🪳 CUCARACHA',
+        },
     };
     let currentLang = 'en';
 
@@ -1080,12 +1258,68 @@
         currentLang = lang;
         localStorage.setItem('df_lang', lang);
         const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+
+        // Update data-i18n elements (setup overlay)
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            if (t[key]) el.textContent = t[key];
+            if (t[key] !== undefined) el.textContent = t[key];
         });
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+
+        // Update language toggle buttons
+        document.querySelectorAll('.lang-btn').forEach(btn =>
+            btn.classList.toggle('active', btn.getAttribute('data-lang') === lang)
+        );
+
+        // ── Live in-game updates ──
+        // Bet zone labels
+        const pBox = document.getElementById('bet-player-box');
+        const bBox = document.getElementById('bet-banker-box');
+        const tBox = document.getElementById('bet-tie-box');
+        if (pBox) pBox.querySelector('.bet-title-text').textContent = t.playerLabel;
+        if (bBox) bBox.querySelector('.bet-title-text').textContent = t.bankerLabel;
+        if (tBox) tBox.querySelector('.bet-title-text').textContent = t.tieLabel;
+
+        // Card group labels
+        document.querySelectorAll('.card-group-label').forEach((el, i) => {
+            el.textContent = i === 0 ? t.playerGroup : t.bankerGroup;
+        });
+
+        // Action buttons (by id/class)
+        const dealBtn = document.querySelector('.main-deal-btn');
+        if (dealBtn) dealBtn.textContent = t.deal;
+        const clearBtn = document.querySelector('.clear-btn');
+        if (clearBtn) clearBtn.textContent = t.clear;
+        const rebetBtn = document.getElementById('btn-rebet');
+        if (rebetBtn) rebetBtn.textContent = t.rebet;
+        const doubleBtn = document.getElementById('btn-double');
+        if (doubleBtn) doubleBtn.textContent = t.double;
+
+        // Financials panel labels
+        const finMap = {
+            '.fin-label-bankroll': t.bankroll, '.fin-label-pl': t.sessionPL,
+            '.fin-label-hands': t.hands, '.fin-label-banker': t.bankerStat,
+            '.fin-label-player': t.playerStat, '.fin-label-tie': t.tieStat,
+            '.fin-label-bets-won': t.betsWon, '.fin-label-bets-lost': t.betsLost,
+            '.fin-label-vol-won': t.volWon, '.fin-label-vol-lost': t.volLost,
+            '.fin-label-last-bet': t.lastBet, '.fin-label-cards': t.cardsLeft,
+        };
+        Object.entries(finMap).forEach(([sel, val]) => {
+            document.querySelectorAll(sel).forEach(el => { if (val) el.textContent = val; });
+        });
+
+        // Dashboard title
+        document.querySelectorAll('.fin-title').forEach(el => el.textContent = t.financials);
+
+        // Shoe inspector
+        document.querySelectorAll('.shoe-inspector-title').forEach(el => el.textContent = t.shoeInspector);
+        const standby = document.getElementById('inspector-placeholder');
+        if (standby && standby.style.display !== 'none') standby.textContent = t.inspectorStandby;
+
+        // Road titles
+        const roadTitleMap = { 'rb-bead': t.beadRoad, 'rb-big': t.bigRoad, 'rb-beb': t.bigEyeBoy, 'rb-small': t.smallRoad, 'rb-cock': t.cockroach };
+        Object.entries(roadTitleMap).forEach(([id, label]) => {
+            const box = document.getElementById(id);
+            if (box) { const span = box.querySelector('.road-title span:first-child'); if (span) span.textContent = label; }
         });
     }
 
@@ -1111,6 +1345,7 @@
         initLang();
         document.getElementById('setup-overlay').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
+        initLayout();
         renderAllRoads();
         updateUI();
         saveGameState();
@@ -2153,6 +2388,155 @@
         if (wrap) wrap.scrollLeft = wrap.scrollWidth;
     }
 
+    // ══════════════════════════════════════════════════════════
+    //  LAYOUT CUSTOMISATION ENGINE
+    // ══════════════════════════════════════════════════════════
+    const LAYOUT_KEY = 'df_layout_order';
+
+    // All draggable slots in their default order
+    const SLOT_DEFS = [
+        { id: 'roads',      icon: '🎯', label: 'Scoreboards' },
+        { id: 'table',      icon: '🎰', label: 'Table + Controls' },
+        { id: 'financials', icon: '💰', label: 'Financials' },
+        { id: 'inspector',  icon: '🔍', label: 'Shoe Inspector' },
+        { id: 'coffee',     icon: '☕', label: 'Support' },
+    ];
+
+    function getLayoutOrder() {
+        try {
+            const saved = localStorage.getItem(LAYOUT_KEY);
+            if (saved) {
+                const order = JSON.parse(saved);
+                // Validate all known slots are present
+                if (SLOT_DEFS.every(s => order.includes(s.id))) return order;
+            }
+        } catch(e) {}
+        return SLOT_DEFS.map(s => s.id);
+    }
+
+    function saveLayoutOrder(order) {
+        localStorage.setItem(LAYOUT_KEY, JSON.stringify(order));
+    }
+
+    function applyLayoutOrder(order) {
+        const container = document.getElementById('game-container');
+        if (!container) return;
+        // Keep non-slot children (header) in place
+        const header = container.querySelector('.header-area');
+        // Remove all slots from DOM
+        const slots = {};
+        container.querySelectorAll('.layout-slot[data-slot]').forEach(el => {
+            slots[el.getAttribute('data-slot')] = el;
+            el.remove();
+        });
+        // Re-append in order after header
+        order.forEach(id => {
+            if (slots[id]) container.appendChild(slots[id]);
+        });
+    }
+
+    function applyLayout() {
+        const order = getCurrentPanelOrder();
+        saveLayoutOrder(order);
+        applyLayoutOrder(order);
+    }
+
+    function resetLayout() {
+        localStorage.removeItem(LAYOUT_KEY);
+        applyLayoutOrder(SLOT_DEFS.map(s => s.id));
+        buildLayoutPanel();
+    }
+
+    // ── Panel UI ──
+    let panelOrder = [];
+
+    function openLayoutPanel() {
+        panelOrder = getLayoutOrder();
+        buildLayoutPanel();
+        document.getElementById('layout-panel').style.display = 'block';
+    }
+
+    function closeLayoutPanel() {
+        document.getElementById('layout-panel').style.display = 'none';
+    }
+
+    function getCurrentPanelOrder() {
+        return [...document.querySelectorAll('#layout-list .layout-item')].map(el => el.getAttribute('data-slot-id'));
+    }
+
+    function buildLayoutPanel() {
+        const list = document.getElementById('layout-list');
+        list.innerHTML = '';
+        const order = panelOrder.length ? panelOrder : getLayoutOrder();
+        order.forEach((id, idx) => {
+            const def = SLOT_DEFS.find(s => s.id === id);
+            if (!def) return;
+            const item = document.createElement('div');
+            item.className = 'layout-item';
+            item.setAttribute('data-slot-id', id);
+            item.draggable = true;
+            item.innerHTML = `
+                <span class="li-icon">${def.icon}</span>
+                <span class="li-label">${def.label}</span>
+                <span class="li-arrows">
+                    <button onclick="movePanelItem('${id}',-1)" title="Move up">▲</button>
+                    <button onclick="movePanelItem('${id}',1)" title="Move down">▼</button>
+                </span>`;
+
+            // Drag events
+            item.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('text/plain', id);
+                item.classList.add('li-dragging');
+            });
+            item.addEventListener('dragend', () => item.classList.remove('li-dragging'));
+            item.addEventListener('dragover', e => { e.preventDefault(); item.style.outline = '1px solid var(--gold)'; });
+            item.addEventListener('dragleave', () => item.style.outline = '');
+            item.addEventListener('drop', e => {
+                e.preventDefault();
+                item.style.outline = '';
+                const draggedId = e.dataTransfer.getData('text/plain');
+                if (draggedId === id) return;
+                const currentOrder = getCurrentPanelOrder();
+                const fromIdx = currentOrder.indexOf(draggedId);
+                const toIdx = currentOrder.indexOf(id);
+                currentOrder.splice(fromIdx, 1);
+                currentOrder.splice(toIdx, 0, draggedId);
+                panelOrder = currentOrder;
+                buildLayoutPanel();
+            });
+
+            // Touch drag (mobile)
+            let touchStartY = 0, touchItem = null;
+            item.addEventListener('touchstart', e => {
+                touchStartY = e.touches[0].clientY;
+                touchItem = id;
+                item.style.opacity = '0.5';
+            }, { passive: true });
+            item.addEventListener('touchend', e => {
+                item.style.opacity = '';
+                const dy = e.changedTouches[0].clientY - touchStartY;
+                if (Math.abs(dy) > 24) movePanelItem(touchItem, dy > 0 ? 1 : -1);
+            });
+
+            list.appendChild(item);
+        });
+    }
+
+    function movePanelItem(id, dir) {
+        const order = getCurrentPanelOrder();
+        const idx = order.indexOf(id);
+        const newIdx = idx + dir;
+        if (newIdx < 0 || newIdx >= order.length) return;
+        [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
+        panelOrder = order;
+        buildLayoutPanel();
+    }
+
+    function initLayout() {
+        const order = getLayoutOrder();
+        applyLayoutOrder(order);
+    }
+
     function toggleRoad(id) {
         const box = document.getElementById(id);
         if (box) box.classList.toggle('collapsed');
@@ -2357,6 +2741,7 @@
         if (loadGameState()) {
             hideSplash();
             restoreGameToScreen();
+            initLayout();
         } else {
             checkExistingSession();
         }
