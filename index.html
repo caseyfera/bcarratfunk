@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Dragonfly To Tie v2.6</title>
+    <title>Dragonfly To Tie v2.8</title>
     <style>
         :root {
             --felt-green: #0a4d2c;
@@ -95,34 +95,6 @@
         .road-title .toggle-arrow { font-size: 0.55rem; opacity: 0.7; transition: transform 0.2s; }
         .road-box.collapsed .road-canvas-wrap { display: none; }
         .road-box.collapsed .toggle-arrow { transform: rotate(180deg); }
-        /* Zoomable scoreboard */
-        .road-zoom-container {
-            position: relative;
-            overflow: hidden;
-            touch-action: none;
-            cursor: zoom-in;
-            border-radius: 4px;
-            width: 100%;
-            height: 100%;
-        }
-        .road-zoom-container.zoomed { cursor: grab; }
-        .road-zoom-container.zoomed:active { cursor: grabbing; }
-        .road-zoom-inner {
-            transform-origin: 0 0;
-            will-change: transform;
-            display: inline-block;
-            min-width: 100%;
-        }
-        .zoom-hint {
-            position: absolute;
-            bottom: 3px;
-            right: 4px;
-            font-size: 0.55rem;
-            color: rgba(212,175,55,0.5);
-            pointer-events: none;
-            letter-spacing: 0.5px;
-            z-index: 2;
-        }
         .road-canvas-wrap { background: var(--road-bg); border-radius: 4px; border: 1px solid var(--road-b); position: relative; overflow: hidden; display: flex; }
 
         .bead-plate { display: grid; grid-template-rows: repeat(6, 11px); grid-auto-flow: column; grid-auto-columns: 11px; gap: 1px; padding: 2px; overflow-x: auto; height: 72px; box-sizing: border-box; }
@@ -362,10 +334,28 @@
         .save-btn { background: linear-gradient(135deg, #1a5220, #2e7d32); color: #fff; border: 1px solid #4caf50; }
         .new-btn  { background: linear-gradient(135deg, #1a3a6b, #1976d2); color: #fff; border: 1px solid #42a5f5; }
         .exit-btn { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.2); font-size: 0.78rem; }
+        .shoe-end-close {
+            position: absolute; top: 10px; right: 12px;
+            background: none; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5);
+            border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+        }
+        .shoe-end-close:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.5); }
+        .shoe-end-card { position: relative; }
 
         /* Low cards warning pulse */
         @keyframes warningPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
         .low-cards-warn { animation: warningPulse 1s infinite; color: #ff9e9e !important; }
+
+        /* Language buttons */
+        .lang-btn { background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.4); color: rgba(255,255,255,0.6); border-radius: 4px; padding: 3px 8px; font-size: 0.65rem; cursor: pointer; transition: all 0.15s; }
+        .lang-btn:hover, .lang-btn.active { background: rgba(212,175,55,0.2); border-color: var(--gold); color: var(--gold); }
+
+        /* Add funds popup */
+        #add-funds-popup { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:700; background:#0b2e1a; border:2px solid var(--gold); border-radius:12px; padding:20px 24px; text-align:center; min-width:240px; box-shadow:0 0 40px rgba(0,0,0,0.8); }
+        #add-funds-popup h3 { color:var(--gold); margin:0 0 14px; font-size:1rem; letter-spacing:1px; }
+        #add-funds-popup input { width:80%; padding:8px; background:#000; color:#fff; border:1px solid var(--gold); border-radius:5px; font-size:1rem; text-align:center; margin-bottom:12px; }
+        #add-funds-popup .btn-row { display:flex; gap:8px; justify-content:center; }
     </style>
 </head>
 <body>
@@ -378,7 +368,7 @@
 
     <div id="login-overlay" class="overlay" style="display:none;">
         <div class="setup-card">
-            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY TO TIE v2.6</h2>
+            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY TO TIE v2.8</h2>
             <div id="email-step">
                 <input type="text" id="user-email" placeholder="Email Address" autocomplete="off" onkeydown="if(event.key==='Enter') handleLogin()">
                 <label style="display:flex;align-items:center;gap:8px;margin:12px auto 0;width:90%;cursor:pointer;font-size:0.75rem;color:rgba(255,255,255,0.6);text-align:left;">
@@ -399,23 +389,33 @@
     </div>
 
     <div id="setup-overlay" class="overlay" style="display:none;">
-        <div class="setup-card">
-            <h2 style="color:var(--gold);font-size:1.4rem;">TABLE SETUP</h2>
-            <p style="margin:8px 0 4px;color:var(--gold);font-size:0.85rem;letter-spacing:1px;">CASINO MODE</p>
+        <div class="setup-card" style="position:relative;">
+            <button id="setup-cancel-btn" onclick="cancelSettings()" style="display:none;position:absolute;top:12px;right:14px;background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:0.85rem;line-height:1;">✕</button>
+            <h2 style="color:var(--gold);font-size:1.4rem;" id="setup-title">TABLE SETUP</h2>
+            <!-- Language selector -->
+            <div style="display:flex;justify-content:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+                <button class="lang-btn active" onclick="setLang('en')" data-lang="en">🇺🇸 EN</button>
+                <button class="lang-btn" onclick="setLang('zh')" data-lang="zh">🇨🇳 中文</button>
+                <button class="lang-btn" onclick="setLang('ja')" data-lang="ja">🇯🇵 日本語</button>
+                <button class="lang-btn" onclick="setLang('ko')" data-lang="ko">🇰🇷 한국어</button>
+                <button class="lang-btn" onclick="setLang('pt')" data-lang="pt">🇧🇷 PT</button>
+                <button class="lang-btn" onclick="setLang('es')" data-lang="es">🇲🇽 ES</button>
+            </div>
+            <p style="margin:8px 0 4px;color:var(--gold);font-size:0.85rem;letter-spacing:1px;" data-i18n="casinoMode">CASINO MODE</p>
             <div class="casino-mode-grid" id="casino-mode-grid"></div>
-            <p style="margin:14px 0 4px;">Initial Bankroll:</p>
+            <p style="margin:14px 0 4px;" data-i18n="initialBankroll">Initial Bankroll:</p>
             <input type="number" id="start-balance" value="5000">
-            <p style="margin:8px 0 4px;">Shoe Size:</p>
+            <p style="margin:8px 0 4px;" data-i18n="shoeSize">Shoe Size:</p>
             <select id="shoe-size">
                 <option value="1">1 Deck</option>
                 <option value="6">6 Decks</option>
                 <option value="8" selected>8 Decks</option>
                 <option value="10">10 Decks</option>
                 <option value="12">12 Decks</option>
-                <option value="0">Infinite</option>
+                <option value="0" data-i18n="infinite">Infinite</option>
             </select>
             <br><br>
-            <button class="main-deal-btn" onclick="startGame()" style="width:100%;font-size:1.1rem;padding:10px 0;">Join Table</button>
+            <button class="main-deal-btn" onclick="startGame()" style="width:100%;font-size:1.1rem;padding:10px 0;" data-i18n="joinTable">Join Table</button>
         </div>
     </div>
 
@@ -432,6 +432,7 @@
     <!-- Shoe End Overlay -->
     <div id="shoe-end-overlay" style="display:none;">
         <div class="shoe-end-card">
+            <button class="shoe-end-close" onclick="minimizeShoeEnd()" title="Close and inspect roads">✕</button>
             <div class="shoe-end-icon">🃏</div>
             <div class="shoe-end-title">SHOE COMPLETE</div>
             <div class="shoe-end-stats" id="shoe-end-stats"></div>
@@ -440,16 +441,100 @@
                 <button class="shoe-end-btn new-btn" onclick="startNewShoe()">🔀 New Shoe</button>
                 <button class="shoe-end-btn exit-btn" onclick="newGame()">🚪 New Game</button>
             </div>
+            <div style="margin-top:10px;font-size:0.65rem;color:rgba(255,255,255,0.35);letter-spacing:0.5px;">✕ to close and inspect roads</div>
+        </div>
+    </div>
+
+    <!-- Load Game Panel (hidden, shown via LOAD button) -->
+    <div id="load-overlay" class="overlay" style="display:none;">
+        <div class="setup-card" style="max-width:460px;position:relative;">
+            <button onclick="document.getElementById('load-overlay').style.display='none'" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--gold);font-size:1.2rem;cursor:pointer;">✕</button>
+            <h2 style="color:var(--gold);font-size:1.2rem;margin-bottom:16px;">📂 LOAD SAVED SHOE</h2>
+            <p style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-bottom:14px;">Select a saved <code>.json</code> file to review its roads or continue playing.</p>
+            <input type="file" id="load-file-input" accept=".json" onchange="loadShoeFile(event)" style="display:none;">
+            <button class="main-deal-btn" onclick="document.getElementById('load-file-input').click()" style="width:100%;margin-bottom:12px;">📁 Choose File</button>
+            <div id="load-preview" style="display:none;text-align:left;">
+                <div style="font-size:0.72rem;color:var(--gold);letter-spacing:1px;margin-bottom:8px;border-bottom:1px solid rgba(212,175,55,0.3);padding-bottom:4px;">SHOE SUMMARY</div>
+                <div id="load-preview-content" style="font-size:0.75rem;font-family:monospace;line-height:1.8;"></div>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+                    <button class="main-deal-btn" id="btn-continue-playing" onclick="continueFromSave()" style="width:100%;background:linear-gradient(135deg,#1a5220,#2e7d32);border:1px solid #4caf50;">▶ Continue Playing</button>
+                    <button class="aux-btn" onclick="reviewLoadedShoe()" style="width:100%;text-align:center;">🔍 Review Roads Only</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Mode Banner (shown when viewing a loaded shoe) -->
+    <div id="review-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:400;background:rgba(0,0,0,0.92);border-top:2px solid var(--gold);padding:8px 16px;display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:0.78rem;color:var(--gold);letter-spacing:1px;">👁 REVIEW MODE — <span id="review-label" style="color:#fff;font-weight:normal;"></span></div>
+        <div style="display:flex;gap:8px;">
+            <button class="aux-btn" onclick="document.getElementById('shoe-end-overlay').style.display='flex'">📊 Show Summary</button>
+            <button class="aux-btn" onclick="exitReviewMode()">✕ Exit Review</button>
+        </div>
+    </div>
+
+    <!-- Add Funds Popup -->
+    <div id="add-funds-popup">
+        <button onclick="document.getElementById('add-funds-popup').style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(255,255,255,0.4);font-size:1rem;cursor:pointer;">✕</button>
+        <h3 data-i18n="addFunds">ADD FUNDS</h3>
+        <input type="number" id="add-funds-input" value="1000" min="1">
+        <div class="btn-row">
+            <button class="aux-btn" onclick="addFunds()">✓ ADD</button>
+            <button class="aux-btn" onclick="document.getElementById('add-funds-popup').style.display='none'">✕ CANCEL</button>
         </div>
     </div>
 
     <div class="game-content" id="game-container" style="display:none;">
 
         <div class="header-area">
-            <div class="header-title">DRAGONFLY TO TIE <span style="font-size:0.9rem;vertical-align:middle;opacity:0.7;">v2.6</span></div>
-            <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" style="right:80px;" title="Toggle Sound">🔊</button>
-            <button class="settings-btn" onclick="toggleSettings()" title="Settings" style="right:46px;">⚙️</button>
-            <button class="settings-btn" onclick="newGame()" title="New Game" style="right:10px; font-size:0.6rem; letter-spacing:0.5px; width:34px; border-radius:8px;">NEW</button>
+            <div class="header-title">DRAGONFLY TO TIE <span style="font-size:0.9rem;vertical-align:middle;opacity:0.7;">v2.8</span></div>
+            <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" style="right:152px;" title="Toggle Sound">🔊</button>
+            <button class="settings-btn" onclick="toggleSettings()" title="Settings" style="right:118px;">⚙️</button>
+            <button id="btn-show-shoe-end" class="settings-btn" onclick="document.getElementById('shoe-end-overlay').style.display='flex'" title="Show shoe summary" style="right:80px;display:none;font-size:0.7rem;">📊</button>
+            <button class="settings-btn" onclick="document.getElementById('load-overlay').style.display='flex'" title="Load saved shoe" style="right:44px;font-size:0.7rem;">📂</button>
+            <button class="settings-btn" onclick="newGame()" title="New Game" style="right:10px;font-size:0.6rem;letter-spacing:0.5px;width:34px;border-radius:8px;">NEW</button>
+        </div>
+
+        <div class="roads-section">
+
+            <!-- Row 1: Bead Plate + Big Road side by side -->
+            <div class="road-row-top">
+                <div class="road-box" id="rb-bead">
+                    <div class="road-title" onclick="toggleRoad('rb-bead')"><span>🔵 BEAD (珠盘路)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-canvas-wrap">
+                        <div class="bead-plate" id="road-bead"></div>
+                    </div>
+                </div>
+                <div class="road-box" id="rb-big">
+                    <div class="road-title" onclick="toggleRoad('rb-big')"><span>🔴 BIG ROAD (大路)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-canvas-wrap">
+                        <div class="big-road-wrap"><div class="big-road-grid" id="road-big"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: Derived roads — 3 equal columns -->
+            <div class="road-row-derived">
+                <div class="road-box" id="rb-beb">
+                    <div class="road-title" onclick="toggleRoad('rb-beb')"><span>👁 BIG EYE BOY (大眼仔)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-canvas-wrap">
+                        <div class="derived-road-wrap"><div class="derived-road-grid" id="road-beb"></div></div>
+                    </div>
+                </div>
+                <div class="road-box" id="rb-small">
+                    <div class="road-title" onclick="toggleRoad('rb-small')"><span>📍 SMALL ROAD (小路)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-canvas-wrap">
+                        <div class="derived-road-wrap"><div class="derived-road-grid" id="road-small"></div></div>
+                    </div>
+                </div>
+                <div class="road-box" id="rb-cock">
+                    <div class="road-title" onclick="toggleRoad('rb-cock')"><span>🪳 COCKROACH PIG (曱甴路)</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-canvas-wrap">
+                        <div class="derived-road-wrap"><div class="derived-road-grid" id="road-cock"></div></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="casino-banner" id="casino-banner"></div>
@@ -516,11 +601,15 @@
                 <button id="btn-rebet" class="aux-btn" onclick="reBet()" disabled title="Repeat last bet">↩ REBET</button>
                 <button id="btn-double" class="aux-btn" onclick="doubleBet()" disabled title="Double current bets">✕2 DOUBLE</button>
                 <button onclick="clearBets()" class="clear-btn">CLEAR</button>
+                <button class="aux-btn" onclick="document.getElementById('add-funds-popup').style.display='block'" title="Add funds to bankroll">+$</button>
+                <button class="aux-btn" onclick="manualSaveGame()" title="Save game now">💾</button>
                 <button class="main-deal-btn" onclick="playHand()">DEAL</button>
             </div>
         </div>
 
-        <div class="top-dashboards">
+
+
+        <div class="top-dashboards" style="grid-template-columns:1fr;">
             <div class="dashboard-box">
                 <div class="dashboard-title">FINANCIALS</div>
                 <div class="fin-row"><span>BANKROLL:</span><span class="balance-label" style="color:#fff;font-weight:bold;">$0.00</span></div>
@@ -539,81 +628,19 @@
                 <div class="fin-row"><span>LAST BET:</span><span id="stat-last-bet" style="color:rgba(255,255,255,0.6);">—</span></div>
                 <div class="fin-row"><span>CARDS LEFT:</span><span class="shoe-count-label" style="color:var(--gold);">0</span></div>
             </div>
-            <div class="dashboard-box">
-                <div class="dashboard-title" style="position:relative;">
-                    SHOE INSPECTOR
-                    <button onclick="toggleShoeVisibility()" style="position:absolute;right:0;top:0;background:none;border:none;color:var(--gold);cursor:pointer;font-size:0.75rem;">[TOGGLE]</button>
-                </div>
-                <div id="shoe-preview-el" class="shoe-preview-container" style="display:none;"></div>
-                <div class="inspector-placeholder-label" id="inspector-placeholder">Inspector Engine Standby</div>
-            </div>
+
         </div>
 
-        <div class="roads-section">
 
-            <!-- Row 1: Bead Plate + Big Road side by side -->
-            <div class="road-row-top">
-                <div class="road-box" id="rb-bead">
-                    <div class="road-title" onclick="toggleRoad('rb-bead')"><span>🔵 BEAD (珠盘路)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
-                        <div class="road-zoom-container" id="zoom-bead">
-                            <div class="road-zoom-inner">
-                                <div class="bead-plate" id="road-bead"></div>
-                            </div>
-                            <span class="zoom-hint">pinch/dbl-tap</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="road-box" id="rb-big">
-                    <div class="road-title" onclick="toggleRoad('rb-big')"><span>🔴 BIG ROAD (大路)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
-                        <div class="road-zoom-container" id="zoom-big">
-                            <div class="road-zoom-inner">
-                                <div class="big-road-wrap"><div class="big-road-grid" id="road-big"></div></div>
-                            </div>
-                            <span class="zoom-hint">pinch/dbl-tap</span>
-                        </div>
-                    </div>
-                </div>
+
+
+        <div class="dashboard-box" style="margin-top:0;">
+            <div class="dashboard-title" style="position:relative;">
+                SHOE INSPECTOR
+                <button onclick="toggleShoeVisibility()" style="position:absolute;right:0;top:0;background:none;border:none;color:var(--gold);cursor:pointer;font-size:0.75rem;">[TOGGLE]</button>
             </div>
-
-            <!-- Row 3: Derived roads — 3 equal columns -->
-            <div class="road-row-derived">
-                <div class="road-box" id="rb-beb">
-                    <div class="road-title" onclick="toggleRoad('rb-beb')"><span>👁 BIG EYE BOY (大眼仔)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
-                        <div class="road-zoom-container" id="zoom-beb">
-                            <div class="road-zoom-inner">
-                                <div class="derived-road-wrap"><div class="derived-road-grid" id="road-beb"></div></div>
-                            </div>
-                            <span class="zoom-hint">pinch/dbl-tap</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="road-box" id="rb-small">
-                    <div class="road-title" onclick="toggleRoad('rb-small')"><span>📍 SMALL ROAD (小路)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
-                        <div class="road-zoom-container" id="zoom-small">
-                            <div class="road-zoom-inner">
-                                <div class="derived-road-wrap"><div class="derived-road-grid" id="road-small"></div></div>
-                            </div>
-                            <span class="zoom-hint">pinch/dbl-tap</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="road-box" id="rb-cock">
-                    <div class="road-title" onclick="toggleRoad('rb-cock')"><span>🪳 COCKROACH PIG (曱甴路)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
-                        <div class="road-zoom-container" id="zoom-cock">
-                            <div class="road-zoom-inner">
-                                <div class="derived-road-wrap"><div class="derived-road-grid" id="road-cock"></div></div>
-                            </div>
-                            <span class="zoom-hint">pinch/dbl-tap</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            <div id="shoe-preview-el" class="shoe-preview-container" style="display:none;"></div>
+            <div class="inspector-placeholder-label" id="inspector-placeholder">Inspector Engine Standby</div>
         </div>
 
         <div class="coffee-link-wrapper" style="width:100%;max-width:240px;margin:6px auto 0 auto;">
@@ -641,8 +668,12 @@
             return;
         }
 
+        // Give the network 4 seconds before falling back gracefully
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
+
         try {
-            const r = await fetch(`${SCRIPT_URL}?email=${encodeURIComponent(savedEmail)}&token=${encodeURIComponent(savedToken)}&sessionCheck=true`);
+            const fetchProm = fetch(`${SCRIPT_URL}?email=${encodeURIComponent(savedEmail)}&token=${encodeURIComponent(savedToken)}&sessionCheck=true`);
+            const r = await Promise.race([fetchProm, timeout]);
             const result = await r.text();
 
             if (result === 'SessionValid') {
@@ -651,17 +682,80 @@
                 buildCasinoGrid();
                 document.getElementById('setup-overlay').style.display = 'flex';
             } else {
-                // Expired or invalid — clear and show login
-                localStorage.removeItem(SESSION_EMAIL_KEY);
+                // Invalid/expired — clear token but check for saved game first
                 localStorage.removeItem(SESSION_TOKEN_KEY);
                 hideSplash();
-                showLoginOverlay();
+                // If they have a game in progress, let them back in with re-auth notice
+                if (loadGameState()) {
+                    showReloginBanner(savedEmail);
+                    restoreGameToScreen();
+                } else {
+                    showLoginOverlay();
+                }
             }
         } catch (e) {
-            // Network error — fall through to login
+            // Network error or timeout — if game exists show it offline, else show login
             hideSplash();
-            showLoginOverlay();
+            if (loadGameState()) {
+                restoreGameToScreen();
+                showToast('⚠️ Offline mode — session unverified', '#b86200');
+            } else {
+                showLoginOverlay();
+            }
         }
+    }
+
+    function restoreGameToScreen() {
+        initBetKeys(); buildSideBetZones(); applyCasinoTheme();
+        renderAllRoads(); updateUI(); updateAuxButtons();
+        refreshAllStatDisplay();
+        document.getElementById('game-container').style.display = 'flex';
+    }
+
+    function showReloginBanner(email) {
+        // Non-blocking banner asking them to re-verify when convenient
+        showToast(`Session expired. <a href="#" onclick="showLoginOverlay();document.getElementById('user-email').value='${email}'" style="color:var(--gold);">Re-login</a>`, '#8b1e1e', 8000);
+    }
+
+    function showToast(msg, bg = '#1a5220', duration = 3000) {
+        let t = document.getElementById('toast-bar');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'toast-bar';
+            t.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:800;padding:7px 16px;border-radius:8px;font-size:0.78rem;letter-spacing:0.5px;transition:opacity 0.4s;pointer-events:none;text-align:center;max-width:320px;';
+            document.body.appendChild(t);
+        }
+        t.style.background = bg;
+        t.style.border = `1px solid ${bg}`;
+        t.innerHTML = msg;
+        t.style.opacity = '1';
+        t.style.pointerEvents = 'auto';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(() => { t.style.opacity = '0'; t.style.pointerEvents = 'none'; }, duration);
+    }
+
+    // ── Midnight auto-save and session renewal ──
+    function scheduleMidnightSave() {
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0);
+        const msUntilMidnight = midnight - now;
+        setTimeout(() => {
+            saveGameState(); // ensure game is persisted
+            // Try to silently refresh session
+            const email = localStorage.getItem(SESSION_EMAIL_KEY);
+            const token = localStorage.getItem(SESSION_TOKEN_KEY);
+            if (email && token) {
+                fetch(`${SCRIPT_URL}?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}&sessionCheck=true`)
+                    .then(r => r.text())
+                    .then(res => {
+                        if (res !== 'SessionValid') {
+                            showToast('⏰ Session expired at midnight — <a href="#" onclick="showLoginOverlay()" style="color:var(--gold);">Re-login</a>', '#8b1e1e', 10000);
+                        }
+                    }).catch(() => {}); // silent fail
+            }
+            scheduleMidnightSave(); // reschedule for next midnight
+        }, msUntilMidnight);
     }
 
     function hideSplash() {
@@ -931,7 +1025,73 @@
 
     function toggleSettings() {
         buildCasinoGrid();
+        // Show cancel button only if a game is already in progress
+        const cancelBtn = document.getElementById('setup-cancel-btn');
+        const inGame = document.getElementById('game-container').style.display !== 'none';
+        if (cancelBtn) cancelBtn.style.display = inGame ? 'block' : 'none';
         document.getElementById('setup-overlay').style.display = 'flex';
+    }
+
+    function cancelSettings() {
+        document.getElementById('setup-overlay').style.display = 'none';
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  ADD FUNDS
+    // ══════════════════════════════════════════════════════════
+    function addFunds() {
+        const amount = parseInt(document.getElementById('add-funds-input').value);
+        if (!amount || amount <= 0) return;
+        bankroll += amount;
+        document.getElementById('add-funds-popup').style.display = 'none';
+        updateUI();
+        saveGameState();
+        // Flash the bankroll label
+        document.querySelectorAll('.balance-label').forEach(el => {
+            el.style.transition = 'color 0.2s';
+            el.style.color = '#7dff7d';
+            setTimeout(() => { el.style.color = '#fff'; }, 800);
+        });
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  MANUAL SAVE
+    // ══════════════════════════════════════════════════════════
+    function manualSaveGame() {
+        saveGameState();
+        // Also offer download
+        saveShoe();
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  MULTILINGUAL (i18n)
+    // ══════════════════════════════════════════════════════════
+    const TRANSLATIONS = {
+        en: { casinoMode:'CASINO MODE', initialBankroll:'Initial Bankroll:', shoeSize:'Shoe Size:', joinTable:'Join Table', infinite:'Infinite', addFunds:'ADD FUNDS', settings:'Settings' },
+        zh: { casinoMode:'赌场模式', initialBankroll:'初始筹码:', shoeSize:'牌靴大小:', joinTable:'加入牌桌', infinite:'无限', addFunds:'增加筹码', settings:'设置' },
+        ja: { casinoMode:'カジノモード', initialBankroll:'初期バンクロール:', shoeSize:'シューサイズ:', joinTable:'テーブルへ', infinite:'無制限', addFunds:'資金追加', settings:'設定' },
+        ko: { casinoMode:'카지노 모드', initialBankroll:'초기 자금:', shoeSize:'슈 크기:', joinTable:'테이블 참가', infinite:'무한', addFunds:'자금 추가', settings:'설정' },
+        pt: { casinoMode:'MODO CASSINO', initialBankroll:'Banca Inicial:', shoeSize:'Tamanho do Sapatilha:', joinTable:'Entrar na Mesa', infinite:'Infinito', addFunds:'Adicionar Fundos', settings:'Configurações' },
+        es: { casinoMode:'MODO CASINO', initialBankroll:'Banca Inicial:', shoeSize:'Tamaño del Zapato:', joinTable:'Unirse a la Mesa', infinite:'Infinito', addFunds:'Agregar Fondos', settings:'Configuración' },
+    };
+    let currentLang = 'en';
+
+    function setLang(lang) {
+        currentLang = lang;
+        localStorage.setItem('df_lang', lang);
+        const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key]) el.textContent = t[key];
+        });
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+        });
+    }
+
+    function initLang() {
+        const saved = localStorage.getItem('df_lang') || 'en';
+        setLang(saved);
     }
 
     function startGame() {
@@ -948,12 +1108,12 @@
         stats = { banker:0, player:0, tie:0, hands:0, betsWon:0, betsLost:0, volWon:0, volLost:0 };
         shoeEnded = false;
         updateAuxButtons();
+        initLang();
         document.getElementById('setup-overlay').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
         renderAllRoads();
         updateUI();
         saveGameState();
-        setTimeout(initAllZoom, 100);
     }
 
     function newGame() {
@@ -1007,16 +1167,19 @@
     }
 
     function saveShoe() {
-        // Build a downloadable JSON summary of the completed shoe
         const pl = bankroll - initialBankroll;
         const timestamp = new Date().toISOString().replace('T',' ').substring(0,19);
+        const midSession = !shoeEnded && shoe.length > 0;
         const summary = {
             savedAt: timestamp,
             casino: selectedCasino.name,
+            casinoId: selectedCasino.id,
             shoeDecks: shoeSize,
             startBankroll: initialBankroll,
             endBankroll: bankroll,
             sessionPL: pl,
+            midSession,                      // flag so loader knows this is resumable
+            shoe: midSession ? shoe : [],    // remaining cards if mid-session
             stats: {
                 hands: stats.hands,
                 banker: stats.banker,
@@ -1027,7 +1190,6 @@
                 volumeWon: stats.volWon,
                 volumeLost: stats.volLost
             },
-            // Save full bead road as sequence of outcomes
             results: beadHistory.map(h => ({
                 outcome: h.cls,
                 label: h.label,
@@ -1038,9 +1200,10 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `dragonfly-shoe-${timestamp.replace(/[: ]/g,'-')}.json`;
+        a.download = `dragonfly-${midSession ? 'session' : 'shoe'}-${timestamp.replace(/[: ]/g,'-')}.json`;
         a.click();
         URL.revokeObjectURL(url);
+        showToast('💾 Saved!', '#1a5220', 2000);
     }
 
     function startNewShoe() {
@@ -1059,26 +1222,268 @@
         updateUI();
         updateAuxButtons();
         // Reset stat display
-        ['stat-b','stat-p','stat-t','stat-hands','stat-bets-won','stat-bets-lost'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = '0';
-        });
-        ['stat-vol-won','stat-vol-lost'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = '$0.00';
-        });
-        const lbEl = document.getElementById('stat-last-bet');
-        if (lbEl) lbEl.textContent = '—';
+        lastBetSummary = '—';
+        refreshAllStatDisplay();
         saveGameState();
         sfxShuffle();
     }
 
+    function minimizeShoeEnd() {
+        document.getElementById('shoe-end-overlay').style.display = 'none';
+        // Show the 📊 button so they can reopen it
+        const btn = document.getElementById('btn-show-shoe-end');
+        if (btn) btn.style.display = 'flex';
+    }
+
     // ══════════════════════════════════════════════════════════
-    //  SESSION STORAGE — persist game across accidental refresh
+    //  LOAD & REVIEW SAVED SHOE
+    // ══════════════════════════════════════════════════════════
+    let loadedShoeData = null;
+
+    function loadShoeFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                loadedShoeData = JSON.parse(e.target.result);
+                const s = loadedShoeData;
+                const pl = (s.sessionPL || 0);
+                const plFmt = (pl >= 0 ? '+$' : '-$') + Math.abs(pl).toFixed(2);
+                const plColor = pl >= 0 ? '#7dff7d' : '#ff9e9e';
+                const isMid = s.midSession && s.shoe && s.shoe.length >= 6;
+                const statusBadge = isMid
+                    ? `<span style="background:#1a5220;border:1px solid #4caf50;color:#7dff7d;border-radius:4px;padding:1px 6px;font-size:0.65rem;">MID-SESSION · ${s.shoe.length} cards left</span>`
+                    : `<span style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);border-radius:4px;padding:1px 6px;font-size:0.65rem;">COMPLETED SHOE</span>`;
+                document.getElementById('load-preview-content').innerHTML = `
+                    <div style="margin-bottom:6px;">${statusBadge}</div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,0.5);">Saved</span><span>${s.savedAt || '—'}</span></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,0.5);">Casino</span><span>${s.casino || '—'}</span></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,0.5);">Shoe</span><span>${s.shoeDecks} deck${s.shoeDecks>1?'s':''}</span></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,0.5);">Hands</span><span style="color:var(--gold);">${s.stats?.hands || s.results?.length || '?'}</span></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,0.5);">B / P / T</span><span><span style="color:#ff9e9e;">${s.stats?.banker||0}</span> / <span style="color:#9ec2ff;">${s.stats?.player||0}</span> / <span style="color:#7dff7d;">${s.stats?.tie||0}</span></span></div>
+                    <div style="display:flex;justify-content:space-between;border-top:1px solid rgba(212,175,55,0.2);margin-top:4px;padding-top:4px;"><span style="color:rgba(255,255,255,0.5);">Bankroll</span><span>$${(s.endBankroll||0).toLocaleString()}</span></div>
+                    <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,0.5);">Session P/L</span><span style="color:${plColor};font-weight:bold;">${plFmt}</span></div>
+                `;
+                // Show/dim the Continue button based on whether resumable
+                const contBtn = document.getElementById('btn-continue-playing');
+                if (contBtn) {
+                    contBtn.style.opacity = '1';
+                    contBtn.style.pointerEvents = 'auto';
+                    contBtn.textContent = isMid ? '▶ Continue Playing' : '▶ Continue From Bankroll';
+                }
+                document.getElementById('load-preview').style.display = 'block';
+            } catch(err) {
+                alert('Could not read file. Make sure it is a valid Dragonfly save file.');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function reviewLoadedShoe() {
+        if (!loadedShoeData) return;
+        const s = loadedShoeData;
+        document.getElementById('load-overlay').style.display = 'none';
+
+        // Rebuild road data from saved results array
+        beadHistory = [];
+        bigRoadColumns = []; bigRoadCurrentCol = 0; bigRoadLastNonTie = null;
+        bebEntries = []; smallEntries = []; cockEntries = [];
+
+        (s.results || []).forEach(r => {
+            // Map saved outcome label to outcomeType
+            const cls = r.outcome || r.cls || '';
+            const label = r.label || '';
+            const score = r.score;
+            let outcomeType = cls.includes('banker') || cls.includes('dragon') ? 'banker'
+                           : cls.includes('player') || cls.includes('panda')  ? 'player'
+                           : 'tie';
+            beadHistory.push({ cls, label, score });
+            if (outcomeType === 'tie') {
+                if (bigRoadColumns.length > 0) {
+                    const lc = bigRoadColumns[bigRoadColumns.length-1];
+                    if (lc.length > 0) lc[lc.length-1].tieCount++;
+                }
+            } else {
+                const isNewType = bigRoadLastNonTie !== outcomeType;
+                if (bigRoadColumns.length === 0 || isNewType) {
+                    bigRoadColumns.push([{ type: outcomeType, tieCount: 0, col: bigRoadColumns.length, row: 0 }]);
+                } else {
+                    const lastCol = bigRoadColumns[bigRoadColumns.length-1];
+                    const lastEntry = lastCol[lastCol.length-1];
+                    if (lastEntry.row < 5) {
+                        lastCol.push({ type: outcomeType, tieCount: 0, col: lastEntry.col, row: lastEntry.row + 1 });
+                    } else {
+                        bigRoadColumns.push([{ type: outcomeType, tieCount: 0, col: lastEntry.col + 1, row: 5, dragonTail: true }]);
+                    }
+                }
+                bigRoadLastNonTie = outcomeType;
+                computeDerivedRoads(outcomeType);
+            }
+        });
+
+        // Populate shoe-end summary from loaded data
+        const pl = s.sessionPL;
+        const plSign = pl >= 0 ? '+' : '';
+        const plColor = pl >= 0 ? '#7dff7d' : '#ff9e9e';
+        const statsHTML = `
+            <div class="shoe-end-stat-row"><span>Hands Played</span><span style="color:var(--gold);">${s.stats?.hands || s.results?.length || 0}</span></div>
+            <div class="shoe-end-stat-row"><span style="color:#ff9e9e;">Banker</span><span style="color:#ff9e9e;">${s.stats?.banker||0}</span></div>
+            <div class="shoe-end-stat-row"><span style="color:#9ec2ff;">Player</span><span style="color:#9ec2ff;">${s.stats?.player||0}</span></div>
+            <div class="shoe-end-stat-row"><span style="color:#7dff7d;">Tie</span><span style="color:#7dff7d;">${s.stats?.tie||0}</span></div>
+            <div class="shoe-end-stat-row" style="margin-top:4px;"><span>Bets Won</span><span style="color:#7dff7d;">${s.stats?.betsWon||0}</span></div>
+            <div class="shoe-end-stat-row"><span>Bets Lost</span><span style="color:#ff9e9e;">${s.stats?.betsLost||0}</span></div>
+            <div class="shoe-end-stat-row"><span>Volume Won</span><span style="color:#7dff7d;">$${(s.stats?.volumeWon||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+            <div class="shoe-end-stat-row"><span>Volume Lost</span><span style="color:#ff9e9e;">-$${(s.stats?.volumeLost||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+            <div class="shoe-end-stat-row" style="margin-top:4px;border-top:1px solid rgba(212,175,55,0.3);padding-top:4px;">
+                <span>Final Bankroll</span><span style="font-weight:bold;">$${(s.endBankroll||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+            </div>
+            <div class="shoe-end-stat-row">
+                <span>Session P/L</span>
+                <span style="color:${plColor};font-weight:bold;">${plSign}$${Math.abs(pl||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+            </div>`;
+        document.getElementById('shoe-end-stats').innerHTML = statsHTML;
+
+        // Show the game container if not already visible
+        document.getElementById('game-container').style.display = 'flex';
+        renderAllRoads();
+
+        // Show review banner and hide game controls
+        const banner = document.getElementById('review-banner');
+        banner.style.display = 'flex';
+        document.getElementById('review-label').textContent = `${s.casino || ''} · ${s.savedAt || ''} · ${s.results?.length || 0} hands`;
+        document.getElementById('btn-show-shoe-end').style.display = 'flex';
+
+        // Disable betting in review mode
+        document.querySelectorAll('.bet-zone, .chip, .main-deal-btn, #btn-rebet, #btn-double').forEach(el => {
+            el.style.pointerEvents = 'none'; el.style.opacity = '0.3';
+        });
+    }
+
+    function continueFromSave() {
+        if (!loadedShoeData) return;
+        const s = loadedShoeData;
+        document.getElementById('load-overlay').style.display = 'none';
+
+        // ── Restore casino mode ──
+        const casino = CASINO_MODES.find(c => c.name === s.casino || c.id === s.casinoId);
+        if (casino) selectedCasino = casino;
+
+        // ── Restore bankroll ──
+        bankroll = s.endBankroll || s.startBankroll || 5000;
+        initialBankroll = s.startBankroll || bankroll;
+        shoeSize = s.shoeDecks || 8;
+
+        // ── Restore stats ──
+        stats = {
+            banker:    s.stats?.banker    || 0,
+            player:    s.stats?.player    || 0,
+            tie:       s.stats?.tie       || 0,
+            hands:     s.stats?.hands     || s.results?.length || 0,
+            betsWon:   s.stats?.betsWon   || 0,
+            betsLost:  s.stats?.betsLost  || 0,
+            volWon:    s.stats?.volumeWon  || 0,
+            volLost:   s.stats?.volumeLost || 0,
+        };
+
+        // ── Rebuild road history ──
+        beadHistory = [];
+        bigRoadColumns = []; bigRoadCurrentCol = 0; bigRoadLastNonTie = null;
+        bebEntries = []; smallEntries = []; cockEntries = [];
+
+        (s.results || []).forEach(r => {
+            const cls = r.outcome || r.cls || '';
+            const label = r.label || '';
+            const score = r.score;
+            let outcomeType = cls.includes('banker') || cls.includes('dragon') ? 'banker'
+                           : cls.includes('player') || cls.includes('panda')  ? 'player'
+                           : 'tie';
+            beadHistory.push({ cls, label, score });
+            if (outcomeType === 'tie') {
+                if (bigRoadColumns.length > 0) {
+                    const lc = bigRoadColumns[bigRoadColumns.length-1];
+                    if (lc.length > 0) lc[lc.length-1].tieCount++;
+                }
+            } else {
+                const isNewType = bigRoadLastNonTie !== outcomeType;
+                if (bigRoadColumns.length === 0 || isNewType) {
+                    bigRoadColumns.push([{ type: outcomeType, tieCount: 0, col: bigRoadColumns.length, row: 0 }]);
+                } else {
+                    const lastCol = bigRoadColumns[bigRoadColumns.length-1];
+                    const lastEntry = lastCol[lastCol.length-1];
+                    if (lastEntry.row < 5) {
+                        lastCol.push({ type: outcomeType, tieCount: 0, col: lastEntry.col, row: lastEntry.row + 1 });
+                    } else {
+                        bigRoadColumns.push([{ type: outcomeType, tieCount: 0, col: lastEntry.col + 1, row: 5, dragonTail: true }]);
+                    }
+                }
+                bigRoadLastNonTie = outcomeType;
+                computeDerivedRoads(outcomeType);
+            }
+        });
+
+        // ── Restore shoe if mid-session save, otherwise deal fresh shoe ──
+        shoeEnded = false;
+        if (s.shoe && s.shoe.length >= 6) {
+            // Mid-session save — use the remaining shoe cards
+            shoe = s.shoe;
+            showToast(`🃏 Resumed with ${shoe.length} cards remaining`, '#1a5220');
+        } else {
+            // Completed shoe — start fresh shoe, road history kept
+            initShoe();
+            showToast('🔀 New shoe dealt — road history restored from save', '#1a3a6b', 4000);
+        }
+
+        // ── Bring up the game ──
+        initBetKeys();
+        buildSideBetZones();
+        applyCasinoTheme();
+        updateAuxButtons();
+        lastBetSummary = '—';
+        lastSavedHandCount = stats.hands; // mark as "saved" so no false warning
+        loadedShoeData = null;
+
+        // Ensure deal button is enabled
+        const dealBtn = document.querySelector('.main-deal-btn');
+        if (dealBtn) { dealBtn.disabled = false; dealBtn.style.opacity = '1'; }
+
+        document.getElementById('game-container').style.display = 'flex';
+        document.getElementById('review-banner').style.display = 'none';
+        document.getElementById('btn-show-shoe-end').style.display = 'none';
+        document.getElementById('shoe-end-overlay').style.display = 'none';
+
+        renderAllRoads();
+        updateUI();
+        refreshAllStatDisplay();
+        saveGameState();
+    }
+
+    function exitReviewMode() {
+        loadedShoeData = null;
+        document.getElementById('review-banner').style.display = 'none';
+        document.getElementById('shoe-end-overlay').style.display = 'none';
+        document.getElementById('btn-show-shoe-end').style.display = 'none';
+        // Re-enable betting controls
+        document.querySelectorAll('.bet-zone, .chip, .main-deal-btn, #btn-rebet, #btn-double').forEach(el => {
+            el.style.pointerEvents = ''; el.style.opacity = '';
+        });
+        // If there was an active game, restore it; otherwise go to setup
+        if (loadGameState()) {
+            hideSplash();
+            initBetKeys(); buildSideBetZones(); applyCasinoTheme();
+            renderAllRoads(); updateUI(); updateAuxButtons();
+        } else {
+            document.getElementById('game-container').style.display = 'none';
+            buildCasinoGrid();
+            document.getElementById('setup-overlay').style.display = 'flex';
+        }
+    }
     // ══════════════════════════════════════════════════════════
     const SAVE_KEY = 'dragonfly_game_state';
 
     function saveGameState() {
+        markSaved();
         try {
             const state = {
                 bankroll, initialBankroll, shoeSize,
@@ -1087,6 +1492,7 @@
                 bigRoadCurrentCol, bigRoadLastNonTie,
                 bebEntries, smallEntries, cockEntries,
                 casinoId: selectedCasino.id,
+                lastBetSummary,
                 ts: Date.now()
             };
             sessionStorage.setItem(SAVE_KEY, JSON.stringify(state));
@@ -1114,6 +1520,7 @@
             bebEntries = s.bebEntries || [];
             smallEntries = s.smallEntries || [];
             cockEntries = s.cockEntries || [];
+            lastBetSummary = s.lastBetSummary || '—';
             // Restore casino
             const casino = CASINO_MODES.find(c => c.id === s.casinoId);
             if (casino) selectedCasino = casino;
@@ -1136,8 +1543,8 @@
         for (let i=shoe.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [shoe[i],shoe[j]]=[shoe[j],shoe[i]]; }
     }
 
-    // Cut card: shoe ends after this many cards remain (approx 1 deck = 52)
-    let cutCardThreshold = 52;
+    // Cut card: shoe ends after this many cards remain
+    let cutCardThreshold = 14; // ~14 cards = reasonable cut regardless of shoe size
     let shoeEnded = false;
 
     function getNextCard() {
@@ -1149,7 +1556,7 @@
     // Check BEFORE a hand is dealt whether enough cards remain
     function canDealHand() {
         if (shoeSize === 0) return true; // infinite mode
-        return shoe.length >= 6; // need at least 6 for a max hand
+        return shoe.length >= 6; // need at least 6 for a max hand (player+banker each get up to 3)
     }
 
     // Warn when getting close to cut card
@@ -1511,8 +1918,9 @@
         if (lastBets.player > 0) lastBetParts.push(`P:$${lastBets.player}`);
         if (lastBets.banker > 0) lastBetParts.push(`B:$${lastBets.banker}`);
         if (lastBets.tie > 0) lastBetParts.push(`T:$${lastBets.tie}`);
+        lastBetSummary = lastBetParts.length ? lastBetParts.join(' ') : '—';
         const lastBetEl = document.getElementById('stat-last-bet');
-        if (lastBetEl) lastBetEl.textContent = lastBetParts.length ? lastBetParts.join(' ') : '—';
+        if (lastBetEl) lastBetEl.textContent = lastBetSummary;
 
         for (let k in currentBets) {
             currentBets[k] = 0;
@@ -1521,19 +1929,7 @@
         }
         updateUI();
         updateAuxButtons();
-        document.getElementById('stat-b').textContent = stats.banker;
-        document.getElementById('stat-p').textContent = stats.player;
-        document.getElementById('stat-t').textContent = stats.tie;
-        const handsEl = document.getElementById('stat-hands');
-        if (handsEl) handsEl.textContent = stats.hands;
-        const wonEl = document.getElementById('stat-bets-won');
-        if (wonEl) wonEl.textContent = stats.betsWon;
-        const lostEl = document.getElementById('stat-bets-lost');
-        if (lostEl) lostEl.textContent = stats.betsLost;
-        const vwEl = document.getElementById('stat-vol-won');
-        if (vwEl) vwEl.textContent = '$' + stats.volWon.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-        const vlEl = document.getElementById('stat-vol-lost');
-        if (vlEl) vlEl.textContent = '-$' + stats.volLost.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+        refreshAllStatDisplay();
         saveGameState();
     }
 
@@ -1921,32 +2317,46 @@
     // ══════════════════════════════════════════════════════════
     //  INIT — check session on load
     // ══════════════════════════════════════════════════════════
+    //  UNSAVED CHANGES WARNING
+    // ══════════════════════════════════════════════════════════
+    let lastSavedHandCount = 0;
+    let lastBetSummary = '—';
+
+    function markSaved() {
+        lastSavedHandCount = stats.hands;
+    }
+
+    function hasUnsavedChanges() {
+        const inGame = document.getElementById('game-container').style.display !== 'none';
+        return inGame && stats.hands > 0 && stats.hands !== lastSavedHandCount;
+    }
+
+    window.addEventListener('beforeunload', (e) => {
+        if (hasUnsavedChanges()) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved game progress. Save before closing?';
+            return e.returnValue;
+        }
+    });
+
+    function refreshAllStatDisplay() {
+        document.getElementById('stat-b').textContent = stats.banker;
+        document.getElementById('stat-p').textContent = stats.player;
+        document.getElementById('stat-t').textContent = stats.tie;
+        const handsEl = document.getElementById('stat-hands'); if (handsEl) handsEl.textContent = stats.hands || 0;
+        const wonEl = document.getElementById('stat-bets-won'); if (wonEl) wonEl.textContent = stats.betsWon || 0;
+        const lostEl = document.getElementById('stat-bets-lost'); if (lostEl) lostEl.textContent = stats.betsLost || 0;
+        const vwEl = document.getElementById('stat-vol-won'); if (vwEl) vwEl.textContent = '$'+(stats.volWon||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+        const vlEl = document.getElementById('stat-vol-lost'); if (vlEl) vlEl.textContent = '-$'+(stats.volLost||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+        const lbEl = document.getElementById('stat-last-bet'); if (lbEl) lbEl.textContent = lastBetSummary || '—';
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
-        // Try to restore game in progress first (survives refresh, not tab close)
+        initLang();
+        scheduleMidnightSave();
         if (loadGameState()) {
-            // We have a saved game — restore it without needing login again
             hideSplash();
-            initBetKeys();
-            buildSideBetZones();
-            applyCasinoTheme();
-            renderAllRoads();
-            updateUI();
-            updateAuxButtons();
-            document.getElementById('stat-b').textContent = stats.banker;
-            document.getElementById('stat-p').textContent = stats.player;
-            document.getElementById('stat-t').textContent = stats.tie;
-            const handsEl = document.getElementById('stat-hands');
-            if (handsEl) handsEl.textContent = stats.hands || 0;
-            const wonEl = document.getElementById('stat-bets-won');
-            if (wonEl) wonEl.textContent = stats.betsWon || 0;
-            const lostEl = document.getElementById('stat-bets-lost');
-            if (lostEl) lostEl.textContent = stats.betsLost || 0;
-            const vwEl = document.getElementById('stat-vol-won');
-            if (vwEl) vwEl.textContent = '$' + (stats.volWon||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-            const vlEl = document.getElementById('stat-vol-lost');
-            if (vlEl) vlEl.textContent = '-$' + (stats.volLost||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-            document.getElementById('game-container').style.display = 'flex';
-            setTimeout(initAllZoom, 100);
+            restoreGameToScreen();
         } else {
             checkExistingSession();
         }
