@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Dragonfly v2.91</title>
+    <title>Dragonfly v2.93</title>
     <style>
         :root {
             --felt-green: #0a4d2c;
@@ -498,7 +498,7 @@
     <div id="login-overlay" class="overlay" style="display:none;">
         <div class="setup-card">
             <button id="login-back-btn" onclick="loginBack()" style="display:none;position:absolute;top:12px;left:14px;background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);border-radius:5px;padding:3px 8px;cursor:pointer;font-size:0.68rem;">← Back to Game</button>
-            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY <span style="font-size:1rem;opacity:0.7;">v2.91</span></h2>
+            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY <span style="font-size:1rem;opacity:0.7;">v2.93</span></h2>
             <div id="email-step">
                 <input type="text" id="user-email" placeholder="Email Address" autocomplete="off" onkeydown="if(event.key==='Enter') handleLogin()">
                 <label style="display:flex;align-items:center;gap:8px;margin:12px auto 0;width:90%;cursor:pointer;font-size:0.75rem;color:rgba(255,255,255,0.6);text-align:left;">
@@ -659,7 +659,7 @@
     <div class="game-content" id="game-container" style="display:none;">
 
         <div class="header-area">
-            <div class="header-title">DRAGONFLY <span style="font-size:0.85rem;vertical-align:middle;opacity:0.6;">v2.91</span></div>
+            <div class="header-title">DRAGONFLY <span style="font-size:0.85rem;vertical-align:middle;opacity:0.6;">v2.93</span></div>
             <div class="header-btns">
                 <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
                 <button class="settings-btn" onclick="toggleSettings()" title="Settings">⚙️</button>
@@ -1206,22 +1206,49 @@
     async function sendCode() {
         userEmail = document.getElementById('user-email').value.trim();
         const msg = document.getElementById('login-msg');
-        msg.style.color = "var(--gold)";
-        msg.textContent = "Checking server...";
+        const consentEl = document.getElementById('marketing-consent');
+        const consent = consentEl ? consentEl.checked : false;
+        msg.style.color = 'var(--gold)';
+        msg.textContent = 'Sending code…';
+
+        // Abort after 12 seconds so it never hangs silently
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 12000);
+
         try {
-            const consent = document.getElementById('marketing-consent') ? document.getElementById('marketing-consent').checked : false;
-        const r = await fetch(SCRIPT_URL + "?email=" + encodeURIComponent(userEmail) + "&consent=" + consent, { method: 'POST' });
-            const result = await r.text();
-            if (result === "Quota Exceeded") {
-                msg.style.color = "#ff4444";
-                msg.textContent = "Google Daily Email Limit Reached.";
-            } else {
+            const url = SCRIPT_URL
+                + '?action=sendCode'
+                + '&email=' + encodeURIComponent(userEmail)
+                + '&consent=' + consent;
+            const r = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeout);
+            const result = (await r.text()).trim();
+
+            if (result === 'CodeSent') {
                 document.getElementById('email-step').style.display = 'none';
                 document.getElementById('code-step').style.display = 'block';
-                msg.textContent = "Code sent! Valid for 5 minutes.";
+                msg.style.color = 'var(--gold)';
+                msg.textContent = 'Code sent — check your email.';
+            } else if (result === 'Quota Exceeded') {
+                msg.style.color = '#ff4444';
+                msg.textContent = 'Email quota exceeded. Try again tomorrow.';
+            } else if (result === 'InvalidEmail') {
+                msg.style.color = '#ff4444';
+                msg.textContent = 'Please enter a valid email address.';
+            } else {
+                // Show the raw response so we can diagnose unexpected replies
+                msg.style.color = '#ff4444';
+                msg.textContent = 'Server error: ' + (result || '(empty response)');
             }
         } catch(e) {
-            msg.textContent = "Connection error.";
+            clearTimeout(timeout);
+            if (e.name === 'AbortError') {
+                msg.style.color = '#ff4444';
+                msg.textContent = 'Request timed out. Check your connection.';
+            } else {
+                msg.style.color = '#ff4444';
+                msg.textContent = 'Network error: ' + e.message;
+            }
         }
     }
 
