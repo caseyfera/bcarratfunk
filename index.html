@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Dragonfly v2.9</title>
+    <title>Dragonfly v2.91</title>
     <style>
         :root {
             --felt-green: #0a4d2c;
@@ -262,13 +262,16 @@
         .coffee-link-wrapper { text-align: center; padding-top: 2px; }
         .coffee-link { display: inline-flex; align-items: center; justify-content: center; gap: 5px; background: linear-gradient(135deg,#FFDD00 0%,var(--gold) 100%); color: #000; padding: 4px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 0.7rem; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
-        #result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.82); display: none; justify-content: center; align-items: center; z-index: 500; cursor: pointer; animation: fadeInOverlay 0.25s ease; }
+        /* ── Side-panel result toast (replaces blocking overlay) ── */
+        #result-overlay { position: fixed; top: 50%; right: 0; transform: translateY(-50%) translateX(110%); width: auto; height: auto; background: none; display: block; z-index: 500; cursor: pointer; pointer-events: none; transition: transform 0.28s cubic-bezier(0.34,1.2,0.64,1); }
+        #result-overlay.visible { transform: translateY(-50%) translateX(0); pointer-events: auto; }
+        .result-card { border-radius: 10px 0 0 10px; padding: 10px 14px 10px 12px; text-align: left; box-shadow: -4px 0 24px rgba(0,0,0,0.7); min-width: 110px; max-width: 160px; border-right: none !important; display: flex; flex-direction: column; gap: 2px; }
+        .result-title { font-size: 1.1rem; font-weight: bold; letter-spacing: 2px; line-height: 1.2; }
+        .result-amount { font-size: 1.3rem; font-weight: bold; line-height: 1.2; }
+        .result-detail-side { font-size: 0.65rem; opacity: 0.7; line-height: 1.3; margin-top: 1px; }
+        .result-tap { font-size: 0.58rem; opacity: 0.4; margin-top: 4px; letter-spacing: 0.5px; }
         @keyframes fadeInOverlay { from{opacity:0} to{opacity:1} }
-        .result-card { border-radius: 20px; padding: 24px 40px; text-align: center; box-shadow: 0 0 60px rgba(0,0,0,0.9); animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); min-width: 220px; }
         @keyframes popIn { from{transform:scale(0.6);opacity:0} to{transform:scale(1);opacity:1} }
-        .result-title { font-size: 2.2rem; font-weight: bold; letter-spacing: 3px; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
-        .result-amount { font-size: 1.4rem; font-weight: bold; margin-bottom: 6px; }
-        .result-tap { font-size: 0.75rem; opacity: 0.6; margin-top: 10px; letter-spacing: 1px; }
 
         .inspector-placeholder-label { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.75rem; margin-top: 6px; }
         .shoe-preview-container { flex-wrap: wrap; gap: 2px; font-size: 9px; font-family: monospace; margin-top: 4px; max-height: 60px; overflow-y: auto; background: #000; padding: 4px; border-radius: 3px; }
@@ -310,19 +313,35 @@
         .insp-panel { min-height: 48px; }
 
         /* ── History list ── */
-        .history-list { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
-        .hist-row { display: flex; align-items: center; gap: 5px; padding: 3px 5px; border-radius: 4px; font-size: 0.68rem; font-family: monospace; }
-        .hist-num { color: rgba(255,255,255,0.3); width: 22px; text-align: right; flex-shrink: 0; }
-        .hist-badge { display: inline-flex; align-items: center; justify-content: center; border-radius: 3px; padding: 1px 6px; font-weight: bold; font-size: 0.65rem; min-width: 40px; }
-        .hist-score { color: rgba(255,255,255,0.55); font-size: 0.62rem; }
-        .hist-pl { margin-left: auto; font-weight: bold; font-size: 0.65rem; }
-        /* outcome colors */
-        .hc-banker   { background: #7a1010; color: #ffb3b3; }
-        .hc-player   { background: #0d2e6b; color: #b3ccff; }
-        .hc-tie      { background: #1a4d1a; color: #b3ffb3; }
-        .hc-dragon   { background: #7a4000; color: #ffd480; }
-        .hc-panda    { background: #3d0066; color: #d9b3ff; }
-        .hc-push     { background: #333; color: #aaa; }
+        /* ── Hand History ── */
+        .history-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; padding-right: 2px; }
+        .hr-row { display: flex; align-items: center; gap: 4px; padding: 3px 4px; border-radius: 5px; background: rgba(255,255,255,0.03); }
+        .hr-row:hover { background: rgba(255,255,255,0.07); }
+        .hr-num  { color: rgba(255,255,255,0.22); width: 20px; text-align: right; font-size: 0.58rem; flex-shrink: 0; font-family: monospace; }
+        .hr-badge { font-size: 0.58rem; font-weight: bold; letter-spacing: 0.3px; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; min-width: 38px; text-align: center; background: rgba(0,0,0,0.3); }
+        /* Row accent strips */
+        .hr-banker { border-left: 2px solid rgba(192,57,43,0.55); }
+        .hr-player { border-left: 2px solid rgba(41,128,185,0.55); }
+        .hr-tie    { border-left: 2px solid rgba(39,174,96,0.55); }
+        .hr-dragon { border-left: 2px solid rgba(230,126,34,0.75); background: rgba(100,40,0,0.12); }
+        .hr-panda  { border-left: 2px solid rgba(155,89,182,0.75); background: rgba(60,0,90,0.12); }
+        .hr-push   { border-left: 2px solid rgba(136,136,136,0.4); }
+        /* Mini playing cards */
+        .hr-cards { display: flex; gap: 2px; align-items: center; flex: 1; }
+        .hcard { width: 16px; height: 22px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: bold; font-family: monospace; flex-shrink: 0; line-height: 1; }
+        .hcard-p { background: #0d2e6b; color: #9ec2ff; border: 1px solid rgba(100,150,255,0.4); }
+        .hcard-b { background: #6b0d0d; color: #ffaaaa; border: 1px solid rgba(255,100,100,0.4); }
+        .hcard-third { opacity: 0.8; outline: 1px dashed rgba(255,255,255,0.2); outline-offset: -1px; }
+        /* Scores */
+        .hr-scores { display: flex; align-items: center; gap: 1px; font-size: 0.65rem; font-family: monospace; flex-shrink: 0; }
+        .hr-ps { color: #9ec2ff; font-weight: bold; }
+        .hr-bs { color: #ffaaaa; font-weight: bold; }
+        .hr-sep { color: rgba(255,255,255,0.25); font-size: 0.55rem; }
+        .hr-pl { margin-left: auto; font-weight: bold; font-size: 0.6rem; font-family: monospace; flex-shrink: 0; }
+        /* Keep old classes around for loaded saves that don't have card data */
+        .hc-banker { background:#7a1010;color:#ffb3b3; } .hc-player { background:#0d2e6b;color:#b3ccff; }
+        .hc-tie { background:#1a4d1a;color:#b3ffb3; } .hc-dragon { background:#7a4000;color:#ffd480; }
+        .hc-panda { background:#3d0066;color:#d9b3ff; } .hc-push { background:#333;color:#aaa; }
 
         /* ── Stats chart ── */
         .stats-bar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; font-size: 0.68rem; }
@@ -479,7 +498,7 @@
     <div id="login-overlay" class="overlay" style="display:none;">
         <div class="setup-card">
             <button id="login-back-btn" onclick="loginBack()" style="display:none;position:absolute;top:12px;left:14px;background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);border-radius:5px;padding:3px 8px;cursor:pointer;font-size:0.68rem;">← Back to Game</button>
-            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY <span style="font-size:1rem;opacity:0.7;">v2.9</span></h2>
+            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY <span style="font-size:1rem;opacity:0.7;">v2.91</span></h2>
             <div id="email-step">
                 <input type="text" id="user-email" placeholder="Email Address" autocomplete="off" onkeydown="if(event.key==='Enter') handleLogin()">
                 <label style="display:flex;align-items:center;gap:8px;margin:12px auto 0;width:90%;cursor:pointer;font-size:0.75rem;color:rgba(255,255,255,0.6);text-align:left;">
@@ -530,13 +549,13 @@
         </div>
     </div>
 
-    <!-- Result Overlay -->
+    <!-- Result Side Toast -->
     <div id="result-overlay" onclick="dismissResult()">
         <div class="result-card" id="result-card">
             <div class="result-title" id="result-title">WIN</div>
             <div class="result-amount" id="result-amount">+$0</div>
-            <div id="result-detail" style="font-size:1rem;opacity:0.85;margin-bottom:4px;"></div>
-            <div class="result-tap">TAP TO CONTINUE</div>
+            <div class="result-detail-side" id="result-detail"></div>
+            <div class="result-tap">tap to close</div>
         </div>
     </div>
 
@@ -628,7 +647,6 @@
         </div>
     </div>
 
-    <div class="game-content" id="game-container" style="display:none;">
     <div id="layout-panel">
         <button class="layout-close" onclick="closeLayoutPanel()">✕</button>
         <h3>🔀 CUSTOMISE LAYOUT</h3>
@@ -641,7 +659,7 @@
     <div class="game-content" id="game-container" style="display:none;">
 
         <div class="header-area">
-            <div class="header-title">DRAGONFLY <span style="font-size:0.85rem;vertical-align:middle;opacity:0.6;">v2.9</span></div>
+            <div class="header-title">DRAGONFLY <span style="font-size:0.85rem;vertical-align:middle;opacity:0.6;">v2.91</span></div>
             <div class="header-btns">
                 <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
                 <button class="settings-btn" onclick="toggleSettings()" title="Settings">⚙️</button>
@@ -964,7 +982,7 @@
         // Show "Back to Game" button if a game is in progress
         const backBtn = document.getElementById('login-back-btn');
         const inGame = document.getElementById('game-container').style.display !== 'none';
-        const hasSave = !!sessionStorage.getItem('dragonfly_game_state');
+        const hasSave = !!localStorage.getItem('dragonfly_game_state');
         if (backBtn) backBtn.style.display = (inGame || hasSave) ? 'block' : 'none';
         document.getElementById('login-overlay').style.display = 'flex';
     }
@@ -1556,6 +1574,10 @@
                 outcome: h.cls,
                 label: h.label,
                 score: h.score,
+                p: h.p || [],
+                b: h.b || [],
+                pS: h.pS ?? null,
+                bS: h.bS ?? null,
                 pl: handHistory[i]
             }))
         };
@@ -1659,10 +1681,14 @@
             const cls = r.outcome || r.cls || '';
             const label = r.label || '';
             const score = r.score;
+            const p = r.p || [];
+            const b = r.b || [];
+            const pS = r.pS ?? null;
+            const bS = r.bS ?? null;
             let outcomeType = cls.includes('banker') || cls.includes('dragon') ? 'banker'
                            : cls.includes('player') || cls.includes('panda')  ? 'player'
                            : 'tie';
-            beadHistory.push({ cls, label, score });
+            beadHistory.push({ cls, label, score, p, b, pS, bS });
             handHistory.push(r.pl);
             if (outcomeType === 'tie') {
                 if (bigRoadColumns.length > 0) {
@@ -1760,10 +1786,14 @@
             const cls = r.outcome || r.cls || '';
             const label = r.label || '';
             const score = r.score;
+            const p = r.p || [];
+            const b = r.b || [];
+            const pS = r.pS ?? null;
+            const bS = r.bS ?? null;
             let outcomeType = cls.includes('banker') || cls.includes('dragon') ? 'banker'
                            : cls.includes('player') || cls.includes('panda')  ? 'player'
                            : 'tie';
-            beadHistory.push({ cls, label, score });
+            beadHistory.push({ cls, label, score, p, b, pS, bS });
             handHistory.push(r.pl);
             if (outcomeType === 'tie') {
                 if (bigRoadColumns.length > 0) {
@@ -1860,17 +1890,17 @@
                 lastBetSummary,
                 ts: Date.now()
             };
-            sessionStorage.setItem(SAVE_KEY, JSON.stringify(state));
+            localStorage.setItem(SAVE_KEY, JSON.stringify(state));
         } catch(e) {}
     }
 
     function loadGameState() {
         try {
-            const raw = sessionStorage.getItem(SAVE_KEY);
+            const raw = localStorage.getItem(SAVE_KEY);
             if (!raw) return false;
             const s = JSON.parse(raw);
             // Only restore if saved in last 8 hours
-            if (Date.now() - s.ts > 8 * 3600 * 1000) { clearGameState(); return false; }
+            if (Date.now() - s.ts > 24 * 3600 * 1000) { clearGameState(); return false; }
             bankroll = s.bankroll;
             initialBankroll = s.initialBankroll;
             shoeSize = s.shoeSize;
@@ -1895,7 +1925,7 @@
     }
 
     function clearGameState() {
-        try { sessionStorage.removeItem(SAVE_KEY); } catch(e) {}
+        try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
     }
 
     // ══════════════════════════════════════════════════════════
@@ -2397,7 +2427,10 @@
         }
 
         bankroll += win;
-        for (let k in currentBets) lastBets[k] = currentBets[k];
+        // Only update lastBets when there was actually a bet — preserves rebet across skipped hands
+        if (totalWagered > 0) {
+            for (let k in currentBets) lastBets[k] = currentBets[k];
+        }
 
         if (totalWagered > 0) {
             const netPL = win - totalWagered;
@@ -2409,7 +2442,7 @@
         }
 
         const winScore = outcomeType==='banker' ? bS : outcomeType==='player' ? pS : Math.max(pS,bS);
-        addToRoads(outcomeType, beadClass, beadLabel, winScore);
+        addToRoads(outcomeType, beadClass, beadLabel, winScore, p, b, pS, bS);
 
         // Track extended stats
         stats.hands++;
@@ -2465,22 +2498,22 @@
         }
         const sign = netPL >= 0 ? '+' : '-';
         amountEl.textContent = `${sign}$${Math.abs(netPL).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-        detailEl.textContent = `${outcomeLabel}  •  Player ${pS} – Banker ${bS}`;
-        overlay.style.display = 'flex';
+        detailEl.textContent = `${outcomeLabel}  P${pS}–B${bS}`;
+        overlay.classList.add('visible');
         clearTimeout(window._resultTimer);
-        window._resultTimer = setTimeout(dismissResult, 2500);
+        window._resultTimer = setTimeout(dismissResult, 2000);
     }
 
     function dismissResult() {
         clearTimeout(window._resultTimer);
-        document.getElementById('result-overlay').style.display = 'none';
+        document.getElementById('result-overlay').classList.remove('visible');
     }
 
     // ══════════════════════════════════════════════════════════
     //  ROADS
     // ══════════════════════════════════════════════════════════
-    function addToRoads(outcomeType, beadClass, beadLabel, winScore) {
-        beadHistory.push({ cls: beadClass, label: beadLabel, score: winScore });
+    function addToRoads(outcomeType, beadClass, beadLabel, winScore, p, b, pS, bS) {
+        beadHistory.push({ cls: beadClass, label: beadLabel, score: winScore, p: p||[], b: b||[], pS: pS??null, bS: bS??null });
         if (outcomeType === 'tie') {
             if (bigRoadColumns.length > 0) {
                 const lastCol = bigRoadColumns[bigRoadColumns.length-1];
@@ -2830,7 +2863,7 @@
         if (tab === 'stats')   renderStatsInspector();
     }
 
-    // History tab: show every hand result color-coded
+    // History tab: card-deal history — shoe-inspector style, dealt order, color-coded
     function renderHistoryInspector() {
         const list = document.getElementById('history-list');
         const ph   = document.getElementById('history-placeholder');
@@ -2842,40 +2875,68 @@
         }
         if (ph) ph.style.display = 'none';
 
-        list.innerHTML = beadHistory.map((h, i) => {
-            const cls  = h.cls || '';
-            const num  = i + 1;
-            const score = h.score !== undefined ? h.score : '';
+        const fm = v => v===1?'A':v===11?'J':v===12?'Q':v===13?'K':String(v);
 
-            // Color class and label
-            let hcCls, badge, bgColor;
+        // Deal order: P1 B1 P2 B2 [P3] [B3]
+        const dealtOrder = (p, b) => {
+            const seq = [];
+            if (p[0] !== undefined) seq.push({ val: p[0], role: 'p' });
+            if (b[0] !== undefined) seq.push({ val: b[0], role: 'b' });
+            if (p[1] !== undefined) seq.push({ val: p[1], role: 'p' });
+            if (b[1] !== undefined) seq.push({ val: b[1], role: 'b' });
+            if (p[2] !== undefined) seq.push({ val: p[2], role: 'p', third: true });
+            if (b[2] !== undefined) seq.push({ val: b[2], role: 'b', third: true });
+            return seq;
+        };
+
+        list.innerHTML = [...beadHistory].reverse().map((h, ri) => {
+            const i   = beadHistory.length - 1 - ri;
+            const cls = h.cls || '';
+            const num = i + 1;
+            const p   = h.p || [];
+            const b   = h.b || [];
+            const pS  = h.pS ?? '?';
+            const bS  = h.bS ?? '?';
+
+            // Outcome identity
+            let rowCls, badge, accentColor;
             if (cls.includes('dragon')) {
-                hcCls = 'hc-dragon'; badge = '🐉 DRAGON 7'; bgColor = 'rgba(122,64,0,0.25)';
+                rowCls = 'hr-dragon'; badge = '🐉 D7';  accentColor = '#e67e22';
             } else if (cls.includes('panda')) {
-                hcCls = 'hc-panda';  badge = '🐼 PANDA 8';  bgColor = 'rgba(61,0,102,0.25)';
+                rowCls = 'hr-panda';  badge = '🐼 P8';  accentColor = '#9b59b6';
             } else if (cls.includes('banker')) {
-                hcCls = 'hc-banker'; badge = 'BANKER';       bgColor = 'rgba(122,16,16,0.18)';
+                rowCls = 'hr-banker'; badge = 'BANK';   accentColor = '#c0392b';
             } else if (cls.includes('player')) {
-                hcCls = 'hc-player'; badge = 'PLAYER';       bgColor = 'rgba(13,46,107,0.18)';
+                rowCls = 'hr-player'; badge = 'PLAY';   accentColor = '#2980b9';
             } else if (cls.includes('tie')) {
-                hcCls = 'hc-tie';    badge = 'TIE';          bgColor = 'rgba(26,77,26,0.2)';
+                rowCls = 'hr-tie';    badge = 'TIE';    accentColor = '#27ae60';
             } else {
-                hcCls = 'hc-push';  badge = h.label || '?'; bgColor = 'rgba(40,40,40,0.3)';
+                rowCls = 'hr-push';   badge = h.label || '?'; accentColor = '#888';
             }
 
-            // P/L for this hand from handHistory (stored alongside beadHistory)
+            // P/L
             const plEntry = handHistory[i];
-            const plHtml  = plEntry !== undefined
-                ? `<span class="hist-pl" style="color:${plEntry>=0?'#7dff7d':'#ff9e9e'};">${plEntry>=0?'+':''}$${Math.abs(plEntry).toFixed(2)}</span>`
+            const plHtml = plEntry !== undefined
+                ? `<span class="hr-pl" style="color:${plEntry>=0?'#7dff7d':'#ff9e9e'};">${plEntry>=0?'+':'\u2212'}$${Math.abs(plEntry).toFixed(0)}</span>`
                 : '';
 
-            return `<div class="hist-row" style="background:${bgColor};">
-                <span class="hist-num">${num}</span>
-                <span class="hist-badge ${hcCls}">${badge}</span>
-                <span class="hist-score">${score !== '' ? `Score: ${score}` : ''}</span>
+            // Cards in deal order with separating dot for 3rd card
+            const seq = dealtOrder(p, b);
+            const cardsHtml = seq.map((c, ci) => {
+                const thirdCls = c.third ? ' hcard-third' : '';
+                const lbl = fm(c.val);
+                const cardCls = c.role === 'p' ? 'hcard-p' : 'hcard-b';
+                return `<div class="hcard ${cardCls}${thirdCls}">${lbl}</div>`;
+            }).join('');
+
+            return `<div class="hr-row ${rowCls}">
+                <span class="hr-num">${num}</span>
+                <span class="hr-badge" style="border-left:2px solid ${accentColor};color:${accentColor};">${badge}</span>
+                <div class="hr-cards">${cardsHtml}</div>
+                <div class="hr-scores"><span class="hr-ps">${pS}</span><span class="hr-sep">:</span><span class="hr-bs">${bS}</span></div>
                 ${plHtml}
             </div>`;
-        }).reverse().join(''); // newest first
+        }).join('');
     }
 
     // Stats tab: bar chart of B/P/T/Dragon/Panda
