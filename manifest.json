@@ -2,7 +2,7 @@
   "name": "Dragonfly Baccarat",
   "short_name": "Dragonfly",
   "description": "Professional baccarat simulator with road maps, betting, and shoe analysis",
-  "start_url": "/dragonfly_v2_96.html",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#05140b",
