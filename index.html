@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="Dragonfly">
     <meta name="theme-color" content="#05140b">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
-    <title>Dragonfly v3.14</title>
+    <title>Dragonfly v3.17</title>
     <style>
         :root {
             --felt-green: #0a4d2c;
@@ -94,9 +94,9 @@
             box-sizing: border-box;
         }
 
-        .roads-section { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-        .road-row-top { display: grid; grid-template-columns: 1fr 2fr; gap: 4px; width: 100%; }
-        .road-row-derived { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; width: 100%; }
+        .roads-section { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+        .road-row-top { display: grid; grid-template-columns: 1fr 2fr; gap: 3px; width: 100%; }
+        .road-row-derived { display: flex; flex-direction: column; gap: 3px; width: 100%; }
 
         .road-box { background: rgba(0,0,0,0.4); border: 1.5px solid var(--gold); border-radius: 5px; padding: 3px 4px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; }
         .road-title { display: flex; justify-content: space-between; align-items: center; color: var(--gold); font-weight: bold; font-size: 0.6rem; letter-spacing: 1px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 2px; flex-shrink: 0; cursor: pointer; user-select: none; }
@@ -151,7 +151,7 @@
             }
             .bead { width: 11px; height: 11px; font-size: 5px; }
 
-            .derived-road-wrap { height: 52px; padding: 2px; }
+            .derived-road-wrap { height: 72px; padding: 2px; }
             .derived-road-grid {
                 grid-template-rows: repeat(4, 11px);
                 grid-auto-columns: 12px;
@@ -166,8 +166,9 @@
             .road-row-derived { gap: 5px; }
         }
 
-        .derived-road-wrap { overflow-x: auto; height: 54px; padding: 2px; box-sizing: border-box; }
-        .derived-road-grid { display: grid; grid-template-rows: repeat(4, 12px); grid-auto-flow: column; grid-auto-columns: 13px; gap: 1px; height: 50px; }
+        .derived-road-wrap { overflow-x: auto; height: 72px; padding: 2px; box-sizing: border-box; position: relative; }
+        .derived-road-grid { display: grid; grid-template-rows: repeat(6, 11px); grid-auto-flow: column; grid-auto-columns: 12px; gap: 1px; height: 68px; }
+        .road-inline-label { position: absolute; top: 4px; left: 5px; font-size: 0.5rem; color: rgba(212,175,55,0.5); font-weight: bold; letter-spacing: 0.5px; pointer-events: none; z-index: 2; }
         .dr-cell { width: 13px; height: 12px; display: flex; align-items: center; justify-content: center; }
         .dr-circle { width: 10px; height: 10px; border-radius: 50%; }
         .dr-circle.rep { background: #e02020; }
@@ -342,6 +343,33 @@
         #view-toggle-result, #view-toggle-deal { font-size:0.58rem;padding:1px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);background:none;color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.15s; }
         #view-toggle-result.active, #view-toggle-deal.active { background:rgba(212,175,55,0.15);border-color:var(--gold);color:var(--gold);font-weight:bold; }
         .next-card { color: var(--gold) !important; border-color: var(--gold) !important; font-weight: bold; box-shadow: 0 0 4px rgba(212,175,55,0.6); }
+
+        /* ── Last Hand Popup ── */
+        #last-hand-popup {
+            position: fixed; bottom: 70px; right: 8px; z-index: 600;
+            background: #061a0c; border: 1px solid rgba(212,175,55,0.5);
+            border-radius: 10px; padding: 8px 10px; min-width: 130px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            transform: translateX(110%); transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1);
+            pointer-events: none;
+        }
+        #last-hand-popup.visible { transform: translateX(0); pointer-events: auto; }
+        .lhp-title { font-size: 0.55rem; color: rgba(212,175,55,0.5); letter-spacing: 1px; font-weight: bold; margin-bottom: 4px; }
+        .lhp-outcome { font-size: 0.85rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 3px; }
+        .lhp-scores { font-size: 0.65rem; margin-bottom: 3px; }
+        .lhp-ps { color: #9ec2ff; font-weight: bold; }
+        .lhp-bs { color: #ffaaaa; font-weight: bold; }
+        .lhp-pl { font-size: 0.75rem; font-weight: bold; }
+        .lhp-cards { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 3px; }
+        .lhp-card-p { background: #0d2e6b; color: #9ec2ff; border: 1px solid rgba(100,150,255,0.4); border-radius: 2px; padding: 1px 3px; font-size: 0.6rem; font-family: monospace; font-weight: bold; }
+        .lhp-card-b { background: #6b0d0d; color: #ffaaaa; border: 1px solid rgba(255,100,100,0.4); border-radius: 2px; padding: 1px 3px; font-size: 0.6rem; font-family: monospace; font-weight: bold; }
+        .lhp-close { position: absolute; top: 4px; right: 6px; background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 0.7rem; padding: 0; }
+
+        /* ── Win/Loss highlights on bet zones ── */
+        .bet-zone.flash-win  { animation: zoneWin  0.7s ease; }
+        .bet-zone.flash-loss { animation: zoneLoss 0.7s ease; }
+        @keyframes zoneWin  { 0%,100%{} 30%{box-shadow:inset 0 0 0 2px #2ecc71, 0 0 12px rgba(46,204,113,0.6);} }
+        @keyframes zoneLoss { 0%,100%{} 30%{box-shadow:inset 0 0 0 2px #e74c3c, 0 0 12px rgba(231,76,60,0.5);} }
         .dealt-card { color: rgba(255,255,255,0.2) !important; border-color: rgba(255,255,255,0.08) !important; background: rgba(0,0,0,0.3); }
         .section-label { font-size: 0.65rem; color: rgba(212,175,55,0.6); text-transform: uppercase; letter-spacing: 2px; }
 
@@ -590,7 +618,7 @@
     <div id="login-overlay" class="overlay" style="display:none;">
         <div class="setup-card">
             <button id="login-back-btn" onclick="loginBack()" style="display:none;position:absolute;top:12px;left:14px;background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);border-radius:5px;padding:3px 8px;cursor:pointer;font-size:0.68rem;">← Back to Game</button>
-            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY <span style="font-size:1rem;opacity:0.7;">v3.14</span></h2>
+            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY <span style="font-size:1rem;opacity:0.7;">v3.17</span></h2>
             <div id="email-step">
                 <input type="text" id="user-email" placeholder="Email Address" autocomplete="off" onkeydown="if(event.key==='Enter') handleLogin()">
                 <label style="display:flex;align-items:center;gap:8px;margin:12px auto 0;width:90%;cursor:pointer;font-size:0.75rem;color:rgba(255,255,255,0.6);text-align:left;">
@@ -649,6 +677,16 @@
             <div class="result-detail-side" id="result-detail"></div>
             <div class="result-tap">tap to close</div>
         </div>
+    </div>
+
+    <!-- Last Hand Popup -->
+    <div id="last-hand-popup">
+        <button class="lhp-close" onclick="document.getElementById('last-hand-popup').classList.remove('visible')">✕</button>
+        <div class="lhp-title">LAST HAND</div>
+        <div class="lhp-outcome" id="lhp-outcome">—</div>
+        <div class="lhp-scores"><span class="lhp-ps" id="lhp-ps">P:—</span> <span style="color:rgba(255,255,255,0.3);">vs</span> <span class="lhp-bs" id="lhp-bs">B:—</span></div>
+        <div class="lhp-cards" id="lhp-cards"></div>
+        <div class="lhp-pl" id="lhp-pl"></div>
     </div>
 
     <!-- Shoe End Overlay -->
@@ -720,7 +758,7 @@
             <p>Dragonfly is a training simulator only. No real money is wagered. Results do not predict or influence real casino outcomes.</p>
             <h3>Disclaimer</h3>
             <p>Dragonfly is provided "as is". We make no guarantees regarding uptime, accuracy of simulations, or fitness for any particular purpose.</p>
-            <p style="margin-top:16px;color:rgba(255,255,255,0.3);font-size:0.65rem;">© 2025 Dragonfly · All Rights Reserved</p>
+            <p style="margin-top:16px;color:rgba(255,255,255,0.3);font-size:0.65rem;">© 2026 Dragonfly · All Rights Reserved</p>
         </div>
     </div>
 
@@ -761,7 +799,7 @@
     <div class="game-content" id="game-container" style="display:none;">
 
         <div class="header-area">
-            <div class="header-title">DRAGONFLY <span style="font-size:0.85rem;vertical-align:middle;opacity:0.6;">v3.14</span></div>
+            <div class="header-title">DRAGONFLY <span style="font-size:0.85rem;vertical-align:middle;opacity:0.6;">v3.17</span></div>
             <div class="header-btns">
                 <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
                 <button class="settings-btn" onclick="toggleSettings()" title="Settings">⚙️</button>
@@ -769,6 +807,7 @@
                 <button class="settings-btn" onclick="document.getElementById('load-overlay').style.display='flex'" title="Load saved game">📂</button>
                 <button id="btn-layout" class="settings-btn" onclick="openLayoutPanel()" title="Customise Layout">⊞</button>
                 <button class="settings-btn" onclick="openBtnCustomPanel()" title="Customise Buttons">🎛</button>
+                <button class="settings-btn" onclick="openSimulator()" title="Strategy Simulator" style="font-size:0.65rem;">🧪</button>
                 <button class="settings-btn" onclick="newGame()" title="New Game" style="font-size:0.58rem;letter-spacing:0.3px;width:32px;border-radius:7px;">NEW</button>
                 <button class="settings-btn logout-btn" onclick="logout()" title="Log out" style="font-size:0.58rem;width:32px;border-radius:7px;">OUT</button>
             </div>
@@ -777,49 +816,47 @@
         <div class="layout-slot" data-slot="roads">
         <div class="roads-section">
 
-            <!-- Row 1: Bead Plate + Big Road side by side -->
+            <!-- Bead + Big Road side by side -->
             <div class="road-row-top">
                 <div class="road-box" id="rb-bead">
-                    <div class="road-title" onclick="toggleRoad('rb-bead')" data-road="rb-bead"><span>🔵 BEAD (珠盘路)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
+                    <div class="road-canvas-wrap" style="cursor:pointer;" onclick="toggleRoad('rb-bead')">
+                        <div class="road-inline-label" id="rb-bead-lbl">BEAD 珠盘路</div>
                         <div class="bead-plate" id="road-bead"></div>
                     </div>
                 </div>
                 <div class="road-box" id="rb-big">
-                    <div class="road-title" onclick="toggleRoad('rb-big')" data-road="rb-big"><span>🔴 BIG ROAD (大路)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
+                    <div class="road-canvas-wrap" style="cursor:pointer;" onclick="toggleRoad('rb-big')">
+                        <div class="road-inline-label" id="rb-big-lbl">BIG ROAD 大路</div>
                         <div class="big-road-wrap"><div class="big-road-grid" id="road-big"></div></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Betting Road — mirrors Big Road structure, colored by bet outcome -->
-            <div class="road-row" id="rb-betting-row">
-                <div class="road-box" id="rb-betting" style="width:100%;">
-                    <div class="road-title" onclick="toggleRoad('rb-betting')" data-road="rb-betting"><span>💰 BETTING ROAD</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
-                        <div class="bet-road-wrap"><div class="bet-road-grid" id="road-betting"></div></div>
-                    </div>
+            <!-- Betting Road — full width, mirrors Big Road -->
+            <div class="road-box" id="rb-betting" style="padding:2px;">
+                <div class="road-canvas-wrap" style="cursor:pointer;" onclick="toggleRoad('rb-betting')">
+                    <div class="road-inline-label" id="rb-betting-lbl">BETTING ROAD</div>
+                    <div class="bet-road-wrap"><div class="bet-road-grid" id="road-betting"></div></div>
                 </div>
             </div>
 
-            <!-- Row 3: Derived roads — 3 equal columns -->
+            <!-- Derived roads — each full width, 6 rows deep, stacking columns -->
             <div class="road-row-derived">
-                <div class="road-box" id="rb-beb">
-                    <div class="road-title" onclick="toggleRoad('rb-beb')" data-road="rb-beb"><span>👁 BIG EYE BOY (大眼仔)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
+                <div class="road-box" id="rb-beb" style="padding:2px;">
+                    <div class="road-canvas-wrap" style="cursor:pointer;" onclick="toggleRoad('rb-beb')">
+                        <div class="road-inline-label" id="rb-beb-lbl">BIG EYE BOY 大眼仔</div>
                         <div class="derived-road-wrap"><div class="derived-road-grid" id="road-beb"></div></div>
                     </div>
                 </div>
-                <div class="road-box" id="rb-small">
-                    <div class="road-title" onclick="toggleRoad('rb-small')" data-road="rb-small"><span>📍 SMALL ROAD (小路)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
+                <div class="road-box" id="rb-small" style="padding:2px;">
+                    <div class="road-canvas-wrap" style="cursor:pointer;" onclick="toggleRoad('rb-small')">
+                        <div class="road-inline-label" id="rb-small-lbl">SMALL ROAD 小路</div>
                         <div class="derived-road-wrap"><div class="derived-road-grid" id="road-small"></div></div>
                     </div>
                 </div>
-                <div class="road-box" id="rb-cock">
-                    <div class="road-title" onclick="toggleRoad('rb-cock')" data-road="rb-cock"><span>🪳 COCKROACH PIG (曱甴路)</span><span class="toggle-arrow">▲</span></div>
-                    <div class="road-canvas-wrap">
+                <div class="road-box" id="rb-cock" style="padding:2px;">
+                    <div class="road-canvas-wrap" style="cursor:pointer;" onclick="toggleRoad('rb-cock')">
+                        <div class="road-inline-label" id="rb-cock-lbl">COCKROACH PIG 曱甴路</div>
                         <div class="derived-road-wrap"><div class="derived-road-grid" id="road-cock"></div></div>
                     </div>
                 </div>
@@ -1030,11 +1067,11 @@
         </div><!-- /slot:coffee -->
 
         <div class="copyright-footer">
-            <span>© 2025 Dragonfly · All Rights Reserved</span>
-            <span class="copyright-sep">·</span>
+            <span id="sub-status-footer"></span>
+            <span class="copyright-sep" id="sub-sep" style="display:none;">·</span>
             <a href="#" onclick="showTerms()" class="copyright-link">Terms of Use</a>
             <span class="copyright-sep">·</span>
-            <span id="sub-status-footer"></span>
+            <span>© 2026 Dragonfly · All Rights Reserved</span>
         </div>
     </div>
 
@@ -1672,8 +1709,8 @@
         // Road titles
         const roadTitleMap = { 'rb-bead': t.beadRoad, 'rb-big': t.bigRoad, 'rb-beb': t.bigEyeBoy, 'rb-small': t.smallRoad, 'rb-cock': t.cockroach };
         Object.entries(roadTitleMap).forEach(([id, label]) => {
-            const box = document.getElementById(id);
-            if (box) { const span = box.querySelector('.road-title span:first-child'); if (span) span.textContent = label; }
+            const lbl = document.getElementById(id + '-lbl');
+            if (lbl) lbl.textContent = label;
         });
     }
 
@@ -2178,6 +2215,7 @@
 
     function updateSubBadge() {
         const el = document.getElementById('sub-status-footer');
+        const sep = document.getElementById('sub-sep');
         if (!el) return;
         const labels = { active:'✓ SUBSCRIBED', trial:'TRIAL', expired:'EXPIRED', free:'FREE MODE', unknown:'' };
         const cls    = { active:'active', trial:'trial', expired:'expired', free:'free', unknown:'' };
@@ -2686,6 +2724,16 @@
         const winScore = outcomeType==='banker' ? bS : outcomeType==='player' ? pS : Math.max(pS,bS);
         addToRoads(outcomeType, beadClass, beadLabel, winScore, p, b, pS, bS);
 
+        // Show last hand popup + flash bet zones
+        const lastH = beadHistory[beadHistory.length - 1];
+        const lastPL = totalWagered > 0 ? win - totalWagered : undefined;
+        showLastHandPopup(lastH, lastPL);
+        if (totalWagered > 0) {
+            if ((currentBets.player||0) > 0) flashBetZone('bet-player-box', outcomeType==='player'||outcomeType==='panda');
+            if ((currentBets.banker||0) > 0) flashBetZone('bet-banker-box', outcomeType==='banker'||outcomeType==='dragon');
+            if ((currentBets.tie||0)    > 0) flashBetZone('bet-tie-box',    outcomeType==='tie');
+        }
+
         // Track extended stats
         stats.hands++;
         const netPLThisHand = totalWagered > 0 ? win - totalWagered : undefined;
@@ -2719,6 +2767,59 @@
         updateAuxButtons();
         refreshAllStatDisplay();
         saveGameState();
+    }
+
+    function showLastHandPopup(h, pl) {
+        if (!h) return;
+        const fm = v => v===1?'A':v===11?'J':v===12?'Q':v===13?'K':String(v);
+        const cls = h.cls || '';
+        let outcomeLabel, outcomeColor;
+        if (cls.includes('dragon'))      { outcomeLabel = '🐉 DRAGON 7'; outcomeColor = '#e67e22'; }
+        else if (cls.includes('panda'))  { outcomeLabel = '🐼 PANDA 8';  outcomeColor = '#9b59b6'; }
+        else if (cls.includes('banker')) { outcomeLabel = 'BANKER';       outcomeColor = '#ff9e9e'; }
+        else if (cls.includes('player')) { outcomeLabel = 'PLAYER';       outcomeColor = '#9ec2ff'; }
+        else if (cls.includes('tie'))    { outcomeLabel = 'TIE';          outcomeColor = '#7dff7d'; }
+        else                             { outcomeLabel = h.label || '?'; outcomeColor = '#888'; }
+
+        document.getElementById('lhp-outcome').textContent = outcomeLabel;
+        document.getElementById('lhp-outcome').style.color = outcomeColor;
+        document.getElementById('lhp-ps').textContent = 'P:' + (h.pS ?? '?');
+        document.getElementById('lhp-bs').textContent = 'B:' + (h.bS ?? '?');
+
+        // Cards in deal order
+        const p = h.p || [], b = h.b || [];
+        const seq = [];
+        if (p[0]!==undefined) seq.push({v:p[0],r:'p'});
+        if (b[0]!==undefined) seq.push({v:b[0],r:'b'});
+        if (p[1]!==undefined) seq.push({v:p[1],r:'p'});
+        if (b[1]!==undefined) seq.push({v:b[1],r:'b'});
+        if (p[2]!==undefined) seq.push({v:p[2],r:'p'});
+        if (b[2]!==undefined) seq.push({v:b[2],r:'b'});
+        document.getElementById('lhp-cards').innerHTML = seq.map(c =>
+            `<span class="lhp-card-${c.r}">${fm(c.v)}</span>`
+        ).join('');
+
+        const plEl = document.getElementById('lhp-pl');
+        if (pl !== undefined) {
+            plEl.textContent = (pl >= 0 ? '+$' : '-$') + Math.abs(pl).toFixed(0);
+            plEl.style.color = pl >= 0 ? '#7dff7d' : '#ff9e9e';
+        } else {
+            plEl.textContent = '';
+        }
+
+        const popup = document.getElementById('last-hand-popup');
+        popup.classList.add('visible');
+        clearTimeout(window._lhpTimer);
+        window._lhpTimer = setTimeout(() => popup.classList.remove('visible'), 3000);
+    }
+
+    function flashBetZone(zoneId, won) {
+        const el = document.getElementById(zoneId);
+        if (!el) return;
+        el.classList.remove('flash-win', 'flash-loss');
+        void el.offsetWidth; // reflow
+        el.classList.add(won ? 'flash-win' : 'flash-loss');
+        setTimeout(() => el.classList.remove('flash-win', 'flash-loss'), 800);
     }
 
     function showResult(netPL, outcomeType, pS, bS, specialMsg) {
@@ -2987,7 +3088,7 @@
     function renderDerivedRoad(containerId, entries, style) {
         const container = document.getElementById(containerId);
         container.innerHTML = '';
-        const ROWS = 4;
+        const ROWS = 6; // match Big Road — 6 rows deep
         const colCount = Math.ceil(entries.length / ROWS) + 2;
         const totalCells = colCount * ROWS;
         const grid = new Array(totalCells).fill(null);
@@ -3198,6 +3299,378 @@
             if (visible) btnVisible = visible;
             applyBtnCustom();
         } catch(e) {}
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  STRATEGY SIMULATOR
+    // ══════════════════════════════════════════════════════════
+
+    function openSimulator()  { document.getElementById('sim-overlay').style.display = 'block'; }
+    function closeSimulator() { document.getElementById('sim-overlay').style.display = 'none'; }
+
+    function updateSimSizingUI() {
+        const sizing = document.getElementById('sim-sizing').value;
+        const maxWrap = document.getElementById('sim-max-bet-wrap');
+        if (maxWrap) maxWrap.style.display = sizing === 'flat' ? 'none' : 'block';
+    }
+
+    // ── Core baccarat deal engine (self-contained, no side effects) ──
+    function simDealShoe(numDecks) {
+        let deck = [];
+        for (let i = 0; i < numDecks * 52; i++) deck.push((i % 13) + 1);
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+
+        const gV = v => v >= 10 ? 0 : v;
+        const pop = () => deck.pop();
+        const hands = [];
+
+        while (deck.length >= 6) {
+            const p = [pop(), pop()];
+            const b = [pop(), pop()];
+            let pS = (gV(p[0]) + gV(p[1])) % 10;
+            let bS = (gV(b[0]) + gV(b[1])) % 10;
+
+            // Natural
+            if (pS >= 8 || bS >= 8) {
+                hands.push({ p, b, pS, bS, outcome: pS > bS ? 'player' : bS > pS ? 'banker' : 'tie' });
+                continue;
+            }
+
+            // Player third card
+            let p3 = null, b3 = null;
+            if (pS <= 5) {
+                p3 = pop(); p.push(p3); pS = (pS + gV(p3)) % 10;
+                const p3v = gV(p3);
+                let dB = bS <= 2 ||
+                    (bS === 3 && p3v !== 8) ||
+                    (bS === 4 && [2,3,4,5,6,7].includes(p3v)) ||
+                    (bS === 5 && [4,5,6,7].includes(p3v)) ||
+                    (bS === 6 && [6,7].includes(p3v));
+                if (dB && deck.length > 0) { b3 = pop(); b.push(b3); bS = (bS + gV(b3)) % 10; }
+            } else if (bS <= 5) {
+                b3 = pop(); b.push(b3); bS = (bS + gV(b3)) % 10;
+            }
+
+            const isDragon = bS === 7 && b.length === 3;
+            const isPanda  = pS === 8 && p.length === 3;
+            let outcome = pS > bS ? 'player' : bS > pS ? 'banker' : 'tie';
+            if (isDragon) outcome = 'dragon';
+            if (isPanda)  outcome = 'panda';
+
+            hands.push({ p, b, pS, bS, outcome });
+        }
+        return hands;
+    }
+
+    // ── Betting strategies ──
+    function simGetBet(strategy, lastOutcome, lastBet, patternIdx, skipTies) {
+        // Returns { side: 'player'|'banker', patternIdx }
+        let side = 'banker';
+        let nextIdx = patternIdx;
+        const patterns = {
+            pattern_bbp: ['banker','banker','player'],
+            pattern_bpp: ['banker','player','player'],
+            pattern_bp:  ['banker','player'],
+        };
+
+        switch (strategy) {
+            case 'always_banker': side = 'banker'; break;
+            case 'always_player': side = 'player'; break;
+            case 'follow_streak':
+                side = (lastOutcome === 'player' || lastOutcome === 'panda') ? 'player' : 'banker';
+                break;
+            case 'chop':
+                side = (lastOutcome === 'player' || lastOutcome === 'panda') ? 'banker' : 'player';
+                break;
+            default:
+                if (patterns[strategy]) {
+                    const pat = patterns[strategy];
+                    side = pat[patternIdx % pat.length];
+                    nextIdx = (patternIdx + 1) % pat.length;
+                }
+        }
+        return { side, patternIdx: nextIdx };
+    }
+
+    // ── Bet sizing systems ──
+    function simNextBetSize(sizing, baseBet, maxBet, lastBetSize, lastWon, consecutiveWins) {
+        switch (sizing) {
+            case 'flat': return baseBet;
+            case 'martingale': return lastWon ? baseBet : Math.min(lastBetSize * 2, maxBet);
+            case 'paroli':
+                if (!lastWon) return baseBet;
+                if (consecutiveWins >= 3) return baseBet;
+                return Math.min(lastBetSize * 2, maxBet);
+            case 'dalembert':
+                return lastWon
+                    ? Math.max(baseBet, lastBetSize - baseBet)
+                    : Math.min(lastBetSize + baseBet, maxBet);
+            default: return baseBet;
+        }
+    }
+
+    // ── Run one shoe simulation ──
+    function simRunShoe(hands, config) {
+        const { strategy, sizing, baseBet, maxBet, bankerOdds, startBankroll, stopLoss, skipTies } = config;
+        let bankroll = startBankroll;
+        let betSize = baseBet;
+        let lastOutcome = 'banker';
+        let lastWon = true;
+        let consecutiveWins = 0;
+        let patternIdx = 0;
+        let handsPlayed = 0, betsPlaced = 0;
+        let netPL = 0, maxDrawdown = 0, peak = startBankroll;
+        let currentLossStreak = 0, currentWinStreak = 0;
+        let maxLossStreak = 0, maxWinStreak = 0;
+
+        for (const hand of hands) {
+            const isTie = hand.outcome === 'tie';
+            if (skipTies && isTie) { lastOutcome = 'tie'; continue; }
+
+            handsPlayed++;
+            const { side, patternIdx: nextIdx } = simGetBet(strategy, lastOutcome, betSize, patternIdx, skipTies);
+            patternIdx = nextIdx;
+
+            // Can we afford the bet?
+            const actualBet = Math.min(betSize, bankroll);
+            if (actualBet <= 0) break;
+            if (stopLoss > 0 && bankroll <= stopLoss) break;
+
+            betsPlaced++;
+            let pl = -actualBet; // assume loss
+
+            const outcome = hand.outcome;
+            const won = (side === 'banker' && (outcome === 'banker' || outcome === 'dragon')) ||
+                        (side === 'player' && (outcome === 'player' || outcome === 'panda'));
+            const pushed = isTie && !skipTies;
+
+            if (pushed) {
+                pl = 0;
+            } else if (won) {
+                const odds = side === 'banker' ? bankerOdds : 1.0;
+                pl = actualBet * odds;
+                // Dragon 7: banker bets push
+                if (outcome === 'dragon' && side === 'banker') pl = 0;
+            }
+
+            bankroll += pl;
+            netPL += pl;
+            lastWon = pl > 0;
+            consecutiveWins = pl > 0 ? consecutiveWins + 1 : 0;
+
+            // Streak tracking
+            if (pl > 0) { currentWinStreak++; currentLossStreak = 0; }
+            else if (pl < 0) { currentLossStreak++; currentWinStreak = 0; }
+            else { currentLossStreak = 0; currentWinStreak = 0; }
+            maxWinStreak  = Math.max(maxWinStreak, currentWinStreak);
+            maxLossStreak = Math.max(maxLossStreak, currentLossStreak);
+
+            // Drawdown
+            if (bankroll > peak) peak = bankroll;
+            const dd = peak - bankroll;
+            if (dd > maxDrawdown) maxDrawdown = dd;
+
+            // Next bet size
+            betSize = simNextBetSize(sizing, baseBet, maxBet, actualBet, lastWon, consecutiveWins);
+            lastOutcome = outcome;
+        }
+
+        return { netPL, bankroll, handsPlayed, betsPlaced, maxDrawdown, maxWinStreak, maxLossStreak };
+    }
+
+    async function runSimulation() {
+        const strategy   = document.getElementById('sim-strategy').value;
+        const sizing     = document.getElementById('sim-sizing').value;
+        const baseBet    = parseFloat(document.getElementById('sim-base-bet').value) || 25;
+        const maxBet     = parseFloat(document.getElementById('sim-max-bet').value) || 10000;
+        const numShoes   = parseInt(document.getElementById('sim-shoes').value) || 100;
+        const numDecks   = parseInt(document.getElementById('sim-decks').value) || 8;
+        const startBR    = parseFloat(document.getElementById('sim-bankroll').value) || 10000;
+        const stopLoss   = parseFloat(document.getElementById('sim-stop-loss').value) || 0;
+        const bankerOdds = parseFloat(document.getElementById('sim-commission').value) || 0.95;
+        const skipTies      = document.getElementById('sim-skip-ties').checked;
+        const tieTrigger    = document.getElementById('sim-tie-trigger').value;
+        const tieBetAmt     = parseFloat(document.getElementById('sim-tie-bet').value) || 10;
+        const skipAfterLoss = parseInt(document.getElementById('sim-skip-after-loss').value) || 0;
+        const maxConsec     = parseInt(document.getElementById('sim-max-consec').value) || 0;
+
+        const config = { strategy, sizing, baseBet, maxBet, bankerOdds, startBankroll: startBR, stopLoss, skipTies, tieTrigger, tieBetAmt, skipAfterLoss, maxConsec };
+
+        // Show progress
+        document.getElementById('sim-run-btn').disabled = true;
+        document.getElementById('sim-run-btn').textContent = 'Running...';
+        document.getElementById('sim-progress-wrap').style.display = 'block';
+        document.getElementById('sim-results').style.display = 'none';
+
+        // Run in chunks to keep UI responsive
+        const results = [];
+        const CHUNK = 50;
+
+        for (let i = 0; i < numShoes; i++) {
+            const hands = simDealShoe(numDecks);
+            results.push(simRunShoe(hands, config));
+
+            if (i % CHUNK === 0) {
+                const pct = Math.round((i / numShoes) * 100);
+                document.getElementById('sim-progress-bar').style.width = pct + '%';
+                document.getElementById('sim-progress-label').textContent = `Running shoe ${i+1} of ${numShoes}...`;
+                await new Promise(r => setTimeout(r, 0)); // yield to UI
+            }
+        }
+
+        document.getElementById('sim-progress-bar').style.width = '100%';
+        document.getElementById('sim-progress-label').textContent = 'Complete!';
+        document.getElementById('sim-run-btn').disabled = false;
+        document.getElementById('sim-run-btn').textContent = '▶ RUN AGAIN';
+
+        displaySimResults(results, config, numShoes);
+    }
+
+    function displaySimResults(results, config, numShoes) {
+        const totalPL     = results.reduce((s, r) => s + r.netPL, 0);
+        const avgPL       = totalPL / numShoes;
+        const winningShoes = results.filter(r => r.netPL > 0).length;
+        const losingShoes  = results.filter(r => r.netPL < 0).length;
+        const roi          = (totalPL / (config.baseBet * results.reduce((s,r) => s + r.betsPlaced, 0))) * 100;
+        const maxDD        = Math.max(...results.map(r => r.maxDrawdown));
+        const maxWinS      = Math.max(...results.map(r => r.maxWinStreak));
+        const maxLossS     = Math.max(...results.map(r => r.maxLossStreak));
+        const avgHands     = Math.round(results.reduce((s,r) => s + r.handsPlayed, 0) / numShoes);
+        const worstShoe    = Math.min(...results.map(r => r.netPL));
+        const bestShoe     = Math.max(...results.map(r => r.netPL));
+        const plValues     = results.map(r => r.netPL).sort((a,b) => a-b);
+        const median       = plValues[Math.floor(plValues.length/2)];
+
+        // Summary cards
+        const fmt = v => (v >= 0 ? '+$' : '-$') + Math.abs(v).toFixed(0);
+        const fmtPct = v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+        const cards = [
+            { label: 'Total P&L', value: fmt(totalPL), color: totalPL >= 0 ? '#7dff7d' : '#ff9e9e' },
+            { label: 'ROI', value: fmtPct(roi), color: roi >= 0 ? '#7dff7d' : '#ff9e9e' },
+            { label: 'Avg/Shoe', value: fmt(avgPL), color: avgPL >= 0 ? '#7dff7d' : '#ff9e9e' },
+            { label: 'Win Shoes', value: `${winningShoes}/${numShoes}`, color: '#9ec2ff' },
+            { label: 'Max Drawdown', value: '$' + maxDD.toFixed(0), color: '#ffaaaa' },
+            { label: 'Median/Shoe', value: fmt(median), color: median >= 0 ? '#7dff7d' : '#ff9e9e' },
+        ];
+        document.getElementById('sim-summary-cards').innerHTML = cards.map(c => `
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.15);border-radius:6px;padding:8px;text-align:center;">
+                <div style="color:rgba(255,255,255,0.4);font-size:0.55rem;letter-spacing:0.5px;margin-bottom:3px;">${c.label}</div>
+                <div style="font-size:0.9rem;font-weight:bold;color:${c.color};">${c.value}</div>
+            </div>`).join('');
+
+        // Detail stats
+        const details = [
+            ['Shoes Simulated', numShoes],
+            ['Winning Shoes', `${winningShoes} (${(winningShoes/numShoes*100).toFixed(1)}%)`],
+            ['Losing Shoes', `${losingShoes} (${(losingShoes/numShoes*100).toFixed(1)}%)`],
+            ['Best Shoe', fmt(bestShoe)],
+            ['Worst Shoe', fmt(worstShoe)],
+            ['Avg Hands/Shoe', avgHands],
+            ['Max Win Streak', maxWinS + ' hands'],
+            ['Max Loss Streak', maxLossS + ' hands'],
+            ['Max Drawdown', '$' + maxDD.toFixed(0)],
+            ['Strategy', document.getElementById('sim-strategy').options[document.getElementById('sim-strategy').selectedIndex].text],
+            ['Bet Sizing', document.getElementById('sim-sizing').options[document.getElementById('sim-sizing').selectedIndex].text],
+            ['Base Bet', '$' + config.baseBet],
+            ['Tie Bet', config.tieTrigger !== 'never' ? config.tieTrigger + ' / $' + config.tieBetAmt : 'Off'],
+        ];
+        document.getElementById('sim-detail-stats').innerHTML = details.map(([k,v]) => `
+            <div style="color:rgba(255,255,255,0.4);">${k}</div>
+            <div style="color:#fff;text-align:right;">${v}</div>`).join('');
+
+        // Bankroll chart
+        drawSimChart(results, config.startBankroll);
+
+        // Distribution chart
+        drawDistChart(results.map(r => r.netPL));
+
+        document.getElementById('sim-results').style.display = 'block';
+        document.getElementById('sim-results').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function drawSimChart(results, startBR) {
+        const canvas = document.getElementById('sim-chart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width  = canvas.offsetWidth  || 500;
+        canvas.height = canvas.offsetHeight || 120;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Cumulative bankroll line
+        let running = startBR;
+        const points = [running];
+        results.forEach(r => { running += r.netPL; points.push(running); });
+
+        const minY = Math.min(...points, startBR * 0.5);
+        const maxY = Math.max(...points, startBR * 1.1);
+        const rangeY = maxY - minY || 1;
+        const W = canvas.width, H = canvas.height;
+        const px = (i) => (i / (points.length - 1)) * W;
+        const py = (v) => H - ((v - minY) / rangeY) * (H - 10) - 5;
+
+        // Zero line
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, py(startBR));
+        ctx.lineTo(W, py(startBR));
+        ctx.stroke();
+
+        // Fill
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(points[0]));
+        points.forEach((v, i) => ctx.lineTo(px(i), py(v)));
+        ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        const endColor = points[points.length-1] >= startBR ? 'rgba(125,255,125,0.3)' : 'rgba(255,100,100,0.3)';
+        grad.addColorStop(0, endColor); grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad; ctx.fill();
+
+        // Line
+        ctx.beginPath();
+        ctx.moveTo(px(0), py(points[0]));
+        points.forEach((v, i) => ctx.lineTo(px(i), py(v)));
+        ctx.strokeStyle = points[points.length-1] >= startBR ? '#7dff7d' : '#ff9e9e';
+        ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    function drawDistChart(plValues) {
+        const canvas = document.getElementById('sim-dist-chart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width  = canvas.offsetWidth  || 500;
+        canvas.height = canvas.offsetHeight || 80;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const BINS = 20;
+        const min = Math.min(...plValues), max = Math.max(...plValues);
+        const range = max - min || 1;
+        const binSize = range / BINS;
+        const bins = new Array(BINS).fill(0);
+        plValues.forEach(v => {
+            const bi = Math.min(BINS - 1, Math.floor((v - min) / binSize));
+            bins[bi]++;
+        });
+        const maxBin = Math.max(...bins) || 1;
+        const W = canvas.width, H = canvas.height;
+        const bw = W / BINS;
+
+        bins.forEach((count, i) => {
+            const x   = i * bw;
+            const h   = (count / maxBin) * (H - 4);
+            const val = min + (i + 0.5) * binSize;
+            ctx.fillStyle = val >= 0 ? 'rgba(125,255,125,0.7)' : 'rgba(255,100,100,0.7)';
+            ctx.fillRect(x + 1, H - h, bw - 2, h);
+        });
+
+        // Labels
+        const labels = document.getElementById('sim-dist-labels');
+        if (labels) {
+            labels.innerHTML = `<span>$${min.toFixed(0)}</span><span>$0</span><span>$${max.toFixed(0)}</span>`;
+        }
     }
 
     function openLayoutPanel() {
@@ -3599,7 +4072,10 @@
 
     function toggleRoad(id) {
         const box = document.getElementById(id);
-        if (box) box.classList.toggle('collapsed');
+        if (!box) return;
+        box.classList.toggle('collapsed');
+        const wrap = box.querySelector('.road-canvas-wrap');
+        if (wrap) wrap.style.display = box.classList.contains('collapsed') ? 'none' : '';
     }
 
     // ══════════════════════════════════════════════════════════
@@ -3902,6 +4378,180 @@
         }
     });
 </script>
+  <!-- Strategy Simulator Overlay -->
+  <div id="sim-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.97);z-index:2000;overflow-y:auto;box-sizing:border-box;padding:16px;">
+    <div style="max-width:600px;margin:0 auto;">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="color:var(--gold);font-size:1.1rem;font-weight:bold;letter-spacing:3px;">🧪 STRATEGY SIMULATOR</div>
+          <div style="color:rgba(255,255,255,0.3);font-size:0.65rem;margin-top:2px;">Test betting strategies across multiple shoes</div>
+        </div>
+        <button onclick="closeSimulator()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">✕ Close</button>
+      </div>
+
+      <!-- Config panel -->
+      <div id="sim-config" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+
+        <!-- Strategy -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px;">
+          <div style="color:var(--gold);font-size:0.65rem;letter-spacing:1px;font-weight:bold;margin-bottom:8px;">BETTING STRATEGY</div>
+          <select id="sim-strategy" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:5px;font-size:0.75rem;">
+            <option value="always_banker">Always Banker</option>
+            <option value="always_player">Always Player</option>
+            <option value="follow_streak">Follow Streak (bet last winner)</option>
+            <option value="chop">Chop (bet opposite of last)</option>
+            <option value="pattern_bbp">Pattern: BBP</option>
+            <option value="pattern_bpp">Pattern: BPP</option>
+            <option value="pattern_bp">Pattern: BP Alternate</option>
+          </select>
+          <div style="margin-top:8px;">
+            <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:3px;">SKIP TIES</div>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+              <input type="checkbox" id="sim-skip-ties" checked style="accent-color:var(--gold);">
+              <span style="font-size:0.7rem;color:rgba(255,255,255,0.7);">Don't bet on tie hands</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Bet sizing -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px;">
+          <div style="color:var(--gold);font-size:0.65rem;letter-spacing:1px;font-weight:bold;margin-bottom:8px;">BET SIZING</div>
+          <select id="sim-sizing" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:5px;font-size:0.75rem;margin-bottom:8px;" onchange="updateSimSizingUI()">
+            <option value="flat">Flat Bet</option>
+            <option value="martingale">Martingale (double after loss)</option>
+            <option value="paroli">Paroli (double after win, reset at 3)</option>
+            <option value="dalembert">D'Alembert (+1 unit after loss)</option>
+          </select>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="flex:1;">
+              <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">BASE BET ($)</div>
+              <input type="number" id="sim-base-bet" value="25" min="1" max="10000" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:4px 6px;font-size:0.8rem;box-sizing:border-box;">
+            </div>
+            <div style="flex:1;" id="sim-max-bet-wrap">
+              <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">MAX BET ($)</div>
+              <input type="number" id="sim-max-bet" value="10000" min="1" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:4px 6px;font-size:0.8rem;box-sizing:border-box;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulation params -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px;">
+          <div style="color:var(--gold);font-size:0.65rem;letter-spacing:1px;font-weight:bold;margin-bottom:8px;">SIMULATION</div>
+          <div style="display:flex;gap:6px;">
+            <div style="flex:1;">
+              <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">SHOES</div>
+              <select id="sim-shoes" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:5px;font-size:0.75rem;">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100" selected>100</option>
+                <option value="250">250</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">DECKS</div>
+              <select id="sim-decks" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:5px;font-size:0.75rem;">
+                <option value="6">6</option>
+                <option value="8" selected>8</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">STARTING BANKROLL ($)</div>
+            <input type="number" id="sim-bankroll" value="10000" min="100" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:4px 6px;font-size:0.8rem;box-sizing:border-box;">
+          </div>
+        </div>
+
+        <!-- Table rules -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px;">
+          <div style="color:var(--gold);font-size:0.65rem;letter-spacing:1px;font-weight:bold;margin-bottom:8px;">TABLE RULES</div>
+          <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">BANKER COMMISSION</div>
+          <select id="sim-commission" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:5px;font-size:0.75rem;margin-bottom:6px;">
+            <option value="0.95">5% Commission (0.95:1)</option>
+            <option value="1.0">No Commission (1:1)</option>
+          </select>
+          <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">STOP IF BANKROLL DROPS TO</div>
+          <input type="number" id="sim-stop-loss" value="0" min="0" placeholder="0 = no stop" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:4px 6px;font-size:0.8rem;box-sizing:border-box;">
+        </div>
+
+      </div>
+
+      <!-- Custom Strategy Params -->
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="color:var(--gold);font-size:0.65rem;letter-spacing:1px;font-weight:bold;">CUSTOM PARAMETERS</div>
+          <span style="color:rgba(255,255,255,0.25);font-size:0.58rem;">Optional — for future strategy testing</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">TIE BET TRIGGER</div>
+            <select id="sim-tie-trigger" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:5px;font-size:0.72rem;">
+              <option value="never">Never bet Tie</option>
+              <option value="always">Always bet Tie</option>
+              <option value="after_tie">After a Tie result</option>
+              <option value="streak_3">After 3+ same results</option>
+              <option value="custom">Custom (see notes)</option>
+            </select>
+          </div>
+          <div>
+            <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">TIE BET AMOUNT ($)</div>
+            <input type="number" id="sim-tie-bet" value="10" min="1" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:4px 6px;font-size:0.8rem;box-sizing:border-box;">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">SKIP N HANDS AFTER LOSS</div>
+            <input type="number" id="sim-skip-after-loss" value="0" min="0" max="10" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:4px 6px;font-size:0.8rem;box-sizing:border-box;">
+          </div>
+          <div>
+            <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">MAX CONSECUTIVE BETS</div>
+            <input type="number" id="sim-max-consec" value="0" min="0" placeholder="0 = unlimited" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:4px 6px;font-size:0.8rem;box-sizing:border-box;">
+          </div>
+        </div>
+        <div>
+          <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:2px;">STRATEGY NOTES</div>
+          <textarea id="sim-notes" placeholder="Describe your strategy parameters here for reference..." style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:6px;font-size:0.72rem;box-sizing:border-box;resize:vertical;min-height:52px;font-family:inherit;"></textarea>
+        </div>
+      </div>
+
+      <!-- Run button -->
+      <button onclick="runSimulation()" id="sim-run-btn" style="width:100%;background:linear-gradient(180deg,#ffe066,#d4af37);color:#000;font-weight:bold;letter-spacing:2px;padding:12px;border-radius:8px;border:none;cursor:pointer;font-size:0.9rem;margin-bottom:14px;">▶ RUN SIMULATION</button>
+
+      <!-- Progress bar -->
+      <div id="sim-progress-wrap" style="display:none;margin-bottom:14px;">
+        <div style="color:rgba(255,255,255,0.5);font-size:0.65rem;margin-bottom:4px;" id="sim-progress-label">Running...</div>
+        <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:6px;overflow:hidden;">
+          <div id="sim-progress-bar" style="background:var(--gold);height:100%;width:0%;transition:width 0.1s;border-radius:4px;"></div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="sim-results" style="display:none;">
+        <!-- Summary cards -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;" id="sim-summary-cards"></div>
+        <!-- Detail stats -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px;margin-bottom:10px;">
+          <div style="color:var(--gold);font-size:0.65rem;letter-spacing:1px;font-weight:bold;margin-bottom:10px;">DETAILED STATISTICS</div>
+          <div id="sim-detail-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:0.72rem;"></div>
+        </div>
+        <!-- Shoe-by-shoe chart -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px;margin-bottom:10px;">
+          <div style="color:var(--gold);font-size:0.65rem;letter-spacing:1px;font-weight:bold;margin-bottom:8px;">BANKROLL OVER TIME</div>
+          <canvas id="sim-chart" style="width:100%;height:120px;"></canvas>
+        </div>
+        <!-- Distribution -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px;">
+          <div style="color:var(--gold);font-size:0.65rem;letter-spacing:1px;font-weight:bold;margin-bottom:8px;">SHOE P&L DISTRIBUTION</div>
+          <canvas id="sim-dist-chart" style="width:100%;height:80px;"></canvas>
+          <div id="sim-dist-labels" style="display:flex;justify-content:space-between;font-size:0.55rem;color:rgba(255,255,255,0.3);margin-top:2px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <script>
     // Register PWA service worker
     if ('serviceWorker' in navigator) {
