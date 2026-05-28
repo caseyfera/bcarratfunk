@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="Dragonfly">
     <meta name="theme-color" content="#05140b">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
-    <title>Dragonfly v2.96</title>
+    <title>Dragonfly v3.14</title>
     <style>
         :root {
             --felt-green: #0a4d2c;
@@ -114,6 +114,15 @@
         .bead.dragon-win { background: var(--dragon-orange); color: black; border: 1px solid black; }
 
         .big-road-wrap { overflow-x: auto; height: 72px; padding: 2px; box-sizing: border-box; position: relative; }
+        .bet-road-wrap { overflow-x: auto; height: 72px; padding: 2px; box-sizing: border-box; position: relative; }
+        .bet-road-grid { display: grid; grid-template-rows: repeat(6, 11px); grid-auto-flow: column; grid-auto-columns: 12px; gap: 1px; height: 68px; }
+        .br-bet-cell { width: 12px; height: 11px; display: flex; align-items: center; justify-content: center; }
+        .br-bet-circle { width: 9px; height: 9px; border-radius: 50%; box-sizing: border-box; position: relative; display: flex; align-items: center; justify-content: center; }
+        .br-bet-win    { background: #1a6b2a; border: 1px solid #2ecc71; }
+        .br-bet-loss   { background: #6b1a1a; border: 1px solid #e74c3c; }
+        .br-bet-push   { background: #3a3a3a; border: 1px solid #888; }
+        .br-bet-nobet  { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+        .br-bet-circle .bet-amt { position:absolute; font-size:4px; color:rgba(255,255,255,0.7); white-space:nowrap; bottom:-6px; left:50%; transform:translateX(-50%); pointer-events:none; }
         .big-road-grid { display: grid; grid-template-rows: repeat(6, 11px); grid-auto-flow: column; grid-auto-columns: 12px; gap: 1px; height: 68px; }
         .br-cell { width: 12px; height: 11px; display: flex; align-items: center; justify-content: center; position: relative; }
         .br-circle { width: 9px; height: 9px; border-radius: 50%; border: 1px solid; box-sizing: border-box; }
@@ -246,6 +255,47 @@
 
         /* ── Controls: chips + buttons in ONE compact row ── */
         .controls-row { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; flex-wrap: wrap; }
+
+        /* ── Betting Mode Switcher ── */
+        .bet-mode-switcher { display:flex; gap:3px; justify-content:center; margin-bottom:5px; }
+        .bet-mode-btn { background:none; border:1px solid rgba(212,175,55,0.3); color:rgba(255,255,255,0.4); border-radius:4px; padding:2px 8px; font-size:0.6rem; cursor:pointer; letter-spacing:0.5px; transition:all 0.15s; }
+        .bet-mode-btn.active { background:rgba(212,175,55,0.15); border-color:var(--gold); color:var(--gold); font-weight:bold; }
+
+        /* ── Classic Felt Table ── */
+        .felt-table-wrap { width:100%; padding:4px 2px; }
+        .felt-table { width:100%; border-radius:14px; border:2px solid rgba(212,175,55,0.5); background:linear-gradient(180deg,#0a3d1f 0%,#072d16 100%); overflow:hidden; position:relative; }
+        .felt-table-inner { display:flex; width:100%; }
+
+        /* Player section */
+        .felt-section { flex:1; display:flex; flex-direction:column; cursor:pointer; user-select:none; transition:filter 0.15s; position:relative; }
+        .felt-section:hover { filter:brightness(1.15); }
+        .felt-section:active { filter:brightness(0.85); }
+
+        .felt-player { background:linear-gradient(135deg,#0d2e6b,#0a1e4a); border-right:1px solid rgba(212,175,55,0.3); }
+        .felt-tie    { background:linear-gradient(135deg,#1a4d1a,#0f2e0f); border-right:1px solid rgba(212,175,55,0.3); flex:0.6; }
+        .felt-banker { background:linear-gradient(135deg,#6b0d0d,#4a0808); }
+
+        .felt-label { text-align:center; font-size:0.6rem; font-weight:bold; letter-spacing:2px; padding:5px 2px 2px; }
+        .felt-player .felt-label { color:#9ec2ff; }
+        .felt-tie    .felt-label { color:#d4af37; }
+        .felt-banker .felt-label { color:#ffaaaa; }
+
+        .felt-odds { text-align:center; font-size:0.55rem; color:rgba(255,255,255,0.4); padding-bottom:3px; }
+        .felt-amount { text-align:center; font-size:0.85rem; font-weight:bold; padding:4px 2px 5px; min-height:24px; }
+        .felt-player .felt-amount { color:#9ec2ff; }
+        .felt-tie    .felt-amount { color:#d4af37; }
+        .felt-banker .felt-amount { color:#ffaaaa; }
+
+        .felt-max { text-align:center; font-size:0.5rem; color:rgba(212,175,55,0.35); padding-bottom:3px; }
+
+        /* Side bets on felt */
+        .felt-side-bets { display:flex; gap:2px; padding:3px 4px; flex-wrap:wrap; border-top:1px solid rgba(212,175,55,0.15); }
+        .felt-side-bet { flex:1; min-width:40px; background:rgba(0,0,0,0.25); border:1px solid rgba(212,175,55,0.2); border-radius:4px; padding:2px 3px; cursor:pointer; text-align:center; transition:filter 0.15s; }
+        .felt-side-bet:hover { filter:brightness(1.2); }
+        .felt-side-bet-label { font-size:0.5rem; color:rgba(255,255,255,0.6); letter-spacing:0.5px; }
+        .felt-side-bet-amount { font-size:0.7rem; font-weight:bold; color:var(--gold); }
+        .felt-win-flash { animation: feltFlash 0.6s ease; }
+        @keyframes feltFlash { 0%,100%{filter:brightness(1)} 50%{filter:brightness(2.5) saturate(2)} }
         .chip-tray { display: flex; gap: 4px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 50px; border: 1.5px solid var(--gold); }
         .chip { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border: 2px dashed rgba(255,255,255,0.4); font-size: 0.55rem; transition: transform 0.15s, box-shadow 0.15s; }
         .chip.active { transform: translateY(-4px) scale(1.1); box-shadow: 0 4px 10px var(--gold); border-style: solid; }
@@ -282,9 +332,17 @@
         @keyframes popIn { from{transform:scale(0.6);opacity:0} to{transform:scale(1);opacity:1} }
 
         .inspector-placeholder-label { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.75rem; margin-top: 6px; }
-        .shoe-preview-container { flex-wrap: wrap; gap: 2px; font-size: 9px; font-family: monospace; margin-top: 4px; max-height: 60px; overflow-y: auto; background: #000; padding: 4px; border-radius: 3px; }
+        .shoe-preview-container { display: flex; flex-wrap: wrap; gap: 2px; font-size: 9px; font-family: monospace; margin-top: 4px; max-height: 90px; overflow-y: auto; background: #000; padding: 4px; border-radius: 3px; }
         .preview-card { color: white; border: 1px solid #333; padding: 1px 2px; min-width: 12px; text-align: center; }
-        .next-card { color: var(--gold) !important; border-color: var(--gold) !important; font-weight: bold; }
+        .preview-card-p { color: #9ec2ff; border: 1px solid rgba(100,150,255,0.4); padding: 1px 2px; min-width: 12px; text-align: center; }
+        .preview-card-b { color: #ffaaaa; border: 1px solid rgba(255,100,100,0.4); padding: 1px 2px; min-width: 12px; text-align: center; }
+        .preview-card-t { color: #7dff7d; border: 1px solid rgba(100,255,100,0.4); padding: 1px 2px; min-width: 12px; text-align: center; }
+        .view-mode-btn { font-size:0.55rem;padding:1px 5px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);background:none;color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.15s; }
+        .view-mode-btn.active { background:rgba(212,175,55,0.15);border-color:var(--gold);color:var(--gold);font-weight:bold; }
+        #view-toggle-result, #view-toggle-deal { font-size:0.58rem;padding:1px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);background:none;color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.15s; }
+        #view-toggle-result.active, #view-toggle-deal.active { background:rgba(212,175,55,0.15);border-color:var(--gold);color:var(--gold);font-weight:bold; }
+        .next-card { color: var(--gold) !important; border-color: var(--gold) !important; font-weight: bold; box-shadow: 0 0 4px rgba(212,175,55,0.6); }
+        .dealt-card { color: rgba(255,255,255,0.2) !important; border-color: rgba(255,255,255,0.08) !important; background: rgba(0,0,0,0.3); }
         .section-label { font-size: 0.65rem; color: rgba(212,175,55,0.6); text-transform: uppercase; letter-spacing: 2px; }
 
         #session-check-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.97); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
@@ -375,6 +433,32 @@
         #btn-layout { font-size: 0.65rem; }
 
         /* Layout panel */
+        /* ── Button Customization Panel ── */
+        #btn-custom-panel {
+            display: none; position: fixed; right: 0; top: 0; height: 100%;
+            width: 240px; background: #061a0c; border-left: 1px solid rgba(212,175,55,0.4);
+            z-index: 800; padding: 16px; box-sizing: border-box; overflow-y: auto;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.7);
+        }
+        #btn-custom-panel h3 { color: var(--gold); font-size: 0.9rem; letter-spacing: 1px; margin: 0 0 4px; }
+        .btn-custom-list { display: flex; flex-direction: column; gap: 4px; margin: 12px 0; }
+        .btn-custom-item {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 6px; padding: 6px 8px; cursor: grab; user-select: none;
+        }
+        .btn-custom-item:active { cursor: grabbing; opacity: 0.7; }
+        .btn-custom-item.dragging { opacity: 0.4; border-style: dashed; }
+        .btn-custom-item.drag-over { border-color: var(--gold); background: rgba(212,175,55,0.1); }
+        .btn-custom-drag { color: rgba(255,255,255,0.25); font-size: 0.8rem; cursor: grab; }
+        .btn-custom-label { flex: 1; font-size: 0.72rem; color: rgba(255,255,255,0.8); }
+        .btn-custom-toggle { width: 18px; height: 18px; border-radius: 3px; border: 1px solid rgba(212,175,55,0.5); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; }
+        .btn-custom-toggle.on { background: rgba(212,175,55,0.2); color: var(--gold); border-color: var(--gold); }
+        .btn-custom-toggle.off { color: rgba(255,255,255,0.2); }
+        .btn-custom-arrows { display: flex; flex-direction: column; gap: 1px; }
+        .btn-custom-arrow { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 0.6rem; padding: 0; line-height: 1; }
+        .btn-custom-arrow:hover { color: var(--gold); }
+
         #layout-panel {
             display: none; position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%); z-index: 700;
@@ -506,7 +590,7 @@
     <div id="login-overlay" class="overlay" style="display:none;">
         <div class="setup-card">
             <button id="login-back-btn" onclick="loginBack()" style="display:none;position:absolute;top:12px;left:14px;background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);border-radius:5px;padding:3px 8px;cursor:pointer;font-size:0.68rem;">← Back to Game</button>
-            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY <span style="font-size:1rem;opacity:0.7;">v2.96</span></h2>
+            <h2 style="color:var(--gold);margin-bottom:20px;font-size:1.4rem;">DRAGONFLY <span style="font-size:1rem;opacity:0.7;">v3.14</span></h2>
             <div id="email-step">
                 <input type="text" id="user-email" placeholder="Email Address" autocomplete="off" onkeydown="if(event.key==='Enter') handleLogin()">
                 <label style="display:flex;align-items:center;gap:8px;margin:12px auto 0;width:90%;cursor:pointer;font-size:0.75rem;color:rgba(255,255,255,0.6);text-align:left;">
@@ -664,16 +748,27 @@
         <button class="aux-btn" onclick="resetLayout();closeLayoutPanel()" style="width:100%;text-align:center;margin-top:6px;">↺ Reset Default</button>
     </div>
 
+    <!-- Button Customization Panel -->
+    <div id="btn-custom-panel">
+        <button onclick="closeBtnCustomPanel()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(255,255,255,0.4);font-size:1.1rem;cursor:pointer;">✕</button>
+        <h3>🎛 BUTTONS</h3>
+        <p style="font-size:0.62rem;color:rgba(255,255,255,0.35);margin:0 0 4px;">Drag or use ▲▼ to reorder · toggle to show/hide</p>
+        <div class="btn-custom-list" id="btn-custom-list"></div>
+        <button class="main-deal-btn" onclick="applyBtnCustom();closeBtnCustomPanel()" style="width:100%;font-size:0.82rem;padding:7px;margin-top:4px;">✓ Apply</button>
+        <button class="aux-btn" onclick="resetBtnCustom()" style="width:100%;text-align:center;margin-top:6px;">↺ Reset Default</button>
+    </div>
+
     <div class="game-content" id="game-container" style="display:none;">
 
         <div class="header-area">
-            <div class="header-title">DRAGONFLY <span style="font-size:0.85rem;vertical-align:middle;opacity:0.6;">v2.96</span></div>
+            <div class="header-title">DRAGONFLY <span style="font-size:0.85rem;vertical-align:middle;opacity:0.6;">v3.14</span></div>
             <div class="header-btns">
                 <button id="sound-toggle-btn" class="settings-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
                 <button class="settings-btn" onclick="toggleSettings()" title="Settings">⚙️</button>
                 <button id="btn-show-shoe-end" class="settings-btn" onclick="document.getElementById('shoe-end-overlay').style.display='flex'" title="Show shoe summary" style="display:none;font-size:0.7rem;">📊</button>
                 <button class="settings-btn" onclick="document.getElementById('load-overlay').style.display='flex'" title="Load saved game">📂</button>
                 <button id="btn-layout" class="settings-btn" onclick="openLayoutPanel()" title="Customise Layout">⊞</button>
+                <button class="settings-btn" onclick="openBtnCustomPanel()" title="Customise Buttons">🎛</button>
                 <button class="settings-btn" onclick="newGame()" title="New Game" style="font-size:0.58rem;letter-spacing:0.3px;width:32px;border-radius:7px;">NEW</button>
                 <button class="settings-btn logout-btn" onclick="logout()" title="Log out" style="font-size:0.58rem;width:32px;border-radius:7px;">OUT</button>
             </div>
@@ -694,6 +789,16 @@
                     <div class="road-title" onclick="toggleRoad('rb-big')" data-road="rb-big"><span>🔴 BIG ROAD (大路)</span><span class="toggle-arrow">▲</span></div>
                     <div class="road-canvas-wrap">
                         <div class="big-road-wrap"><div class="big-road-grid" id="road-big"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Betting Road — mirrors Big Road structure, colored by bet outcome -->
+            <div class="road-row" id="rb-betting-row">
+                <div class="road-box" id="rb-betting" style="width:100%;">
+                    <div class="road-title" onclick="toggleRoad('rb-betting')" data-road="rb-betting"><span>💰 BETTING ROAD</span><span class="toggle-arrow">▲</span></div>
+                    <div class="road-canvas-wrap">
+                        <div class="bet-road-wrap"><div class="bet-road-grid" id="road-betting"></div></div>
                     </div>
                 </div>
             </div>
@@ -753,24 +858,66 @@
             </div>
             <!-- Right: all bet zones -->
             <div class="betting-layout">
-                <div class="row-main-bets">
-                    <div id="bet-player-box" class="bet-zone zone-player" onclick="placeBet('player')">
-                        <div class="bet-title-text">PLAYER</div>
-                        <div class="bet-sub-text" id="player-odds-label">1:1</div>
-                        <div class="bet-value-text" id="disp-player">$0</div>
+
+                <!-- Mode switcher -->
+                <div class="bet-mode-switcher">
+                    <button class="bet-mode-btn active" id="mode-btn-buttons" onclick="setBetMode('buttons')">BUTTONS</button>
+                    <button class="bet-mode-btn" id="mode-btn-table" onclick="setBetMode('table')">TABLE</button>
+                    <button class="bet-mode-btn" id="mode-btn-both" onclick="setBetMode('both')">BOTH</button>
+                </div>
+
+                <!-- BUTTONS MODE -->
+                <div id="bet-buttons-panel">
+                    <div class="row-main-bets">
+                        <div id="bet-player-box" class="bet-zone zone-player" onclick="placeBet('player')">
+                            <div class="bet-title-text">PLAYER</div>
+                            <div class="bet-sub-text" id="player-odds-label">1:1</div>
+                            <div class="bet-value-text" id="disp-player">$0</div>
+                        </div>
+                        <div id="bet-tie-box" class="bet-zone zone-tie" onclick="placeBet('tie')">
+                            <div class="bet-title-text" style="color:var(--gold);">TIE</div>
+                            <div class="bet-sub-text" id="tie-odds-label">8:1</div>
+                            <div class="bet-value-text" id="disp-tie">$0</div>
+                        </div>
+                        <div id="bet-banker-box" class="bet-zone zone-banker" onclick="placeBet('banker')">
+                            <div class="bet-title-text">BANKER</div>
+                            <div class="bet-sub-text" id="banker-odds-label">0.95:1</div>
+                            <div class="bet-value-text" id="disp-banker">$0</div>
+                        </div>
                     </div>
-                    <div id="bet-tie-box" class="bet-zone zone-tie" onclick="placeBet('tie')">
-                        <div class="bet-title-text" style="color:var(--gold);">TIE</div>
-                        <div class="bet-sub-text" id="tie-odds-label">8:1</div>
-                        <div class="bet-value-text" id="disp-tie">$0</div>
-                    </div>
-                    <div id="bet-banker-box" class="bet-zone zone-banker" onclick="placeBet('banker')">
-                        <div class="bet-title-text">BANKER</div>
-                        <div class="bet-sub-text" id="banker-odds-label">0.95:1</div>
-                        <div class="bet-value-text" id="disp-banker">$0</div>
+                    <div class="row-side-bets" id="side-bets-row"></div>
+                </div>
+
+                <!-- TABLE MODE (classic felt) -->
+                <div id="bet-table-panel" style="display:none;">
+                    <div class="felt-table-wrap">
+                        <div class="felt-table">
+                            <div class="felt-table-inner">
+                                <div class="felt-section felt-player" onclick="placeBet('player')">
+                                    <div class="felt-label">PLAYER</div>
+                                    <div class="felt-odds" id="felt-player-odds">1:1</div>
+                                    <div class="felt-amount" id="felt-disp-player">—</div>
+                                    <div class="felt-max" id="felt-max-player"></div>
+                                </div>
+                                <div class="felt-section felt-tie" onclick="placeBet('tie')">
+                                    <div class="felt-label">TIE</div>
+                                    <div class="felt-odds" id="felt-tie-odds">8:1</div>
+                                    <div class="felt-amount" id="felt-disp-tie">—</div>
+                                    <div class="felt-max" id="felt-max-tie"></div>
+                                </div>
+                                <div class="felt-section felt-banker" onclick="placeBet('banker')">
+                                    <div class="felt-label">BANKER</div>
+                                    <div class="felt-odds" id="felt-banker-odds">0.95:1</div>
+                                    <div class="felt-amount" id="felt-disp-banker">—</div>
+                                    <div class="felt-max" id="felt-max-banker"></div>
+                                </div>
+                            </div>
+                            <!-- Side bets on felt -->
+                            <div class="felt-side-bets" id="felt-side-bets-row"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="row-side-bets" id="side-bets-row"></div>
+
             </div>
         </div>
 
@@ -784,7 +931,7 @@
                 <div class="chip c500" onclick="selectChip(500,this)">$500</div>
                 <div class="chip c1000" onclick="selectChip(1000,this)">$1k</div>
             </div>
-            <div class="action-buttons-group">
+            <div class="action-buttons-group" id="action-buttons-group">
                 <button id="btn-rebet" class="aux-btn" onclick="reBet()" disabled title="Repeat last bet">↩ REBET</button>
                 <button id="btn-double" class="aux-btn" onclick="doubleBet()" disabled title="Double current bets">✕2 DOUBLE</button>
                 <button id="btn-deal" class="main-deal-btn" onclick="playHand()">DEAL</button>
@@ -832,21 +979,42 @@
             <div class="insp-tabs">
                 <button class="insp-tab active" onclick="switchInspector('shoe')" id="itab-shoe">🃏 Shoe</button>
                 <button class="insp-tab" onclick="switchInspector('history')" id="itab-history">📋 History</button>
+                <button class="insp-tab" onclick="switchInspector('bets')" id="itab-bets">🎯 Bets</button>
                 <button class="insp-tab" onclick="switchInspector('stats')" id="itab-stats">📊 Stats</button>
             </div>
             <!-- Shoe Inspector (existing) -->
             <div id="insp-shoe" class="insp-panel">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
-                    <span class="shoe-inspector-title" style="font-size:0.65rem;color:var(--gold);letter-spacing:1px;font-weight:bold;">REMAINING CARDS</span>
-                    <button onclick="toggleShoeVisibility()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:0.68rem;padding:0;">[TOGGLE]</button>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                    <span class="shoe-inspector-title" style="font-size:0.65rem;color:var(--gold);letter-spacing:1px;font-weight:bold;">SHOE INSPECTOR</span>
+                    <div style="display:flex;gap:3px;align-items:center;">
+                        <button id="view-toggle-result" onclick="setShoeView('result')" class="active">RESULT</button>
+                        <button id="view-toggle-deal" onclick="setShoeView('deal')">DEAL ORDER</button>
+                        <button id="shoe-vis-btn" onclick="toggleShoeVisibility()" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);color:var(--gold);cursor:pointer;font-size:0.65rem;padding:1px 5px;border-radius:3px;" title="Show/hide cards">👁</button>
+                    </div>
                 </div>
-                <div id="shoe-preview-el" class="shoe-preview-container" style="display:none;"></div>
-                <div class="inspector-placeholder-label" id="inspector-placeholder">Inspector Engine Standby</div>
+                <!-- Single grid — color mode toggled by RESULT/DEAL ORDER buttons -->
+                <div id="shoe-inspector-grid">
+                    <div style="font-size:0.55rem;color:rgba(255,255,255,0.3);margin-bottom:2px;" id="deal-order-subtitle"></div>
+                    <div id="shoe-preview-el" class="shoe-preview-container"></div>
+                </div>
+                <div class="inspector-placeholder-label" id="inspector-placeholder" style="display:none;">Inspector Engine Standby</div>
             </div>
             <!-- History Inspector -->
             <div id="insp-history" class="insp-panel" style="display:none;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                    <span style="font-size:0.58rem;color:rgba(255,255,255,0.3);letter-spacing:0.5px;">HAND HISTORY</span>
+                    <div style="display:flex;gap:3px;">
+                        <button id="hist-mode-deal" onclick="setHistoryMode('deal')" class="view-mode-btn active">DEAL</button>
+                        <button id="hist-mode-table" onclick="setHistoryMode('table')" class="view-mode-btn">TABLE</button>
+                    </div>
+                </div>
                 <div id="history-list" class="history-list"></div>
                 <div class="inspector-placeholder-label" id="history-placeholder" style="display:none;">No hands played yet</div>
+            </div>
+            <!-- Bet Inspector -->
+            <div id="insp-bets" class="insp-panel" style="display:none;">
+                <div id="bet-inspector-list" class="history-list"></div>
+                <div class="inspector-placeholder-label" id="bet-inspector-placeholder">No bets placed yet</div>
             </div>
             <!-- Stats Inspector -->
             <div id="insp-stats" class="insp-panel" style="display:none;">
@@ -934,6 +1102,8 @@
         document.getElementById('game-container').style.display = 'flex';
         initLayout();
         initLang();
+        loadBtnCustom();
+        renderShoePreview();
     }
 
     function showReloginBanner(email) {
@@ -1110,11 +1280,14 @@
     // ══════════════════════════════════════════════════════════
     //  STATE
     // ══════════════════════════════════════════════════════════
-    let bankroll = 0, initialBankroll = 0, selectedChipValue = 25, userEmail = "";
+    let bankroll = 0, initialBankroll = 0, totalDeposits = 0, selectedChipValue = 25, userEmail = "";
+    let shoeView = 'result'; // 'result' | 'deal'
+    let betMode = 'buttons';  // 'buttons' | 'table' | 'both'
+    let historyMode = 'deal';   // 'deal' | 'table'
     let currentBets = {};
     let lastBets = {};
     let stats = { banker:0, player:0, tie:0, hands:0, betsWon:0, betsLost:0, volWon:0, volLost:0 };
-    let shoe = [], shoeSize = 8, shoeVisible = false;
+    let shoe = [], shoeFullCopy = [], shoeSize = 8, shoeVisible = true;
     let selectedCasino = CASINO_MODES[0];
 
     let beadHistory = [];
@@ -1311,6 +1484,7 @@
         const amount = parseInt(document.getElementById('add-funds-input').value);
         if (!amount || amount <= 0) return;
         bankroll += amount;
+        totalDeposits += amount;  // track separately so P&L is unaffected
         document.getElementById('add-funds-popup').style.display = 'none';
         updateUI();
         saveGameState();
@@ -1534,10 +1708,10 @@
     function newGame() {
         if (!confirm('Start a new game? Current progress will be lost.')) return;
         clearGameState();
-        bankroll = 0; initialBankroll = 0;
+        bankroll = 0; initialBankroll = 0; totalDeposits = 0;
         currentBets = {}; lastBets = {};
         stats = { banker:0, player:0, tie:0, hands:0, betsWon:0, betsLost:0, volWon:0, volLost:0 };
-        shoe = []; shoeEnded = false;
+        shoe = []; shoeFullCopy = []; shoeEnded = false;
         beadHistory = []; bigRoadColumns = []; bigRoadCurrentCol = 0; bigRoadLastNonTie = null;
         bebEntries = []; smallEntries = []; cockEntries = [];
         document.getElementById('game-container').style.display = 'none';
@@ -1558,7 +1732,7 @@
         if (dealBtn) { dealBtn.disabled = true; dealBtn.style.opacity = '0.4'; }
 
         // Build summary stats
-        const pl = bankroll - initialBankroll;
+        const pl = bankroll - initialBankroll - totalDeposits;
         const plSign = pl >= 0 ? '+' : '';
         const plColor = pl >= 0 ? '#7dff7d' : '#ff9e9e';
         const statsHTML = `
@@ -1582,7 +1756,7 @@
     }
 
     function saveShoe() {
-        const pl = bankroll - initialBankroll;
+        const pl = bankroll - initialBankroll - totalDeposits;
         const timestamp = new Date().toISOString().replace('T',' ').substring(0,19);
         const midSession = !shoeEnded && shoe.length > 0;
         const summary = {
@@ -1595,6 +1769,7 @@
             sessionPL: pl,
             midSession,                      // flag so loader knows this is resumable
             shoe: midSession ? shoe : [],    // remaining cards if mid-session
+            shoeFullCopy: [...shoeFullCopy],           // full shoe for inspector
             stats: {
                 hands: stats.hands,
                 banker: stats.banker,
@@ -1858,6 +2033,31 @@
         if (s.shoe && s.shoe.length >= 6) {
             // Mid-session save — use the remaining shoe cards
             shoe = s.shoe;
+            if (s.shoeFullCopy && s.shoeFullCopy.length > shoe.length) {
+                // Have the full copy from a newer save
+                shoeFullCopy = s.shoeFullCopy;
+            } else {
+                // Older save — reconstruct full shoe by prepending dealt cards
+                // Dealt cards come from beadHistory p[] and b[] in reverse deal order
+                // (shoe is a stack — pop() order — so dealt cards go at the END)
+                const dealtCards = [];
+                if (s.results) {
+                    s.results.forEach(r => {
+                        // deal order: p1,b1,p2,b2,p3?,b3? — push in reverse to rebuild stack
+                        const p = r.p || [], b = r.b || [];
+                        const seq = [];
+                        if (p[0]!==undefined) seq.push(p[0]);
+                        if (b[0]!==undefined) seq.push(b[0]);
+                        if (p[1]!==undefined) seq.push(p[1]);
+                        if (b[1]!==undefined) seq.push(b[1]);
+                        if (p[2]!==undefined) seq.push(p[2]);
+                        if (b[2]!==undefined) seq.push(b[2]);
+                        seq.reverse().forEach(c => dealtCards.push(c));
+                    });
+                }
+                // shoeFullCopy = dealt cards (bottom of stack) + remaining (top of stack)
+                shoeFullCopy = [...dealtCards.reverse(), ...shoe];
+            }
             showToast(`🃏 Resumed with ${shoe.length} cards remaining`, '#1a5220');
         } else {
             // Completed shoe — start fresh shoe, road history kept
@@ -1916,7 +2116,7 @@
         markSaved();
         try {
             const state = {
-                bankroll, initialBankroll, shoeSize,
+                bankroll, initialBankroll, totalDeposits, shoeSize, betMode,
                 currentBets, lastBets, stats,
                 shoe, beadHistory, bigRoadColumns,
                 bigRoadCurrentCol, bigRoadLastNonTie,
@@ -1938,6 +2138,8 @@
             if (Date.now() - s.ts > 24 * 3600 * 1000) { clearGameState(); return false; }
             bankroll = s.bankroll;
             initialBankroll = s.initialBankroll;
+            totalDeposits = s.totalDeposits || 0;
+            if (s.betMode) setBetMode(s.betMode);
             shoeSize = s.shoeSize;
             currentBets = s.currentBets || {};
             lastBets = s.lastBets || {};
@@ -2038,7 +2240,7 @@
                     updateSubBadge();
                 }
                 // If server returns initial shoe for inspector preview, use it
-                if (data.shoe) { shoe = data.shoe; }
+                if (data.shoe) { shoe = data.shoe; shoeFullCopy = [...shoe]; }
                 else { initShoeLocal(); }
                 return;
             }
@@ -2057,7 +2259,7 @@
             if (data.error === 'ShoeExpired') { serverShoeId = null; useServerDealing = false; return null; }
             if (data.cards && data.cards.length >= 4) {
                 // Update local shoe mirror for inspector
-                if (data.remaining !== undefined) shoe = data.remaining || [];
+                if (data.remaining !== undefined) { shoe = data.remaining || []; if (!shoeFullCopy || shoeFullCopy.length === 0) shoeFullCopy = [...shoe]; }
                 return data.cards; // [p1, p2, b1, b2, p3?, b3?]  (values 1-13)
             }
         } catch(e) { /* fall through */ }
@@ -2070,6 +2272,7 @@
         shoe = [];
         for (let i=0; i<shoeSize*52; i++) shoe.push((i%13)+1);
         for (let i=shoe.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [shoe[i],shoe[j]]=[shoe[j],shoe[i]]; }
+        shoeFullCopy = [...shoe]; // keep full copy for inspector display
     }
 
     function initShoe() {
@@ -2418,9 +2621,13 @@
                 notifications.push(`<span class="win-badge" style="background:#555;">DRAGON PUSH</span>`);
             } else {
                 if (drg) {
+                    // Dragon 7 hit: Dragon bet pays 40:1, Banker bet PUSHES (stake returned, no win)
                     win += (currentBets.dragon||0) * 41 + (currentBets.banker||0);
                     beadClass='dragon-win'; beadLabel='D7'; outcomeType='banker';
                     flash('bet-dragon-box'); flash('bet-banker-box');
+                    if ((currentBets.banker||0) > 0) {
+                        notifications.push(`<span class="win-badge" style="background:#555;">BANKER PUSH</span>`);
+                    }
                     notifications.push(`<span class="win-badge" style="background:var(--dragon-orange);color:black;border:1px solid black;">DRAGON 7 WIN!</span>`);
                     specialMsg = '🐉 DRAGON 7!';
                 } else {
@@ -2489,8 +2696,10 @@
         }
 
         // Refresh whichever inspector tab is open
+        if (activeInspectorTab === 'shoe')    renderShoePreview();
         if (activeInspectorTab === 'history') renderHistoryInspector();
-        else if (activeInspectorTab === 'stats') renderStatsInspector();
+        if (activeInspectorTab === 'stats')   renderStatsInspector();
+        if (activeInspectorTab === 'bets')    renderBetInspector();
 
         // Build last-bet summary
         const lastBetParts = [];
@@ -2624,6 +2833,7 @@
     function renderAllRoads() {
         renderBeadPlate();
         renderBigRoad();
+        renderBettingRoad();
         renderDerivedRoad('road-beb', bebEntries, 'circle');
         renderDerivedRoad('road-small', smallEntries, 'hollow');
         renderDerivedRoad('road-cock', cockEntries, 'slash');
@@ -2686,6 +2896,84 @@
                         const tieLine = document.createElement('div');
                         tieLine.style.cssText = 'position:absolute;width:2px;height:11px;background:#1a8c22;top:0;left:50%;transform:translateX(-50%);border-radius:1px;';
                         circle.appendChild(tieLine);
+                    }
+                    cell.appendChild(circle);
+                }
+                container.appendChild(cell);
+            }
+        }
+        const wrap = container.parentElement;
+        if (wrap) wrap.scrollLeft = wrap.scrollWidth;
+    }
+
+    function renderBettingRoad() {
+        const container = document.getElementById('road-betting');
+        if (!container) return;
+        container.innerHTML = '';
+
+        // Mirror Big Road column structure exactly, but color by bet outcome
+        // Win = green, Loss = red, Push = grey, No bet = dim empty
+        const ROWS = 6;
+        let maxCol = 0;
+
+        const allEntries = [];
+        bigRoadColumns.forEach(col => {
+            col.forEach(entry => {
+                allEntries.push(entry);
+                if (entry.col > maxCol) maxCol = entry.col;
+            });
+        });
+
+        if (allEntries.length === 0) return;
+
+        // Map each Big Road entry to its hand index in beadHistory
+        // Big Road entries are built in the same order as beadHistory
+        // We need to match col/row to hand index
+        // Build a flat ordered list of non-tie entries (same order as bigRoadColumns traversal)
+        const orderedEntries = [];
+        bigRoadColumns.forEach(col => col.forEach(e => orderedEntries.push(e)));
+
+        // beadHistory index map: skip ties for Big Road matching (ties don't create new cells)
+        // Build mapping: bigRoad entry index → beadHistory index
+        const entryToHistIdx = [];
+        let bigIdx = 0;
+        for (let i = 0; i < beadHistory.length; i++) {
+            const h = beadHistory[i];
+            const isTie = (h.cls || '').includes('tie');
+            if (!isTie) {
+                entryToHistIdx[bigIdx] = i;
+                bigIdx++;
+            }
+        }
+
+        const totalCols = maxCol + 1;
+        const grid = {};
+        orderedEntries.forEach((entry, idx) => {
+            if (!grid[entry.col]) grid[entry.col] = {};
+            grid[entry.col][entry.row] = { entry, histIdx: entryToHistIdx[idx] };
+        });
+
+        for (let c = 0; c < totalCols; c++) {
+            for (let r = 0; r < ROWS; r++) {
+                const cell = document.createElement('div');
+                cell.className = 'br-bet-cell';
+                const item = grid[c] && grid[c][r];
+                if (item) {
+                    const pl = handHistory[item.histIdx];
+                    const circle = document.createElement('div');
+                    circle.className = 'br-bet-circle';
+                    if (pl === undefined) {
+                        circle.classList.add('br-bet-nobet');
+                        circle.title = 'No bet';
+                    } else if (pl === 0) {
+                        circle.classList.add('br-bet-push');
+                        circle.title = 'Push';
+                    } else if (pl > 0) {
+                        circle.classList.add('br-bet-win');
+                        circle.title = '+$' + pl.toFixed(0);
+                    } else {
+                        circle.classList.add('br-bet-loss');
+                        circle.title = '-$' + Math.abs(pl).toFixed(0);
                     }
                     cell.appendChild(circle);
                 }
@@ -2794,6 +3082,124 @@
     // ── Panel UI ──
     let panelOrder = [];
 
+    // ── Button Customization ─────────────────────────────────
+    const BTN_DEFS = [
+        { id: 'btn-rebet',  label: '↩ REBET',    default: true  },
+        { id: 'btn-double', label: '✕2 DOUBLE',  default: true  },
+        { id: 'btn-deal',   label: '🃏 DEAL',     default: true, required: true },
+        { id: 'btn-clear',  label: '🗑 CLEAR',    default: true  },
+        { id: 'btn-addfunds', label: '+$ ADD FUNDS', default: true },
+        { id: 'btn-save',   label: '💾 SAVE',     default: true  },
+    ];
+
+    let btnOrder = BTN_DEFS.map(b => b.id);
+    let btnVisible = Object.fromEntries(BTN_DEFS.map(b => [b.id, b.default]));
+
+    function openBtnCustomPanel() {
+        renderBtnCustomList();
+        document.getElementById('btn-custom-panel').style.display = 'block';
+    }
+
+    function closeBtnCustomPanel() {
+        document.getElementById('btn-custom-panel').style.display = 'none';
+    }
+
+    function renderBtnCustomList() {
+        const list = document.getElementById('btn-custom-list');
+        list.innerHTML = btnOrder.map((id, idx) => {
+            const def = BTN_DEFS.find(b => b.id === id);
+            if (!def) return '';
+            const vis = btnVisible[id];
+            const isRequired = def.required;
+            return `<div class="btn-custom-item" data-btn-id="${id}" draggable="true"
+                        ondragstart="btnDragStart(event,${idx})"
+                        ondragover="btnDragOver(event)"
+                        ondrop="btnDrop(event,${idx})"
+                        ondragleave="btnDragLeave(event)">
+                <span class="btn-custom-drag">⠿</span>
+                <span class="btn-custom-label">${def.label}</span>
+                <div class="btn-custom-arrows">
+                    <button class="btn-custom-arrow" onclick="btnMove(${idx},-1)">▲</button>
+                    <button class="btn-custom-arrow" onclick="btnMove(${idx},1)">▼</button>
+                </div>
+                <button class="btn-custom-toggle ${vis?'on':'off'}" onclick="btnToggleVis('${id}',this)" ${isRequired?'disabled title="Required"':''}>
+                    ${vis?'✓':'✕'}
+                </button>
+            </div>`;
+        }).join('');
+
+        // Drag events
+        list.querySelectorAll('.btn-custom-item').forEach(el => {
+            el.addEventListener('dragstart', e => { e.dataTransfer.effectAllowed='move'; el.classList.add('dragging'); });
+            el.addEventListener('dragend',   e => { el.classList.remove('dragging'); });
+        });
+    }
+
+    let btnDragIdx = -1;
+    function btnDragStart(e, idx) { btnDragIdx = idx; }
+    function btnDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+    function btnDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+    function btnDrop(e, toIdx) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        if (btnDragIdx < 0 || btnDragIdx === toIdx) return;
+        const moved = btnOrder.splice(btnDragIdx, 1)[0];
+        btnOrder.splice(toIdx, 0, moved);
+        btnDragIdx = -1;
+        renderBtnCustomList();
+    }
+    function btnMove(idx, dir) {
+        const newIdx = idx + dir;
+        if (newIdx < 0 || newIdx >= btnOrder.length) return;
+        [btnOrder[idx], btnOrder[newIdx]] = [btnOrder[newIdx], btnOrder[idx]];
+        renderBtnCustomList();
+    }
+    function btnToggleVis(id, btn) {
+        btnVisible[id] = !btnVisible[id];
+        btn.className = 'btn-custom-toggle ' + (btnVisible[id] ? 'on' : 'off');
+        btn.textContent = btnVisible[id] ? '✓' : '✕';
+    }
+
+    function applyBtnCustom() {
+        const group = document.getElementById('action-buttons-group');
+        if (!group) return;
+        // Reorder and show/hide based on btnOrder and btnVisible
+        const btnEls = {
+            'btn-rebet':    document.getElementById('btn-rebet'),
+            'btn-double':   document.getElementById('btn-double'),
+            'btn-deal':     document.getElementById('btn-deal'),
+            'btn-clear':    document.querySelector('.clear-btn'),
+            'btn-addfunds': document.querySelector('[title="Add funds to bankroll"]'),
+            'btn-save':     document.querySelector('[title="Save game now"]'),
+        };
+        btnOrder.forEach(id => {
+            const el = btnEls[id];
+            if (!el) return;
+            el.style.display = btnVisible[id] ? '' : 'none';
+            group.appendChild(el); // reorder by appending in order
+        });
+        // Save preference
+        try { localStorage.setItem('df_btn_custom', JSON.stringify({ order: btnOrder, visible: btnVisible })); } catch(e) {}
+    }
+
+    function resetBtnCustom() {
+        btnOrder   = BTN_DEFS.map(b => b.id);
+        btnVisible = Object.fromEntries(BTN_DEFS.map(b => [b.id, b.default]));
+        applyBtnCustom();
+        renderBtnCustomList();
+    }
+
+    function loadBtnCustom() {
+        try {
+            const saved = localStorage.getItem('df_btn_custom');
+            if (!saved) return;
+            const { order, visible } = JSON.parse(saved);
+            if (order)   btnOrder   = order;
+            if (visible) btnVisible = visible;
+            applyBtnCustom();
+        } catch(e) {}
+    }
+
     function openLayoutPanel() {
         panelOrder = getLayoutOrder();
         buildLayoutPanel();
@@ -2886,19 +3292,170 @@
     // ══════════════════════════════════════════════════════════
     let activeInspectorTab = 'shoe';
 
+    // ── Betting Mode ──────────────────────────────────────────
+    function setBetMode(mode) {
+        betMode = mode;
+        ['buttons','table','both'].forEach(m => {
+            document.getElementById('mode-btn-' + m).classList.toggle('active', m === mode);
+        });
+        const btnPanel   = document.getElementById('bet-buttons-panel');
+        const tablePanel = document.getElementById('bet-table-panel');
+        if (mode === 'buttons') {
+            btnPanel.style.display   = '';
+            tablePanel.style.display = 'none';
+        } else if (mode === 'table') {
+            btnPanel.style.display   = 'none';
+            tablePanel.style.display = '';
+        } else { // both
+            btnPanel.style.display   = '';
+            tablePanel.style.display = '';
+        }
+        syncFeltDisplay();
+    }
+
+    function syncFeltDisplay() {
+        // Keep felt table amounts in sync with button display values
+        const fmt = v => v > 0 ? '$' + v : '—';
+        const fP = document.getElementById('felt-disp-player');
+        const fT = document.getElementById('felt-disp-tie');
+        const fB = document.getElementById('felt-disp-banker');
+        if (fP) fP.textContent = fmt(currentBets.player || 0);
+        if (fT) fT.textContent = fmt(currentBets.tie    || 0);
+        if (fB) fB.textContent = fmt(currentBets.banker || 0);
+
+        // Sync odds labels
+        const foP = document.getElementById('felt-player-odds');
+        const foT = document.getElementById('felt-tie-odds');
+        const foB = document.getElementById('felt-banker-odds');
+        if (foP) foP.textContent = document.getElementById('player-odds-label')?.textContent || '1:1';
+        if (foT) foT.textContent = document.getElementById('tie-odds-label')?.textContent    || '8:1';
+        if (foB) foB.textContent = document.getElementById('banker-odds-label')?.textContent || '0.95:1';
+
+        // Sync side bets into felt
+        const feltSide = document.getElementById('felt-side-bets-row');
+        const btnSide  = document.getElementById('side-bets-row');
+        if (feltSide && btnSide) {
+            // Mirror side bets as compact felt chips
+            const activeSideBets = [];
+            document.querySelectorAll('[id^="bet-"][id$="-box"]:not(#bet-player-box):not(#bet-banker-box):not(#bet-tie-box)').forEach(el => {
+                const key = el.id.replace('bet-','').replace('-box','');
+                if (currentBets[key] > 0) {
+                    const def = Object.values(window.sideBetDefs || {}).find(d => d.key === key);
+                    activeSideBets.push({ key, amount: currentBets[key], label: def ? def.label : key });
+                }
+            });
+            feltSide.innerHTML = activeSideBets.length ? activeSideBets.map(b =>
+                `<div class="felt-side-bet" onclick="placeBet('${b.key}')">
+                    <div class="felt-side-bet-label">${b.label}</div>
+                    <div class="felt-side-bet-amount">$${b.amount}</div>
+                </div>`
+            ).join('') : '';
+            feltSide.style.display = activeSideBets.length ? 'flex' : 'none';
+        }
+    }
+
     function switchInspector(tab) {
         activeInspectorTab = tab;
-        ['shoe','history','stats'].forEach(t => {
+        ['shoe','history','bets','stats'].forEach(t => {
             const panel = document.getElementById(`insp-${t}`);
             const btn   = document.getElementById(`itab-${t}`);
             if (panel) panel.style.display = t === tab ? '' : 'none';
             if (btn)   btn.classList.toggle('active', t === tab);
         });
+        if (tab === 'shoe')    renderShoePreview();
         if (tab === 'history') renderHistoryInspector();
+        if (tab === 'bets')    renderBetInspector();
         if (tab === 'stats')   renderStatsInspector();
     }
 
+    // Bet Inspector — shows won/lost bets, grays out no-bet hands
+    function renderBetInspector() {
+        const list = document.getElementById('bet-inspector-list');
+        const ph   = document.getElementById('bet-inspector-placeholder');
+        if (!list) return;
+
+        const fm = v => v===1?'A':v===11?'J':v===12?'Q':v===13?'K':String(v);
+
+        // Check if any hand had a bet
+        const anyBets = beadHistory.some((h, i) => handHistory[i] !== undefined);
+        if (!beadHistory || beadHistory.length === 0 || !anyBets) {
+            list.innerHTML = '';
+            if (ph) ph.style.display = 'block';
+            return;
+        }
+        if (ph) ph.style.display = 'none';
+
+        const dealtOrder = (p, b) => {
+            const seq = [];
+            if (p[0] !== undefined) seq.push({ val: p[0], role: 'p' });
+            if (b[0] !== undefined) seq.push({ val: b[0], role: 'b' });
+            if (p[1] !== undefined) seq.push({ val: p[1], role: 'p' });
+            if (b[1] !== undefined) seq.push({ val: b[1], role: 'b' });
+            if (p[2] !== undefined) seq.push({ val: p[2], role: 'p', third: true });
+            if (b[2] !== undefined) seq.push({ val: b[2], role: 'b', third: true });
+            return seq;
+        };
+
+        list.innerHTML = [...beadHistory].reverse().map((h, ri) => {
+            const i      = beadHistory.length - 1 - ri;
+            const cls    = h.cls || '';
+            const num    = i + 1;
+            const p      = h.p || [];
+            const b      = h.b || [];
+            const pS     = h.pS ?? '?';
+            const bS     = h.bS ?? '?';
+            const pl     = handHistory[i];
+            const noBet  = pl === undefined;
+
+            // Outcome
+            let rowCls, badge, accentColor;
+            if (cls.includes('dragon'))      { rowCls='hr-dragon'; badge='🐉 D7';  accentColor='#e67e22'; }
+            else if (cls.includes('panda'))  { rowCls='hr-panda';  badge='🐼 P8';  accentColor='#9b59b6'; }
+            else if (cls.includes('banker')) { rowCls='hr-banker'; badge='BANK';   accentColor='#c0392b'; }
+            else if (cls.includes('player')) { rowCls='hr-player'; badge='PLAY';   accentColor='#2980b9'; }
+            else if (cls.includes('tie'))    { rowCls='hr-tie';    badge='TIE';    accentColor='#27ae60'; }
+            else                             { rowCls='hr-push';   badge='—';      accentColor='#555'; }
+
+            if (noBet) {
+                // No bet — grayed out row, minimal info
+                return `<div class="hr-row" style="opacity:0.25;border-left:2px solid #333;">
+                    <span class="hr-num">${num}</span>
+                    <span class="hr-badge" style="color:#555;border-left:none;">${badge}</span>
+                    <div class="hr-scores" style="margin-left:auto;"><span style="color:#444;font-size:0.58rem;">no bet</span></div>
+                </div>`;
+            }
+
+            // Has a bet — show full detail
+            const won = pl >= 0;
+            const plColor = won ? '#7dff7d' : '#ff9e9e';
+            const plSign  = won ? '+' : '−';
+
+            const seq = dealtOrder(p, b);
+            const cardsHtml = seq.map(c => {
+                const lbl = fm(c.val);
+                const cardCls = c.role === 'p' ? 'hcard-p' : 'hcard-b';
+                const thirdCls = c.third ? ' hcard-third' : '';
+                return `<div class="hcard ${cardCls}${thirdCls}">${lbl}</div>`;
+            }).join('');
+
+            return `<div class="hr-row ${rowCls}" style="border-left:2px solid ${won?'rgba(125,255,125,0.4)':'rgba(255,100,100,0.4)'};">
+                <span class="hr-num">${num}</span>
+                <span class="hr-badge" style="border-left:2px solid ${accentColor};color:${accentColor};">${badge}</span>
+                <div class="hr-cards">${cardsHtml}</div>
+                <div class="hr-scores"><span class="hr-ps">${pS}</span><span class="hr-sep">:</span><span class="hr-bs">${bS}</span></div>
+                <span class="hr-pl" style="color:${plColor};">${plSign}$${Math.abs(pl).toFixed(0)}</span>
+            </div>`;
+        }).join('');
+    }
+
     // History tab: card-deal history — shoe-inspector style, dealt order, color-coded
+    function setHistoryMode(mode) {
+        historyMode = mode;
+        document.getElementById('hist-mode-deal').classList.toggle('active', mode === 'deal');
+        document.getElementById('hist-mode-table').classList.toggle('active', mode === 'table');
+        renderHistoryInspector();
+    }
+
     function renderHistoryInspector() {
         const list = document.getElementById('history-list');
         const ph   = document.getElementById('history-placeholder');
@@ -2955,20 +3512,39 @@
                 ? `<span class="hr-pl" style="color:${plEntry>=0?'#7dff7d':'#ff9e9e'};">${plEntry>=0?'+':'\u2212'}$${Math.abs(plEntry).toFixed(0)}</span>`
                 : '';
 
-            // Cards in deal order with separating dot for 3rd card
-            const seq = dealtOrder(p, b);
-            const cardsHtml = seq.map((c, ci) => {
-                const thirdCls = c.third ? ' hcard-third' : '';
-                const lbl = fm(c.val);
-                const cardCls = c.role === 'p' ? 'hcard-p' : 'hcard-b';
-                return `<div class="hcard ${cardCls}${thirdCls}">${lbl}</div>`;
-            }).join('');
+            // Cards — deal order or table layout based on mode
+            let cardsHtml;
+            if (historyMode === 'table') {
+                // Table mode: Player cards left (blue) | score | Banker cards right (red)
+                const pCardsHtml = p.map((v,i) => `<div class="hcard hcard-p${i===2?' hcard-third':''}">${fm(v)}</div>`).join('');
+                const bCardsHtml = b.map((v,i) => `<div class="hcard hcard-b${i===2?' hcard-third':''}">${fm(v)}</div>`).join('');
+                cardsHtml = `<div style="display:flex;align-items:center;flex:1;gap:3px;">
+                    <div style="display:flex;gap:1px;align-items:center;">${pCardsHtml}</div>
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:0;margin:0 3px;flex-shrink:0;">
+                        <span class="hr-ps" style="font-size:0.7rem;font-weight:bold;">${pS}</span>
+                        <span class="hr-sep" style="font-size:0.45rem;line-height:1;">vs</span>
+                        <span class="hr-bs" style="font-size:0.7rem;font-weight:bold;">${bS}</span>
+                    </div>
+                    <div style="display:flex;gap:1px;align-items:center;">${bCardsHtml}</div>
+                </div>`;
+            } else {
+                // Deal order: P1 B1 P2 B2 [P3] [B3]
+                const seq = dealtOrder(p, b);
+                cardsHtml = `<div class="hr-cards">${seq.map((c, ci) => {
+                    const thirdCls = c.third ? ' hcard-third' : '';
+                    const cardCls  = c.role === 'p' ? 'hcard-p' : 'hcard-b';
+                    return `<div class="hcard ${cardCls}${thirdCls}">${fm(c.val)}</div>`;
+                }).join('')}</div>`;
+            }
+
+            const scoresHtml = historyMode === 'table' ? '' :
+                `<div class="hr-scores"><span class="hr-ps">${pS}</span><span class="hr-sep">:</span><span class="hr-bs">${bS}</span></div>`;
 
             return `<div class="hr-row ${rowCls}">
                 <span class="hr-num">${num}</span>
                 <span class="hr-badge" style="border-left:2px solid ${accentColor};color:${accentColor};">${badge}</span>
-                <div class="hr-cards">${cardsHtml}</div>
-                <div class="hr-scores"><span class="hr-ps">${pS}</span><span class="hr-sep">:</span><span class="hr-bs">${bS}</span></div>
+                ${cardsHtml}
+                ${scoresHtml}
                 ${plHtml}
             </div>`;
         }).join('');
@@ -3029,17 +3605,112 @@
     // ══════════════════════════════════════════════════════════
     function toggleShoeVisibility() {
         shoeVisible = !shoeVisible;
-        const el = document.getElementById('shoe-preview-el');
-        const ph = document.getElementById('inspector-placeholder');
-        el.style.display = shoeVisible ? 'flex' : 'none';
-        if (ph) ph.style.display = shoeVisible ? 'none' : 'block';
+        const btn = document.getElementById('shoe-vis-btn');
+        if (btn) {
+            btn.style.background   = shoeVisible ? 'rgba(212,175,55,0.1)' : 'none';
+            btn.style.borderColor  = shoeVisible ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.1)';
+            btn.style.color        = shoeVisible ? 'var(--gold)' : 'rgba(255,255,255,0.2)';
+        }
+        renderShoePreview();
+    }
+
+    function setShoeView(view) {
+        shoeView = view;
+        // Update toggle button styles
+        document.getElementById('view-toggle-result').classList.toggle('active', view === 'result');
+        document.getElementById('view-toggle-deal').classList.toggle('active', view === 'deal');
         renderShoePreview();
     }
 
     function renderShoePreview() {
-        if (!shoeVisible) return;
-        const fm={1:'A',11:'J',12:'Q',13:'K'};
-        document.getElementById('shoe-preview-el').innerHTML = [...shoe].reverse().map((c,i)=>`<span class="preview-card ${i===0?'next-card':''}">${fm[c]||c}</span>`).join('');
+        const fm    = {1:'A',11:'J',12:'Q',13:'K'};
+        const label = v => fm[v] || String(v);
+        const el       = document.getElementById('shoe-preview-el');
+        const subtitle = document.getElementById('deal-order-subtitle');
+        const ph       = document.getElementById('inspector-placeholder');
+        const grid     = document.getElementById('shoe-inspector-grid');
+
+        if (ph) ph.style.display = 'none';
+
+        if (!shoeVisible) {
+            if (grid) grid.style.display = 'none';
+            if (ph)   ph.style.display   = 'block';
+            return;
+        }
+
+        if (grid) grid.style.display = 'block';
+        if (!el) return;
+
+        if (!shoeFullCopy || shoeFullCopy.length === 0) {
+            el.innerHTML = '<span style="color:rgba(255,255,255,0.2);font-size:0.6rem;">Deal a hand to see cards</span>';
+            if (subtitle) subtitle.textContent = '';
+            return;
+        }
+
+        const fullLen    = shoeFullCopy.length;
+        const remaining  = shoe.length;
+        const dealtCount = fullLen - remaining;
+
+        if (subtitle) subtitle.textContent =
+            dealtCount === 0 ? `${fullLen} cards · next card highlighted in gold`
+            : `${dealtCount} dealt · ${remaining} remaining`;
+
+        // Build a map: card position → seat color (for result mode)
+        // Each hand in beadHistory has p[] and b[] arrays dealt in order
+        // We reconstruct which absolute shoe positions belong to P/B/T
+        let seatMap = {}; // absoluteIndex (from end of shoeFullCopy) → 'p'|'b'|'t'
+        if (shoeView === 'result') {
+            let pos = fullLen - 1; // first card dealt = index fullLen-1 in shoeFullCopy
+            beadHistory.forEach(h => {
+                const isTie = (h.cls || '').includes('tie');
+                const seat  = isTie ? 't' : null;
+                const allCards = [];
+                // deal order: p[0], b[0], p[1], b[1], p[2]?, b[2]?
+                const p = h.p || [], b = h.b || [];
+                const seq = [];
+                if (p[0] !== undefined) seq.push('p');
+                if (b[0] !== undefined) seq.push('b');
+                if (p[1] !== undefined) seq.push('p');
+                if (b[1] !== undefined) seq.push('b');
+                if (p[2] !== undefined) seq.push('p');
+                if (b[2] !== undefined) seq.push('b');
+                seq.forEach(s => {
+                    seatMap[pos] = isTie ? 't' : s;
+                    pos--;
+                });
+            });
+        }
+
+        // displayArr[0] = first card dealt (index fullLen-1 in shoeFullCopy)
+        const displayArr = [...shoeFullCopy].reverse();
+
+        el.innerHTML = displayArr.map((c, i) => {
+            const isDealt = i < dealtCount;
+            const isNext  = i === dealtCount;
+            const absPos  = fullLen - 1 - i; // position in shoeFullCopy
+
+            let cls;
+            if (isNext) {
+                cls = 'preview-card next-card';
+            } else if (!isDealt) {
+                cls = 'preview-card';
+            } else if (shoeView === 'result') {
+                const seat = seatMap[absPos];
+                cls = seat === 'p' ? 'preview-card preview-card-p'
+                    : seat === 'b' ? 'preview-card preview-card-b'
+                    : seat === 't' ? 'preview-card preview-card-t'
+                    : 'preview-card dealt-card';
+            } else {
+                cls = 'preview-card dealt-card';
+            }
+
+            return `<span class="${cls}">${label(c)}</span>`;
+        }).join('');
+
+        setTimeout(() => {
+            const nextEl = el.querySelector('.next-card');
+            if (nextEl) nextEl.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        }, 50);
     }
 
     // ══════════════════════════════════════════════════════════
@@ -3047,7 +3718,7 @@
     // ══════════════════════════════════════════════════════════
     function updateUI() {
         const fmt=`$${bankroll.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-        const pl=bankroll-initialBankroll;
+        const pl=bankroll-initialBankroll-totalDeposits;
         const fmtPL=(pl>=0?'+$':'-$')+Math.abs(pl).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
         const plColor=pl>=0?'#4caf50':'#f44336';
         const rawCount=shoeSize===0?"∞":shoe.length;
@@ -3056,6 +3727,7 @@
         document.querySelectorAll('.shoe-count-label').forEach(el=>el.textContent=rawCount);
         updateCardsWarning();
         renderShoePreview();
+        syncFeltDisplay();
     }
 
     // ══════════════════════════════════════════════════════════
