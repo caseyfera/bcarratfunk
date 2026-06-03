@@ -1750,6 +1750,8 @@
         renderAllRoads();
         updateUI();
         saveGameState();
+        const _endBtnInit = document.getElementById('btn-end-shoe');
+        if (_endBtnInit) { _endBtnInit.disabled = false; _endBtnInit.style.opacity = '1'; }
     }
 
     function newGame() {
@@ -1769,10 +1771,48 @@
 
     function jumpToEndOfShoe() {
         if (shoeEnded) return;
-        if (shoeSize > 0 && shoe.length > 0) {
-            // Trim shoe to fewer than 6 cards so canDealHand() returns false
-            shoe.splice(0, Math.max(0, shoe.length - 5));
+        if (shoeSize === 0) { endShoe(); return; } // infinite shoe — just end
+
+        // Fast-forward: deal all remaining hands silently, no bets, no animation
+        _fastForwarding = true;
+        clearBets();
+
+        const gV = v => v >= 10 ? 0 : v;
+        while (canDealHand()) {
+            let p = [getNextCard(), getNextCard()];
+            let b = [getNextCard(), getNextCard()];
+            let pS = (gV(p[0]) + gV(p[1])) % 10;
+            let bS = (gV(b[0]) + gV(b[1])) % 10;
+
+            if (!(pS >= 8 || bS >= 8)) {
+                if (pS <= 5) {
+                    let p3 = getNextCard(); p.push(p3); pS = (pS + gV(p3)) % 10;
+                    const p3v = gV(p3);
+                    const dB = bS <= 2 ||
+                        (bS === 3 && p3v !== 8) ||
+                        (bS === 4 && [2,3,4,5,6,7].includes(p3v)) ||
+                        (bS === 5 && [4,5,6,7].includes(p3v)) ||
+                        (bS === 6 && [6,7].includes(p3v));
+                    if (dB && shoe.length > 0) { b.push(getNextCard()); bS = (bS + gV(b[b.length-1])) % 10; }
+                } else if (bS <= 5 && pS >= 6 && pS < 8) {
+                    b.push(getNextCard()); bS = (bS + gV(b[b.length-1])) % 10;
+                }
+            }
+
+            resolve(p, b, pS, bS);
         }
+
+        _fastForwarding = false;
+
+        // One final UI refresh after all hands are processed
+        renderHand([], [], 0, 0);
+        document.getElementById('p-score').textContent = '0';
+        document.getElementById('b-score').textContent = '0';
+        renderHistoryInspector();
+        renderStatsInspector();
+        renderBetInspector();
+        updateUI();
+        refreshAllStatDisplay();
         endShoe();
     }
 
@@ -1870,6 +1910,8 @@
         // Re-enable DEAL button
         const dealBtn = document.getElementById('btn-deal');
         if (dealBtn) { dealBtn.disabled = false; dealBtn.style.opacity = '1'; }
+        const endBtn = document.getElementById('btn-end-shoe');
+        if (endBtn) { endBtn.disabled = false; endBtn.style.opacity = '1'; }
         document.getElementById('shoe-end-overlay').style.display = 'none';
         renderAllRoads();
         updateUI();
@@ -2076,6 +2118,8 @@
         // Ensure deal button is enabled
         const dealBtn = document.getElementById('btn-deal');
         if (dealBtn) { dealBtn.disabled = false; dealBtn.style.opacity = '1'; }
+        const endBtn2 = document.getElementById('btn-end-shoe');
+        if (endBtn2) { endBtn2.disabled = false; endBtn2.style.opacity = '1'; }
 
         document.getElementById('game-container').style.display = 'flex';
         document.getElementById('review-banner').style.display = 'none';
@@ -2294,6 +2338,7 @@
 
     let cutCardThreshold = 14;
     let shoeEnded = false;
+    let _fastForwarding = false;
 
     function getNextCard() {
         if (shoeSize === 0) return Math.floor(Math.random()*13)+1;
@@ -2689,12 +2734,12 @@
             for (let k in currentBets) lastBets[k] = currentBets[k];
         }
 
-        if (totalWagered > 0) {
+        if (!_fastForwarding && totalWagered > 0) {
             const netPL = win - totalWagered;
             showResult(netPL, outcomeType, pS, bS, specialMsg);
         }
 
-        if (notifications.length > 0) {
+        if (!_fastForwarding && notifications.length > 0) {
             document.getElementById('special-notifications').innerHTML = notifications.join(' ');
         }
 
@@ -2702,6 +2747,7 @@
         addToRoads(outcomeType, beadClass, beadLabel, winScore, p, b, pS, bS);
 
         // Show last hand popup + flash bet zones
+        if (!_fastForwarding) {
         const lastH = beadHistory[beadHistory.length - 1];
         const lastPL = totalWagered > 0 ? win - totalWagered : undefined;
         showLastHandPopup(lastH, lastPL);
@@ -2709,6 +2755,7 @@
             if ((currentBets.player||0) > 0) flashBetZone('bet-player-box', outcomeType==='player'||outcomeType==='panda');
             if ((currentBets.banker||0) > 0) flashBetZone('bet-banker-box', outcomeType==='banker'||outcomeType==='dragon');
             if ((currentBets.tie||0)    > 0) flashBetZone('bet-tie-box',    outcomeType==='tie');
+        }
         }
 
         // Track extended stats
@@ -2721,10 +2768,12 @@
         }
 
         // Refresh whichever inspector tab is open
+        if (!_fastForwarding) {
         if (activeInspectorTab === 'shoe')    renderShoePreview();
         if (activeInspectorTab === 'history') renderHistoryInspector();
         if (activeInspectorTab === 'stats')   renderStatsInspector();
         if (activeInspectorTab === 'bets')    renderBetInspector();
+        }
 
         // Build last-bet summary
         const lastBetParts = [];
@@ -2732,18 +2781,24 @@
         if (lastBets.banker > 0) lastBetParts.push(`B:$${lastBets.banker}`);
         if (lastBets.tie > 0) lastBetParts.push(`T:$${lastBets.tie}`);
         lastBetSummary = lastBetParts.length ? lastBetParts.join(' ') : '—';
+        if (!_fastForwarding) {
         const lastBetEl = document.getElementById('stat-last-bet');
         if (lastBetEl) lastBetEl.textContent = lastBetSummary;
+        }
 
         for (let k in currentBets) {
             currentBets[k] = 0;
+            if (!_fastForwarding) {
             const disp = document.getElementById(`disp-${k}`);
             if (disp) disp.textContent = "$0";
+            }
         }
+        if (!_fastForwarding) {
         updateUI();
         updateAuxButtons();
         refreshAllStatDisplay();
         saveGameState();
+        }
     }
 
     function showLastHandPopup(h, pl) {
