@@ -290,6 +290,218 @@
         .felt-tie    { background:linear-gradient(135deg,#1a4d1a,#0f2e0f); border-right:1px solid rgba(212,175,55,0.3); flex:0.6; }
         .felt-banker { background:linear-gradient(135deg,#6b0d0d,#4a0808); }
 
+        /* ── Cut Card Modal ── */
+        #cut-card-overlay {
+            position:fixed;top:0;left:0;width:100%;height:100%;
+            background:rgba(0,0,0,0.88);z-index:3000;
+            display:none;align-items:center;justify-content:center;
+        }
+        #cut-card-overlay.visible { display:flex; }
+        .cut-card-modal {
+            background:linear-gradient(160deg,#0a1f0f 0%,#060e06 100%);
+            border:1px solid rgba(212,175,55,0.45);
+            border-radius:16px;padding:28px 24px 22px;
+            max-width:340px;width:92%;text-align:center;
+            box-shadow:0 8px 40px rgba(0,0,0,0.7);
+            position:relative;
+        }
+        .cut-card-icon { font-size:2.2rem; margin-bottom:6px; }
+        .cut-card-title {
+            color:var(--gold);font-size:0.9rem;font-weight:bold;
+            letter-spacing:3px;margin-bottom:4px;
+        }
+        .cut-card-subtitle {
+            color:rgba(255,255,255,0.4);font-size:0.65rem;
+            letter-spacing:1px;margin-bottom:18px;
+        }
+        .cut-card-shoe {
+            display:flex;align-items:center;justify-content:center;
+            gap:2px;height:44px;margin-bottom:20px;
+            overflow:hidden;border-radius:6px;
+            background:rgba(255,255,255,0.03);
+            border:1px solid rgba(255,255,255,0.08);
+            padding:0 8px;position:relative;cursor:pointer;
+        }
+        .cut-card-deck-card {
+            width:6px;height:30px;border-radius:2px;flex-shrink:0;
+            background:linear-gradient(180deg,#e8e0cc,#d4c89a);
+            border:1px solid rgba(0,0,0,0.2);
+            transition:transform 0.1s;
+        }
+        .cut-card-deck-card.dealt {
+            background:linear-gradient(180deg,#2a2a2a,#1a1a1a);
+            border-color:rgba(255,255,255,0.06);
+        }
+        .cut-card-marker {
+            width:5px;height:38px;border-radius:2px;flex-shrink:0;
+            background:linear-gradient(180deg,#ff4444,#cc0000);
+            border:1px solid rgba(255,100,100,0.5);
+            box-shadow:0 0 6px rgba(255,0,0,0.5);
+            z-index:2;
+            transition:all 0.05s;
+        }
+        .cut-position-label {
+            font-size:0.72rem;color:var(--gold);margin-bottom:6px;
+            font-weight:bold;letter-spacing:1px;
+        }
+        .cut-position-hint {
+            font-size:0.6rem;color:rgba(255,255,255,0.3);
+            margin-bottom:16px;
+        }
+        .cut-slider {
+            width:100%;margin-bottom:18px;
+            accent-color:var(--gold);cursor:pointer;
+        }
+        .cut-card-btns { display:flex;gap:10px; }
+        .cut-btn-skip {
+            flex:1;padding:10px 0;border-radius:8px;
+            background:rgba(255,255,255,0.06);
+            border:1px solid rgba(255,255,255,0.15);
+            color:rgba(255,255,255,0.5);font-size:0.8rem;
+            cursor:pointer;letter-spacing:1px;
+            transition:background 0.15s;
+        }
+        .cut-btn-skip:hover { background:rgba(255,255,255,0.1); }
+        .cut-btn-cut {
+            flex:2;padding:10px 0;border-radius:8px;
+            background:linear-gradient(135deg,#1a5220,#2e7d32);
+            border:1px solid rgba(76,175,80,0.5);
+            color:#fff;font-size:0.85rem;font-weight:bold;
+            cursor:pointer;letter-spacing:2px;
+            transition:background 0.15s;
+        }
+        .cut-btn-cut:hover { background:linear-gradient(135deg,#236b2c,#388e3c); }
+
+        /* ── Burn Card Modal ── */
+        #burn-card-overlay {
+            position:fixed;top:0;left:0;width:100%;height:100%;
+            background:rgba(0,0,0,0.88);z-index:3000;
+            display:none;align-items:center;justify-content:center;
+        }
+        #burn-card-overlay.visible { display:flex; }
+        .burn-card-modal {
+            background:linear-gradient(160deg,#1a0d0d 0%,#0d0606 100%);
+            border:1px solid rgba(212,175,55,0.45);
+            border-radius:16px;padding:28px 24px 22px;
+            max-width:340px;width:92%;text-align:center;
+            box-shadow:0 8px 40px rgba(0,0,0,0.7);
+        }
+        .burn-card-icon { font-size:2.2rem;margin-bottom:6px; }
+        .burn-card-title {
+            color:var(--gold);font-size:0.9rem;font-weight:bold;
+            letter-spacing:3px;margin-bottom:4px;
+        }
+        .burn-card-subtitle {
+            color:rgba(255,255,255,0.4);font-size:0.65rem;
+            letter-spacing:1px;margin-bottom:20px;
+        }
+        /* Card flip scene */
+        .burn-scene {
+            width:80px;height:110px;perspective:600px;
+            margin:0 auto 18px;cursor:pointer;
+        }
+        .burn-flipper {
+            width:100%;height:100%;position:relative;
+            transform-style:preserve-3d;
+            transition:transform 0.55s cubic-bezier(0.4,0,0.2,1);
+        }
+        .burn-flipper.flipped { transform:rotateY(180deg); }
+        .burn-face, .burn-back {
+            position:absolute;width:100%;height:100%;
+            backface-visibility:hidden;border-radius:8px;
+            display:flex;align-items:center;justify-content:center;
+        }
+        .burn-back {
+            background:linear-gradient(135deg,#1a3a6b,#0d1e3a);
+            border:2px solid rgba(212,175,55,0.5);
+            font-size:2rem;
+        }
+        .burn-face {
+            background:#fff;border:2px solid rgba(0,0,0,0.15);
+            transform:rotateY(180deg);
+            flex-direction:column;gap:2px;
+        }
+        .burn-face-value {
+            font-size:1.8rem;font-weight:bold;line-height:1;
+        }
+        .burn-face-suit { font-size:1.4rem;line-height:1; }
+        .burn-face.red .burn-face-value,
+        .burn-face.red .burn-face-suit { color:#c0392b; }
+        .burn-face.black .burn-face-value,
+        .burn-face.black .burn-face-suit { color:#111; }
+        /* Count selector */
+        .burn-count-row {
+            display:flex;align-items:center;justify-content:center;
+            gap:10px;margin-bottom:6px;
+        }
+        .burn-count-label {
+            color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;
+        }
+        .burn-hint {
+            font-size:0.6rem;color:rgba(255,255,255,0.3);
+            margin-bottom:18px;min-height:16px;
+        }
+        .burn-card-btns { display:flex;gap:10px; }
+        .burn-btn-skip {
+            flex:1;padding:10px 0;border-radius:8px;
+            background:rgba(255,255,255,0.06);
+            border:1px solid rgba(255,255,255,0.15);
+            color:rgba(255,255,255,0.5);font-size:0.8rem;
+            cursor:pointer;letter-spacing:1px;
+            transition:background 0.15s;
+        }
+        .burn-btn-skip:hover { background:rgba(255,255,255,0.1); }
+        .burn-btn-burn {
+            flex:2;padding:10px 0;border-radius:8px;
+            background:linear-gradient(135deg,#6b0d0d,#9b1a1a);
+            border:1px solid rgba(200,50,50,0.5);
+            color:#fff;font-size:0.85rem;font-weight:bold;
+            cursor:pointer;letter-spacing:2px;
+            transition:background 0.15s;
+        }
+        .burn-btn-burn:hover { background:linear-gradient(135deg,#8b1111,#b52222); }
+
+        /* ── Burn card before/after shoe view ── */
+        .burn-shoe-panels {
+            display:none;gap:8px;margin-bottom:14px;
+        }
+        .burn-shoe-panels.visible { display:flex; }
+        .burn-shoe-panel {
+            flex:1;background:rgba(0,0,0,0.4);
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:6px;padding:6px 6px 4px;
+            overflow:hidden;
+        }
+        .burn-shoe-panel-title {
+            font-size:0.55rem;letter-spacing:1.5px;font-weight:bold;
+            margin-bottom:4px;text-align:center;
+        }
+        .burn-shoe-panel-title.before { color:rgba(255,255,255,0.4); }
+        .burn-shoe-panel-title.after  { color:#ff9e9e; }
+        .burn-shoe-grid {
+            display:flex;flex-wrap:wrap;gap:1px;
+            max-height:54px;overflow:hidden;
+        }
+        .bsg-card {
+            font-size:7px;font-family:monospace;
+            border:1px solid #333;padding:1px 2px;
+            min-width:11px;text-align:center;color:#fff;
+            border-radius:1px;
+        }
+        .bsg-card.burned {
+            color:#ff6b6b;border-color:rgba(255,80,80,0.5);
+            background:rgba(180,30,30,0.25);
+            text-decoration:line-through;
+        }
+        .bsg-card.next {
+            color:var(--gold);border-color:var(--gold);
+            font-weight:bold;
+        }
+        .burn-shoe-count {
+            font-size:0.55rem;color:rgba(255,255,255,0.3);
+            text-align:center;margin-top:3px;
+        }
+
         .felt-label { text-align:center; font-size:0.6rem; font-weight:bold; letter-spacing:2px; padding:5px 2px 2px; }
         .felt-player .felt-label { color:#9ec2ff; }
         .felt-tie    .felt-label { color:#d4af37; }
@@ -788,6 +1000,73 @@
                 <button class="shoe-end-btn exit-btn" onclick="newGame()">🚪 New Game</button>
             </div>
             <div style="margin-top:10px;font-size:0.65rem;color:rgba(255,255,255,0.35);letter-spacing:0.5px;">✕ to close and inspect roads</div>
+        </div>
+    </div>
+
+    <!-- Cut Card Modal -->
+    <div id="cut-card-overlay">
+        <div class="cut-card-modal">
+            <div class="cut-card-icon">🃏</div>
+            <div class="cut-card-title">CUT THE SHOE</div>
+            <div class="cut-card-subtitle">DRAG OR SLIDE TO PLACE THE CUT CARD</div>
+            <div class="cut-position-label" id="cut-position-label">Cut after card <span id="cut-pos-num">0</span></div>
+            <div class="cut-card-shoe" id="cut-shoe-visual"></div>
+            <input type="range" class="cut-slider" id="cut-slider" min="1" max="20" value="7" oninput="updateCutSlider()">
+            <div class="cut-position-hint" id="cut-position-hint"></div>
+            <div class="cut-card-btns">
+                <button class="cut-btn-skip" onclick="confirmCut(0)">SKIP</button>
+                <button class="cut-btn-cut" onclick="confirmCut()">✂ CUT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Burn Card Modal -->
+    <div id="burn-card-overlay">
+        <div class="burn-card-modal">
+            <div class="burn-card-icon">🔥</div>
+            <div class="burn-card-title">BURN CARD</div>
+            <div class="burn-card-subtitle" id="burn-card-subtitle">TAP CARD TO REVEAL</div>
+            <!-- Flip card -->
+            <div class="burn-scene" id="burn-scene" onclick="flipBurnCard()">
+                <div class="burn-flipper" id="burn-flipper">
+                    <div class="burn-back">🂠</div>
+                    <div class="burn-face" id="burn-face">
+                        <div class="burn-face-value" id="burn-face-value">A</div>
+                        <div class="burn-face-suit"  id="burn-face-suit">♠</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Auto burn summary (shown after flip) -->
+            <div id="burn-summary" style="display:none;margin-bottom:10px;">
+                <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);letter-spacing:1px;margin-bottom:4px;">TOTAL CARDS BURNED</div>
+                <div style="font-size:2rem;font-weight:bold;color:#ff6b6b;" id="burn-total-val">—</div>
+                <div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:3px;" id="burn-breakdown">1 face card + value additional</div>
+            </div>
+            <!-- Before / After shoe toggle -->
+            <div id="burn-shoe-toggle-row" style="display:none;margin-bottom:8px;">
+                <button onclick="toggleBurnShoeView()" id="burn-shoe-toggle-btn"
+                    style="width:100%;padding:5px 0;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-size:0.68rem;cursor:pointer;letter-spacing:1px;">
+                    👁 SHOW SHOE BEFORE / AFTER
+                </button>
+            </div>
+            <!-- Before/after panels -->
+            <div class="burn-shoe-panels" id="burn-shoe-panels">
+                <div class="burn-shoe-panel">
+                    <div class="burn-shoe-panel-title before">BEFORE</div>
+                    <div class="burn-shoe-grid" id="burn-shoe-before"></div>
+                    <div class="burn-shoe-count" id="burn-shoe-before-count"></div>
+                </div>
+                <div class="burn-shoe-panel">
+                    <div class="burn-shoe-panel-title after">AFTER BURN</div>
+                    <div class="burn-shoe-grid" id="burn-shoe-after"></div>
+                    <div class="burn-shoe-count" id="burn-shoe-after-count"></div>
+                </div>
+            </div>
+            <div class="burn-hint" id="burn-hint">Tap the card to reveal</div>
+            <div class="burn-card-btns">
+                <button class="burn-btn-skip" onclick="confirmBurn(true)">SKIP</button>
+                <button class="burn-btn-burn" id="burn-btn-confirm" onclick="confirmBurn(false)">🔥 BURN</button>
+            </div>
         </div>
     </div>
 
@@ -1833,6 +2112,12 @@
         saveGameState();
         const _endBtnInit = document.getElementById('btn-end-shoe');
         if (_endBtnInit) { _endBtnInit.disabled = false; _endBtnInit.style.opacity = '1'; }
+        // Offer cut card then burn card (skip if infinite shoe)
+        if (shoeSize > 0) {
+            showCutCardModal(() => {
+                showBurnCardModal(() => { updateUI(); saveGameState(); });
+            });
+        }
     }
 
     function newGame() {
@@ -2002,6 +2287,12 @@
         refreshAllStatDisplay();
         saveGameState();
         sfxShuffle();
+        // Offer cut card then burn card (skip if infinite shoe)
+        if (shoeSize > 0) {
+            showCutCardModal(() => {
+                showBurnCardModal(() => { updateUI(); saveGameState(); });
+            });
+        }
     }
 
     function minimizeShoeEnd() {
@@ -2407,6 +2698,211 @@
         for (let i=0; i<shoeSize*52; i++) shoe.push((i%13)+1);
         for (let i=shoe.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [shoe[i],shoe[j]]=[shoe[j],shoe[i]]; }
         shoeFullCopy = [...shoe]; // keep full copy for inspector display
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  CUT CARD
+    // ══════════════════════════════════════════════════════════
+    let _cutCardCallback = null;
+
+    function showCutCardModal(callback) {
+        _cutCardCallback = callback;
+        // Slider: 1–20 cards to cut (shown as visual position in a mini shoe)
+        const slider = document.getElementById('cut-slider');
+        const total = 20; // visual cards shown
+        slider.max = total;
+        // Randomise default position so it doesn't always look the same
+        slider.value = Math.floor(Math.random() * (total - 2)) + 2;
+        updateCutSlider();
+        document.getElementById('cut-card-overlay').classList.add('visible');
+    }
+
+    function updateCutSlider() {
+        const slider = document.getElementById('cut-slider');
+        const total = parseInt(slider.max);
+        const pos = parseInt(slider.value);
+
+        // Update label
+        document.getElementById('cut-pos-num').textContent = pos;
+        // Hint: rough percentage through the full real shoe
+        const totalCards = shoeSize > 0 ? shoeSize * 52 : 416;
+        // The cut removes 'pos' cards (scaled: visual 1-20 maps to ~1-20 actual cards)
+        const hint = `~${pos} card${pos !== 1 ? 's' : ''} burned from top of shoe`;
+        document.getElementById('cut-position-hint').textContent = hint;
+
+        // Render visual
+        const container = document.getElementById('cut-shoe-visual');
+        container.innerHTML = '';
+        for (let i = 1; i <= total; i++) {
+            if (i === pos + 1) {
+                // Insert the red cut marker here
+                const marker = document.createElement('div');
+                marker.className = 'cut-card-marker';
+                container.appendChild(marker);
+            }
+            const card = document.createElement('div');
+            card.className = 'cut-card-deck-card' + (i <= pos ? ' dealt' : '');
+            container.appendChild(card);
+        }
+        // If cut is at the very end, add marker after all cards
+        if (pos >= total) {
+            const marker = document.createElement('div');
+            marker.className = 'cut-card-marker';
+            container.appendChild(marker);
+        }
+    }
+
+    function confirmCut(override) {
+        const cutCount = override === 0 ? 0 : parseInt(document.getElementById('cut-slider').value);
+        document.getElementById('cut-card-overlay').classList.remove('visible');
+        if (cutCount > 0 && shoe.length > 0) {
+            // Remove 'cutCount' cards from top of shoe (pop = top, so we just pop them)
+            const burned = [];
+            for (let i = 0; i < cutCount && shoe.length > 0; i++) {
+                burned.push(shoe.pop());
+            }
+            // Update shoeFullCopy to reflect the cut
+            shoeFullCopy = [...shoe];
+            showToast(`✂ Cut: ${cutCount} card${cutCount !== 1 ? 's' : ''} burned`, '#1a3a1a', 2000);
+        }
+        if (_cutCardCallback) {
+            _cutCardCallback();
+            _cutCardCallback = null;
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  BURN CARD
+    //  Rule: flip the top card → burn it + burn (pip value) more cards
+    //  10/J/Q/K count as 10 additional burns; Ace = 1 additional
+    // ══════════════════════════════════════════════════════════
+    let _burnCardCallback = null;
+    let _burnFlipped = false;
+    let _burnFaceVal = 0;    // raw card value (1-13)
+    let _burnPipCount = 0;   // additional cards to burn after the face card
+    let _burnShoeBefore = []; // snapshot of shoe before burn
+    let _burnShoeViewOpen = false;
+
+    const BURN_SUITS = ['♠','♥','♦','♣'];
+    const BURN_SUIT_RED = new Set(['♥','♦']);
+
+    function showBurnCardModal(callback) {
+        _burnCardCallback = callback;
+        _burnFlipped = false;
+        _burnShoeViewOpen = false;
+
+        // Snapshot the shoe before burn
+        _burnShoeBefore = [...shoe];
+
+        // Reset flip animation
+        const flipper = document.getElementById('burn-flipper');
+        flipper.classList.remove('flipped');
+        void flipper.offsetWidth;
+
+        // Peek at the top card (don't pop yet)
+        _burnFaceVal = shoe.length > 0 ? shoe[shoe.length - 1] : (Math.floor(Math.random() * 13) + 1);
+        const suit = BURN_SUITS[Math.floor(Math.random() * 4)];
+        const label = _burnFaceVal === 1 ? 'A' : _burnFaceVal === 11 ? 'J' : _burnFaceVal === 12 ? 'Q' : _burnFaceVal === 13 ? 'K' : String(_burnFaceVal);
+        const isRed = BURN_SUIT_RED.has(suit);
+
+        // Pip value: 10/J/Q/K = 10, Ace = 1, others = face
+        _burnPipCount = _burnFaceVal >= 10 ? 10 : _burnFaceVal;
+
+        const faceEl = document.getElementById('burn-face');
+        faceEl.className = 'burn-face ' + (isRed ? 'red' : 'black');
+        document.getElementById('burn-face-value').textContent = label;
+        document.getElementById('burn-face-suit').textContent = suit;
+
+        // Reset UI
+        document.getElementById('burn-summary').style.display = 'none';
+        document.getElementById('burn-shoe-toggle-row').style.display = 'none';
+        document.getElementById('burn-shoe-panels').classList.remove('visible');
+        document.getElementById('burn-shoe-toggle-btn').textContent = '👁 SHOW SHOE BEFORE / AFTER';
+        document.getElementById('burn-card-subtitle').textContent = 'TAP CARD TO REVEAL';
+        document.getElementById('burn-hint').textContent = 'Tap the card to reveal';
+        document.getElementById('burn-scene').style.cursor = 'pointer';
+
+        document.getElementById('burn-card-overlay').classList.add('visible');
+    }
+
+    function flipBurnCard() {
+        if (_burnFlipped) return;
+        _burnFlipped = true;
+        document.getElementById('burn-flipper').classList.add('flipped');
+        document.getElementById('burn-scene').style.cursor = 'default';
+
+        setTimeout(() => {
+            const total = 1 + _burnPipCount;
+            const label = _burnFaceVal === 1 ? 'A' : _burnFaceVal === 11 ? 'J' : _burnFaceVal === 12 ? 'Q' : _burnFaceVal === 13 ? 'K' : String(_burnFaceVal);
+            document.getElementById('burn-total-val').textContent = total;
+            document.getElementById('burn-breakdown').textContent =
+                `1 burn card (${label}) + ${_burnPipCount} additional`;
+            document.getElementById('burn-summary').style.display = 'block';
+            document.getElementById('burn-card-subtitle').textContent = 'CARD REVEALED';
+            document.getElementById('burn-hint').textContent =
+                `${label} = burn ${total} card${total !== 1 ? 's' : ''} total`;
+            document.getElementById('burn-shoe-toggle-row').style.display = 'block';
+            renderBurnShoeView();
+        }, 620);
+    }
+
+    function toggleBurnShoeView() {
+        _burnShoeViewOpen = !_burnShoeViewOpen;
+        const panels = document.getElementById('burn-shoe-panels');
+        const btn    = document.getElementById('burn-shoe-toggle-btn');
+        if (_burnShoeViewOpen) {
+            panels.classList.add('visible');
+            btn.textContent = '👁 HIDE SHOE VIEW';
+        } else {
+            panels.classList.remove('visible');
+            btn.textContent = '👁 SHOW SHOE BEFORE / AFTER';
+        }
+    }
+
+    function renderBurnShoeView() {
+        const fm = v => v === 1 ? 'A' : v === 11 ? 'J' : v === 12 ? 'Q' : v === 13 ? 'K' : String(v);
+        const totalBurned = 1 + _burnPipCount;
+
+        // shoe is a stack: last element = next card to be dealt (top of shoe)
+        // Reverse so index 0 = first card dealt (top of shoe)
+        const before = [..._burnShoeBefore].reverse();
+        const beforeHTML = before.map((c, i) => {
+            const cls = i < totalBurned ? 'bsg-card burned'
+                      : i === totalBurned ? 'bsg-card next'
+                      : 'bsg-card';
+            return `<span class="${cls}">${fm(c)}</span>`;
+        }).join('');
+        document.getElementById('burn-shoe-before').innerHTML = beforeHTML;
+        document.getElementById('burn-shoe-before-count').textContent =
+            `${before.length} cards · ${totalBurned} will be burned`;
+
+        // After: burned cards removed, first remaining highlighted as next
+        const after = before.slice(totalBurned);
+        const afterHTML = after.map((c, i) => {
+            const cls = i === 0 ? 'bsg-card next' : 'bsg-card';
+            return `<span class="${cls}">${fm(c)}</span>`;
+        }).join('');
+        document.getElementById('burn-shoe-after').innerHTML = afterHTML;
+        document.getElementById('burn-shoe-after-count').textContent =
+            `${after.length} cards remaining`;
+    }
+
+    function confirmBurn(skip) {
+        document.getElementById('burn-card-overlay').classList.remove('visible');
+        if (!skip && shoe.length > 0) {
+            // Burn the face card first
+            shoe.pop();
+            // Then burn pip-value more cards
+            const extra = Math.min(_burnPipCount, shoe.length);
+            for (let i = 0; i < extra; i++) shoe.pop();
+            shoeFullCopy = [...shoe];
+            const total = 1 + extra;
+            showToast(`🔥 Burned ${total} card${total !== 1 ? 's' : ''}`, '#3a1a0d', 2000);
+        }
+        if (_burnCardCallback) {
+            _burnCardCallback();
+            _burnCardCallback = null;
+        }
     }
 
     function initShoe() {
@@ -3672,6 +4168,50 @@
     //  STRATEGY SIMULATOR
     // ══════════════════════════════════════════════════════════
 
+    function updateSimStrategyUI() {
+        const strategy = document.getElementById('sim-strategy').value;
+        const isObserver = strategy === 'observer';
+        const isTie = strategy === 'always_tie';
+        const betFields = ['sim-sizing', 'sim-base-bet', 'sim-max-bet', 'sim-skip-ties'];
+        const dimOpacity = '0.35';
+
+        betFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.disabled = isObserver;
+            el.closest('div').style.opacity = isObserver ? dimOpacity : '1';
+        });
+
+        // Tie mode: disable skip-ties (meaningless), show tie payout note
+        const skipTiesEl = document.getElementById('sim-skip-ties');
+        if (skipTiesEl) {
+            skipTiesEl.disabled = isObserver || isTie;
+            skipTiesEl.closest('label').style.opacity = (isObserver || isTie) ? dimOpacity : '1';
+        }
+
+        // Highlight notes field when observer
+        const notes = document.getElementById('sim-notes');
+        if (notes) {
+            notes.style.borderColor = isObserver ? 'rgba(212,175,55,0.8)' : 'rgba(212,175,55,0.3)';
+            notes.placeholder = isObserver
+                ? 'Observer mode — no bets placed. Use this space to document your manual strategy, reads, or pattern notes for reference...'
+                : 'Describe your strategy parameters here for reference...';
+        }
+
+        // Show/hide tie payout info
+        let tieNote = document.getElementById('sim-tie-payout-note');
+        if (isTie && !tieNote) {
+            tieNote = document.createElement('div');
+            tieNote.id = 'sim-tie-payout-note';
+            tieNote.style.cssText = 'color:rgba(34,197,94,0.8);font-size:0.6rem;margin-top:4px;';
+            tieNote.textContent = 'Tie pays 8:1. Banker & Player bets push on tie.';
+            document.getElementById('sim-strategy').parentNode.appendChild(tieNote);
+        } else if (!isTie && tieNote) {
+            tieNote.remove();
+        }
+    }
+
+    
     function openSimulator()  { document.getElementById('sim-overlay').style.display = 'block'; }
     function closeSimulator() { document.getElementById('sim-overlay').style.display = 'none'; }
 
@@ -3746,6 +4286,8 @@
         switch (strategy) {
             case 'always_banker': side = 'banker'; break;
             case 'always_player': side = 'player'; break;
+            case 'always_tie':    side = 'tie';    break;
+            case 'observer':      side = 'none';   break;
             case 'follow_streak':
                 side = (lastOutcome === 'player' || lastOutcome === 'panda') ? 'player' : 'banker';
                 break;
@@ -3779,9 +4321,8 @@
         }
     }
 
-    // ── Run one shoe simulation ──
     function simRunShoe(hands, config) {
-        const { strategy, sizing, baseBet, maxBet, bankerOdds, startBankroll, stopLoss, skipTies } = config;
+        const { strategy, sizing, baseBet, maxBet, bankerOdds, startBankroll, stopLoss, skipTies, skipAfterLoss, maxConsec } = config;
         let bankroll = startBankroll;
         let betSize = baseBet;
         let lastOutcome = 'banker';
@@ -3792,35 +4333,49 @@
         let netPL = 0, maxDrawdown = 0, peak = startBankroll;
         let currentLossStreak = 0, currentWinStreak = 0;
         let maxLossStreak = 0, maxWinStreak = 0;
-        const handLog = []; // per-hand data for history display
+        let skipHandsRemaining = 0;
+        let consecBets = 0;
+        const handLog = [];
 
         for (const hand of hands) {
             const isTie = hand.outcome === 'tie';
             if (skipTies && isTie) { lastOutcome = 'tie'; continue; }
 
             handsPlayed++;
+
+            // Skip N hands after a loss
+            if (skipHandsRemaining > 0) { skipHandsRemaining--; continue; }
+
+            // Max consecutive bets cap
+            if (maxConsec > 0 && consecBets >= maxConsec) break;
+
             const { side, patternIdx: nextIdx } = simGetBet(strategy, lastOutcome, betSize, patternIdx, skipTies);
             patternIdx = nextIdx;
-
-            // Can we afford the bet?
-            const actualBet = Math.min(betSize, bankroll);
-            if (actualBet <= 0) break;
+            const outcome = hand.outcome;
+            if (actualBet <= 0 && side !== 'none') break;
             if (stopLoss > 0 && bankroll <= stopLoss) break;
 
-            betsPlaced++;
-            let pl = -actualBet; // assume loss
+            // Observer mode — just log the hand, no money changes
+            if (side === 'none') {
+                handLog.push({ p: hand.p, b: hand.b, pS: hand.pS, bS: hand.bS, outcome, side, bet: 0, pl: 0 });
+                lastOutcome = outcome;
+                continue;
+            }
 
-            const outcome = hand.outcome;
+            betsPlaced++;
+            consecBets++;
+            let pl = -actualBet;
+
             const won = (side === 'banker' && (outcome === 'banker' || outcome === 'dragon')) ||
-                        (side === 'player' && (outcome === 'player' || outcome === 'panda'));
-            const pushed = isTie && !skipTies;
+                        (side === 'player' && (outcome === 'player' || outcome === 'panda')) ||
+                        (side === 'tie'    && outcome === 'tie');
+            const pushed = (side !== 'tie') && isTie && !skipTies;
 
             if (pushed) {
                 pl = 0;
             } else if (won) {
-                const odds = side === 'banker' ? bankerOdds : 1.0;
+                const odds = side === 'banker' ? bankerOdds : side === 'tie' ? 8.0 : 1.0;
                 pl = actualBet * odds;
-                // Dragon 7: banker bets push
                 if (outcome === 'dragon' && side === 'banker') pl = 0;
             }
 
@@ -3829,19 +4384,19 @@
             lastWon = pl > 0;
             consecutiveWins = pl > 0 ? consecutiveWins + 1 : 0;
 
-            // Streak tracking
             if (pl > 0) { currentWinStreak++; currentLossStreak = 0; }
-            else if (pl < 0) { currentLossStreak++; currentWinStreak = 0; }
+            else if (pl < 0) {
+                currentLossStreak++; currentWinStreak = 0;
+                if (skipAfterLoss > 0) skipHandsRemaining = skipAfterLoss;
+            }
             else { currentLossStreak = 0; currentWinStreak = 0; }
             maxWinStreak  = Math.max(maxWinStreak, currentWinStreak);
             maxLossStreak = Math.max(maxLossStreak, currentLossStreak);
 
-            // Drawdown
             if (bankroll > peak) peak = bankroll;
             const dd = peak - bankroll;
             if (dd > maxDrawdown) maxDrawdown = dd;
 
-            // Next bet size
             betSize = simNextBetSize(sizing, baseBet, maxBet, actualBet, lastWon, consecutiveWins);
             lastOutcome = outcome;
 
@@ -3854,18 +4409,26 @@
     async function runSimulation() {
         const strategy   = document.getElementById('sim-strategy').value;
         const sizing     = document.getElementById('sim-sizing').value;
-        const baseBet    = parseFloat(document.getElementById('sim-base-bet').value) || 25;
-        const maxBet     = parseFloat(document.getElementById('sim-max-bet').value) || 10000;
-        const numShoes   = parseInt(document.getElementById('sim-shoes').value) || 100;
-        const numDecks   = parseInt(document.getElementById('sim-decks').value) || 8;
-        const startBR    = parseFloat(document.getElementById('sim-bankroll').value) || 10000;
+        const baseBet    = parseFloat(document.getElementById('sim-base-bet').value);
+        const maxBet     = parseFloat(document.getElementById('sim-max-bet').value);
+        const numShoes   = parseInt(document.getElementById('sim-shoes').value);
+        const numDecks   = parseInt(document.getElementById('sim-decks').value);
+        const startBR    = parseFloat(document.getElementById('sim-bankroll').value);
         const stopLoss   = parseFloat(document.getElementById('sim-stop-loss').value) || 0;
-        const bankerOdds = parseFloat(document.getElementById('sim-commission').value) || 0.95;
+        const bankerOdds = parseFloat(document.getElementById('sim-commission').value);
         const skipTies      = document.getElementById('sim-skip-ties').checked;
         const tieTrigger    = document.getElementById('sim-tie-trigger').value;
-        const tieBetAmt     = parseFloat(document.getElementById('sim-tie-bet').value) || 10;
+        const tieBetAmt     = parseFloat(document.getElementById('sim-tie-bet').value) || 0;
         const skipAfterLoss = parseInt(document.getElementById('sim-skip-after-loss').value) || 0;
         const maxConsec     = parseInt(document.getElementById('sim-max-consec').value) || 0;
+
+        // Validate required fields (not needed for observer)
+        if (strategy !== 'observer') {
+            if (!baseBet || baseBet <= 0)  { alert('Please enter a valid Base Bet.'); return; }
+            if (!maxBet  || maxBet  <= 0)  { alert('Please enter a valid Max Bet.');  return; }
+        }
+        if (!startBR || startBR <= 0)  { alert('Please enter a valid Starting Bankroll.'); return; }
+        if (!bankerOdds || bankerOdds <= 0) { alert('Please select a Banker Commission.'); return; }
 
         const config = { strategy, sizing, baseBet, maxBet, bankerOdds, startBankroll: startBR, stopLoss, skipTies, tieTrigger, tieBetAmt, skipAfterLoss, maxConsec };
 
@@ -4843,14 +5406,16 @@ let activeInspectorTab = 'history';
         <!-- Strategy -->
         <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:12px;">
           <div style="color:var(--gold);font-size:0.65rem;letter-spacing:1px;font-weight:bold;margin-bottom:8px;">BETTING STRATEGY</div>
-          <select id="sim-strategy" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:5px;font-size:0.75rem;">
+          <select id="sim-strategy" style="width:100%;background:#0a1a0f;border:1px solid rgba(212,175,55,0.3);color:#fff;border-radius:4px;padding:5px;font-size:0.75rem;" onchange="updateSimStrategyUI()">
             <option value="always_banker">Always Banker</option>
             <option value="always_player">Always Player</option>
+            <option value="always_tie">Always Tie</option>
             <option value="follow_streak">Follow Streak (bet last winner)</option>
             <option value="chop">Chop (bet opposite of last)</option>
             <option value="pattern_bbp">Pattern: BBP</option>
             <option value="pattern_bpp">Pattern: BPP</option>
             <option value="pattern_bp">Pattern: BP Alternate</option>
+            <option value="observer">⬜ Observer — No Bets (Notes Only)</option>
           </select>
           <div style="margin-top:8px;">
             <div style="color:rgba(255,255,255,0.4);font-size:0.6rem;margin-bottom:3px;">SKIP TIES</div>
