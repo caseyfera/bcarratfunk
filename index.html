@@ -5940,14 +5940,30 @@ let activeInspectorTab = 'history';
 
 
   <!-- ═══════════════════════════════════════════════════════════
-       FREE-DRAG WINDOW SYSTEM  v4
-       • Drag any panel's bar → floats freely as a "ghost clone"
-       • While dragging, hover over any other panel → it highlights
-       • Release → the dragged panel swaps/inserts at that position
-       • Panels in layout shift around live as you drag over them
-       • Works with mouse and touch
+       FREE-DRAG WINDOW SYSTEM  v5
+       Lock toggle in the top toolbar — drag bars only active
+       when unlocked. Order persists to localStorage.
   ════════════════════════════════════════════════════════════ -->
   <style>
+    /* ── Lock toggle button (lives in header-btns) ── */
+    #fd-lock-btn {
+      background: none;
+      border: 1px solid rgba(212,175,55,0.4);
+      color: rgba(212,175,55,0.45);
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      cursor: pointer; font-size: 0.82rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.18s, color 0.18s, border-color 0.18s;
+    }
+    #fd-lock-btn.unlocked {
+      background: rgba(212,175,55,0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+      box-shadow: 0 0 6px rgba(212,175,55,0.35);
+    }
+
     /* ── Drag bar on every layout-slot ── */
     .fd-bar {
       display: flex; align-items: center; gap: 5px;
@@ -5955,18 +5971,33 @@ let activeInspectorTab = 'history';
       background: rgba(0,0,0,0.4);
       border-bottom: 1px solid rgba(212,175,55,0.2);
       border-radius: 5px 5px 0 0;
-      cursor: grab; user-select: none; touch-action: none;
+      user-select: none; touch-action: none;
       box-sizing: border-box; width: 100%; flex-shrink: 0;
+      /* locked by default */
+      cursor: default;
+      pointer-events: none;
+      opacity: 0;
+      height: 0; padding: 0; overflow: hidden;
+      transition: opacity 0.2s, height 0.2s;
     }
-    .fd-bar:active { cursor: grabbing; }
+    /* When layout is unlocked, bars become visible & grabbable */
+    body.fd-unlocked .fd-bar {
+      opacity: 1;
+      height: auto;
+      padding: 4px 6px;
+      cursor: grab;
+      pointer-events: auto;
+    }
+    body.fd-unlocked .fd-bar:active { cursor: grabbing; }
+
     .fd-bar-icon  { font-size: 0.82rem; flex-shrink: 0; }
     .fd-bar-label { flex: 1; font-size: 0.58rem; font-weight: bold;
                     letter-spacing: 1px; color: rgba(212,175,55,0.75);
                     text-transform: uppercase; }
-    .fd-bar-grip  { font-size: 1rem; color: rgba(212,175,55,0.35);
+    .fd-bar-grip  { font-size: 1rem; color: rgba(212,175,55,0.5);
                     flex-shrink: 0; line-height: 1; }
 
-    /* ── Floating "ghost" clone that follows cursor ── */
+    /* ── Ghost clone that follows cursor while dragging ── */
     .fd-ghost-clone {
       position: fixed;
       pointer-events: none;
@@ -5977,10 +6008,9 @@ let activeInspectorTab = 'history';
       border: 1.5px solid rgba(212,175,55,0.6);
       background: #061a0d;
       overflow: hidden;
-      transition: none;
     }
 
-    /* ── Original slot while it's being dragged (collapsed/dimmed) ── */
+    /* ── Source slot dims while dragging ── */
     .layout-slot.fd-dragging-src {
       opacity: 0.28;
       border: 2px dashed rgba(212,175,55,0.35) !important;
@@ -5990,26 +6020,28 @@ let activeInspectorTab = 'history';
     }
     .layout-slot.fd-dragging-src > *:not(.fd-bar) { visibility: hidden; }
 
-    /* ── Drop target highlight ── */
+    /* ── Drop-target highlight ── */
     .layout-slot.fd-drop-target {
-      outline: 2px solid rgba(212,175,55,0.85) !important;
+      outline: 2px solid rgba(212,175,55,0.9) !important;
       outline-offset: -2px;
-      background: rgba(212,175,55,0.07) !important;
+      background: rgba(212,175,55,0.08) !important;
       border-radius: 6px;
-      transition: outline 0.1s, background 0.1s;
     }
 
-    /* ── Insert line (shows where panel will land) ── */
+    /* ── Insert line (before/after indicator) ── */
     .fd-insert-line {
-      position: absolute;
-      left: 8px; right: 8px;
+      position: fixed;
       height: 3px;
-      background: rgba(212,175,55,0.9);
+      background: rgba(212,175,55,0.95);
       border-radius: 2px;
       pointer-events: none;
       z-index: 1900;
-      box-shadow: 0 0 8px rgba(212,175,55,0.6);
-      transition: top 0.1s, bottom 0.1s;
+      box-shadow: 0 0 10px rgba(212,175,55,0.7);
+    }
+
+    /* ── Subtle "drag enabled" shimmer on bars ── */
+    body.fd-unlocked .fd-bar {
+      border-bottom-color: rgba(212,175,55,0.35);
     }
   </style>
 
@@ -6031,20 +6063,27 @@ let activeInspectorTab = 'history';
       'coffee':       { icon: '☕', label: 'Support'           },
     };
 
-    /* ─── State ──────────────────────────────────────────────── */
-    var drag = null;
-    /* drag = {
-         src      : layout-slot being dragged
-         clone    : ghost clone element
-         offsetX  : cursor offset within clone
-         offsetY  : cursor offset within clone
-         target   : current hovered slot (or null)
-         insertPos: 'before'|'after' relative to target
-         line     : fd-insert-line element
-       }
-    */
+    var LAYOUT_KEY = 'df_layout_order';
 
-    /* ─── Helpers ────────────────────────────────────────────── */
+    /* ─── Lock state ─────────────────────────────────────────── */
+    var locked = true;  // start locked
+
+    function setLocked(val) {
+      locked = val;
+      document.body.classList.toggle('fd-unlocked', !locked);
+      var btn = document.getElementById('fd-lock-btn');
+      if (btn) {
+        btn.textContent = locked ? '🔒' : '🔓';
+        btn.title       = locked ? 'Layout locked — click to enable drag' : 'Layout unlocked — click to lock';
+        btn.classList.toggle('unlocked', !locked);
+      }
+    }
+
+    window.fdToggleLock = function () { setLocked(!locked); };
+
+    /* ─── Drag state ─────────────────────────────────────────── */
+    var drag = null;
+
     function pt(e) {
       var t = e.touches || e.changedTouches;
       return t && t.length ? { x: t[0].clientX, y: t[0].clientY }
@@ -6057,52 +6096,44 @@ let activeInspectorTab = 'history';
     }
 
     function slotAtPoint(x, y, exclude) {
-      // Temporarily hide clone so elementFromPoint works
       if (drag && drag.clone) drag.clone.style.display = 'none';
       var el = document.elementFromPoint(x, y);
       if (drag && drag.clone) drag.clone.style.display = '';
-
       if (!el) return null;
       var slot = el.closest('.layout-slot[data-slot]');
       if (!slot || slot === exclude) return null;
       return slot;
     }
 
-    function insertPosition(slot, y) {
+    function insertPos(slot, y) {
       var r = slot.getBoundingClientRect();
       return y < r.top + r.height / 2 ? 'before' : 'after';
     }
 
     /* ─── Start drag ─────────────────────────────────────────── */
-    function startDrag(src, clientX, clientY) {
+    function startDrag(src, cx, cy) {
+      if (locked) return;
+
       var rect  = src.getBoundingClientRect();
       var clone = src.cloneNode(true);
-
-      // Style the clone
-      clone.className = 'fd-ghost-clone';
+      clone.className   = 'fd-ghost-clone';
       clone.style.width  = rect.width  + 'px';
       clone.style.height = rect.height + 'px';
       clone.style.left   = rect.left   + 'px';
       clone.style.top    = rect.top    + 'px';
       document.body.appendChild(clone);
 
-      // Dim the source slot in-layout
       src.classList.add('fd-dragging-src');
 
-      // Insert-line indicator
       var line = document.createElement('div');
       line.className = 'fd-insert-line';
       line.style.display = 'none';
       document.body.appendChild(line);
 
       drag = {
-        src: src,
-        clone: clone,
-        offsetX: clientX - rect.left,
-        offsetY: clientY - rect.top,
-        target: null,
-        insertPos: 'after',
-        line: line
+        src: src, clone: clone,
+        ox: cx - rect.left, oy: cy - rect.top,
+        target: null, pos: 'after', line: line
       };
     }
 
@@ -6110,36 +6141,26 @@ let activeInspectorTab = 'history';
     function onMove(e) {
       if (!drag) return;
       if (e.cancelable) e.preventDefault();
-
       var p = pt(e);
 
-      // Move clone
-      drag.clone.style.left = (p.x - drag.offsetX) + 'px';
-      drag.clone.style.top  = (p.y - drag.offsetY) + 'px';
+      drag.clone.style.left = (p.x - drag.ox) + 'px';
+      drag.clone.style.top  = (p.y - drag.oy) + 'px';
 
-      // Find hovered slot
       var hovered = slotAtPoint(p.x, p.y, drag.src);
 
-      // Clear old highlight
-      if (drag.target && drag.target !== hovered) {
+      if (drag.target && drag.target !== hovered)
         drag.target.classList.remove('fd-drop-target');
-      }
 
       if (hovered) {
         hovered.classList.add('fd-drop-target');
-        drag.target    = hovered;
-        drag.insertPos = insertPosition(hovered, p.y);
+        drag.target = hovered;
+        drag.pos    = insertPos(hovered, p.y);
 
-        // Position the insert line
         var hr = hovered.getBoundingClientRect();
         drag.line.style.display = 'block';
         drag.line.style.left    = hr.left + 'px';
         drag.line.style.width   = hr.width + 'px';
-        if (drag.insertPos === 'before') {
-          drag.line.style.top = (hr.top - 2 + window.scrollY) + 'px';
-        } else {
-          drag.line.style.top = (hr.bottom - 2 + window.scrollY) + 'px';
-        }
+        drag.line.style.top     = (drag.pos === 'before' ? hr.top : hr.bottom) - 1.5 + 'px';
       } else {
         drag.target = null;
         drag.line.style.display = 'none';
@@ -6149,29 +6170,22 @@ let activeInspectorTab = 'history';
     /* ─── End drag ───────────────────────────────────────────── */
     function onEnd(e) {
       if (!drag) return;
+      var src = drag.src, target = drag.target, pos = drag.pos;
 
-      var src    = drag.src;
-      var target = drag.target;
-      var pos    = drag.insertPos;
-
-      // Cleanup
       drag.clone.parentNode && drag.clone.parentNode.removeChild(drag.clone);
       drag.line.parentNode  && drag.line.parentNode.removeChild(drag.line);
       src.classList.remove('fd-dragging-src');
       if (target) target.classList.remove('fd-drop-target');
       drag = null;
 
-      // Perform the reorder
       if (target && target !== src) {
         if (pos === 'before') {
           target.parentNode.insertBefore(src, target);
         } else {
-          // Insert after target
-          var after = target.nextSibling;
-          if (after) target.parentNode.insertBefore(src, after);
-          else       target.parentNode.appendChild(src);
+          var next = target.nextSibling;
+          if (next) target.parentNode.insertBefore(src, next);
+          else      target.parentNode.appendChild(src);
         }
-        // Persist new order
         saveOrder();
       }
     }
@@ -6181,14 +6195,12 @@ let activeInspectorTab = 'history';
     window.addEventListener('mouseup',   onEnd);
     window.addEventListener('touchend',  onEnd);
 
-    /* ─── Persist order (mirrors game's layout system) ────────── */
-    var LAYOUT_KEY = 'df_layout_order';
+    /* ─── Persist order ──────────────────────────────────────── */
     function saveOrder() {
       try {
-        var order = getAllSlots().map(function(s) {
-          return s.getAttribute('data-slot');
-        });
-        localStorage.setItem(LAYOUT_KEY, JSON.stringify(order));
+        localStorage.setItem(LAYOUT_KEY, JSON.stringify(
+          getAllSlots().map(function(s) { return s.getAttribute('data-slot'); })
+        ));
       } catch(e) {}
     }
 
@@ -6197,10 +6209,8 @@ let activeInspectorTab = 'history';
       if (slot._fdWired) return;
       slot._fdWired = true;
 
-      var slotId = slot.getAttribute('data-slot') || '';
-      var meta   = SLOT_META[slotId] || { icon: '⠿', label: slotId };
+      var meta = SLOT_META[slot.getAttribute('data-slot')] || { icon: '⠿', label: '' };
 
-      /* Build drag bar */
       var bar = document.createElement('div');
       bar.className = 'fd-bar';
       bar.innerHTML =
@@ -6210,22 +6220,40 @@ let activeInspectorTab = 'history';
 
       slot.insertBefore(bar, slot.firstChild);
 
-      /* Mouse */
       bar.addEventListener('mousedown', function(e) {
+        if (locked) return;
         e.preventDefault(); e.stopPropagation();
         startDrag(slot, e.clientX, e.clientY);
       });
-
-      /* Touch */
       bar.addEventListener('touchstart', function(e) {
+        if (locked) return;
         e.stopPropagation();
         if (e.touches.length === 1)
           startDrag(slot, e.touches[0].clientX, e.touches[0].clientY);
       }, { passive: true });
     }
 
+    /* ─── Inject the lock button into the header ─────────────── */
+    function injectLockBtn() {
+      if (document.getElementById('fd-lock-btn')) return;
+      var headerBtns = document.querySelector('.header-btns');
+      if (!headerBtns) return;
+
+      var btn = document.createElement('button');
+      btn.id        = 'fd-lock-btn';
+      btn.className = 'settings-btn';
+      btn.onclick   = window.fdToggleLock;
+      // Insert just before the layout button
+      var layoutBtn = document.getElementById('btn-layout');
+      if (layoutBtn) headerBtns.insertBefore(btn, layoutBtn);
+      else           headerBtns.appendChild(btn);
+
+      setLocked(true);  // initialise display
+    }
+
     /* ─── Init ───────────────────────────────────────────────── */
     function applyAll() {
+      injectLockBtn();
       document.querySelectorAll('.layout-slot[data-slot]').forEach(wire);
     }
 
