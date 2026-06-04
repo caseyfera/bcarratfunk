@@ -113,6 +113,9 @@
         .road-title .toggle-arrow { font-size: 0.55rem; opacity: 0.7; transition: transform 0.2s; }
         .road-box.collapsed .road-canvas-wrap { display: none; }
         .road-box.collapsed .toggle-arrow { transform: rotate(180deg); }
+        .road-box-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; padding: 1px 2px; }
+        .road-box-header .road-box-title { color: rgba(212,175,55,0.75); font-size: 0.55rem; font-weight: bold; letter-spacing: 1px; }
+        .road-box-header .toggle-arrow { font-size: 0.55rem; opacity: 0.7; transition: transform 0.2s; color: var(--gold); }
         .road-canvas-wrap { background: var(--road-bg); border-radius: 4px; border: 1px solid var(--road-b); position: relative; overflow: hidden; display: flex; }
 
         .bead-plate { display: grid; grid-template-rows: repeat(6, 11px); grid-auto-flow: column; grid-auto-columns: 11px; gap: 1px; padding: 2px; overflow-x: auto; height: 72px; box-sizing: border-box; }
@@ -1006,16 +1009,16 @@
     <!-- Cut Card Modal -->
     <div id="cut-card-overlay">
         <div class="cut-card-modal">
-            <div class="cut-card-icon">🃏</div>
-            <div class="cut-card-title">CUT THE SHOE</div>
-            <div class="cut-card-subtitle">DRAG OR SLIDE TO PLACE THE CUT CARD</div>
-            <div class="cut-position-label" id="cut-position-label">Cut after card <span id="cut-pos-num">0</span></div>
+            <div class="cut-card-icon" id="cut-card-icon">🃏</div>
+            <div class="cut-card-title" id="cut-card-title">CUT THE SHOE</div>
+            <div class="cut-card-subtitle" id="cut-card-subtitle">SLIDE TO PLACE THE CUT CARD ANYWHERE IN THE DECK</div>
+            <div class="cut-position-label" id="cut-position-label"><span id="cut-pos-num">0</span></div>
             <div class="cut-card-shoe" id="cut-shoe-visual"></div>
             <input type="range" class="cut-slider" id="cut-slider" min="1" max="20" value="7" oninput="updateCutSlider()">
             <div class="cut-position-hint" id="cut-position-hint"></div>
             <div class="cut-card-btns">
-                <button class="cut-btn-skip" onclick="confirmCut(0)">SKIP</button>
-                <button class="cut-btn-cut" onclick="confirmCut()">✂ CUT</button>
+                <button class="cut-btn-skip" id="cut-btn-skip" onclick="confirmCut(0)">SKIP</button>
+                <button class="cut-btn-cut" id="cut-btn-cut" onclick="confirmCut()">✂ CUT</button>
             </div>
         </div>
     </div>
@@ -1182,8 +1185,12 @@
         <!-- Bead + Big Road — own draggable slot -->
         <div class="layout-slot" data-slot="road-bead">
             <div class="road-box" id="rb-bead">
-                <div class="road-canvas-wrap" onclick="toggleRoad('rb-bead')" style="cursor:pointer;">
-                    <div class="road-inline-label" id="rb-bead-lbl">BEAD</div>
+                <div class="road-box-header" onclick="toggleRoad('rb-bead')">
+                    <span class="road-box-title" id="rb-bead-lbl">BEAD</span>
+                    <span class="toggle-arrow">▲</span>
+                </div>
+                <div class="road-canvas-wrap">
+                    <div class="road-inline-label" style="display:none;"></div>
                     <div class="bead-plate" id="road-bead"></div>
                 </div>
             </div>
@@ -1191,8 +1198,11 @@
 
         <div class="layout-slot" data-slot="road-big">
             <div class="road-box" id="rb-big">
-                <div class="road-canvas-wrap" onclick="toggleRoad('rb-big')" style="cursor:pointer;">
-                    <div class="road-inline-label" id="rb-big-lbl">BIG ROAD</div>
+                <div class="road-box-header" onclick="toggleRoad('rb-big')">
+                    <span class="road-box-title" id="rb-big-lbl">BIG ROAD</span>
+                    <span class="toggle-arrow">▲</span>
+                </div>
+                <div class="road-canvas-wrap">
                     <div class="big-road-wrap"><div class="big-road-grid" id="road-big"></div></div>
                 </div>
             </div>
@@ -1201,36 +1211,54 @@
         <!-- Betting Road — own draggable slot -->
         <div class="layout-slot" data-slot="road-betting">
             <div class="road-box" id="rb-betting">
-                <div class="road-canvas-wrap" onclick="toggleRoad('rb-betting')" style="cursor:pointer;">
-                    <div class="road-inline-label" id="rb-betting-lbl">BETTING ROAD</div>
+                <div class="road-box-header" onclick="toggleRoad('rb-betting')">
+                    <span class="road-box-title" id="rb-betting-lbl">BETTING ROAD</span>
+                    <span class="toggle-arrow">▲</span>
+                </div>
+                <div class="road-canvas-wrap">
                     <div class="bet-road-wrap"><div class="bet-road-grid" id="road-betting"></div></div>
+                </div>
             </div>
         </div><!-- /slot:road-betting -->
 
         <!-- Big Eye Boy — own draggable slot -->
         <div class="layout-slot" data-slot="road-beb">
             <div class="road-box" id="rb-beb">
-                <div class="road-canvas-wrap" onclick="toggleRoad('rb-beb')" style="cursor:pointer;">
-                    <div class="road-inline-label" id="rb-beb-lbl">BIG EYE BOY</div>
+                <div class="road-box-header" onclick="toggleRoad('rb-beb')">
+                    <span class="road-box-title" id="rb-beb-lbl">BIG EYE BOY</span>
+                    <span class="toggle-arrow">▲</span>
+                </div>
+                <div class="road-canvas-wrap">
                     <div class="derived-road-wrap"><div class="derived-road-grid" id="road-beb"></div></div>
+                </div>
             </div>
         </div><!-- /slot:road-beb -->
 
-        <!-- Small Road + Cockroach Pig — own draggable slot -->
-        <div class="layout-slot" data-slot="road-derived">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
-                <div class="road-box" id="rb-small">
-                    <div class="road-canvas-wrap" onclick="toggleRoad('rb-small')" style="cursor:pointer;">
-                        <div class="road-inline-label" id="rb-small-lbl">SMALL ROAD</div>
-                        <div class="derived-road-wrap"><div class="derived-road-grid" id="road-small"></div></div>
+        <!-- Small Road — own draggable slot -->
+        <div class="layout-slot" data-slot="road-small">
+            <div class="road-box" id="rb-small">
+                <div class="road-box-header" onclick="toggleRoad('rb-small')">
+                    <span class="road-box-title" id="rb-small-lbl">SMALL ROAD</span>
+                    <span class="toggle-arrow">▲</span>
                 </div>
-                <div class="road-box" id="rb-cock">
-                    <div class="road-canvas-wrap" onclick="toggleRoad('rb-cock')" style="cursor:pointer;">
-                        <div class="road-inline-label" id="rb-cock-lbl">COCKROACH PIG</div>
-                        <div class="derived-road-wrap"><div class="derived-road-grid" id="road-cock"></div></div>
+                <div class="road-canvas-wrap">
+                    <div class="derived-road-wrap"><div class="derived-road-grid" id="road-small"></div></div>
                 </div>
             </div>
-        </div><!-- /slot:road-derived -->
+        </div><!-- /slot:road-small -->
+
+        <!-- Cockroach Pig — own draggable slot -->
+        <div class="layout-slot" data-slot="road-cock">
+            <div class="road-box" id="rb-cock">
+                <div class="road-box-header" onclick="toggleRoad('rb-cock')">
+                    <span class="road-box-title" id="rb-cock-lbl">COCKROACH PIG</span>
+                    <span class="toggle-arrow">▲</span>
+                </div>
+                <div class="road-canvas-wrap">
+                    <div class="derived-road-wrap"><div class="derived-road-grid" id="road-cock"></div></div>
+                </div>
+            </div>
+        </div><!-- /slot:road-cock -->
 
         <div class="layout-slot" data-slot="table">
         <div class="casino-banner" id="casino-banner"></div>
@@ -1431,8 +1459,8 @@
         </div><!-- /slot:inspector -->
 
         <div class="layout-slot" data-slot="coffee">
-        <div class="coffee-link-wrapper" style="width:100%;max-width:240px;margin:6px auto 0 auto;">
-            <a href="https://buymeacoffee.com/baccaratfunk/the-motion-energy" target="_blank" class="coffee-link">☕ Buy me a cup of coffee</a>
+        <div class="coffee-link-wrapper" style="width:100%;box-sizing:border-box;padding:0 8px;margin:6px auto 0 auto;">
+            <a href="https://buymeacoffee.com/baccaratfunk/the-motion-energy" target="_blank" class="coffee-link" style="width:100%;box-sizing:border-box;">☕ Buy me a cup of coffee</a>
         </div>
         </div><!-- /slot:coffee -->
 
@@ -2701,70 +2729,183 @@
     }
 
     // ══════════════════════════════════════════════════════════
-    //  CUT CARD
+    //  CUT CARD  (two-phase: player split → dealer penetration)
+    //
+    //  Phase 1 — PLAYER CUT  (Initial Cut / Randomising the Shuffle)
+    //    The player slides a cut card anywhere into the stacked decks.
+    //    Everything in FRONT of that position moves to the BACK of the
+    //    stack.  This is a true deck-split, not a burn.
+    //    Visual: 30 representative slabs; slider covers the full range.
+    //
+    //  Phase 2 — DEALER PENETRATION  (Setting the Penetration Line)
+    //    After the split the dealer inserts a second cut card 14–26
+    //    cards from the very back of the shoe.  The cards sitting behind
+    //    that marker are the "buffer" — they will never be played.
+    //    cutCardThreshold is set to exactly that buffer size so that
+    //    when the live shoe drains down to that many cards the cut card
+    //    "appears" and the last coup rule fires.
     // ══════════════════════════════════════════════════════════
     let _cutCardCallback = null;
+    let _cutPhase = 1; // 1 = player split, 2 = dealer penetration
 
     function showCutCardModal(callback) {
         _cutCardCallback = callback;
-        // Slider: 1–20 cards to cut (shown as visual position in a mini shoe)
-        const slider = document.getElementById('cut-slider');
-        const total = 20; // visual cards shown
-        slider.max = total;
-        // Randomise default position so it doesn't always look the same
-        slider.value = Math.floor(Math.random() * (total - 2)) + 2;
-        updateCutSlider();
+        _cutPhase = 1;
+        _setupCutPhase1();
         document.getElementById('cut-card-overlay').classList.add('visible');
     }
 
-    function updateCutSlider() {
+    // ── Phase 1 setup ──────────────────────────────────────────
+    function _setupCutPhase1() {
         const slider = document.getElementById('cut-slider');
-        const total = parseInt(slider.max);
-        const pos = parseInt(slider.value);
+        const VISUAL = 30; // number of card-slabs shown
+        slider.min   = 1;
+        slider.max   = VISUAL;
+        // Player places card somewhere in the middle — avoid extreme edges
+        slider.value = Math.floor(Math.random() * (VISUAL - 6)) + 4;
 
-        // Update label
-        document.getElementById('cut-pos-num').textContent = pos;
-        // Hint: rough percentage through the full real shoe
+        document.getElementById('cut-card-icon').textContent     = '🃏';
+        document.getElementById('cut-card-title').textContent    = 'CUT THE SHOE';
+        document.getElementById('cut-card-subtitle').textContent = 'SLIDE TO PLACE THE CUT CARD ANYWHERE';
+        document.getElementById('cut-btn-skip').textContent      = 'SKIP';
+        document.getElementById('cut-btn-cut').textContent       = '✂ CUT';
+        document.getElementById('cut-btn-skip').onclick          = () => confirmCut(0);
+        document.getElementById('cut-btn-cut').onclick           = () => confirmCut();
+
+        updateCutSlider();
+    }
+
+    // ── Phase 2 setup ──────────────────────────────────────────
+    function _setupCutPhase2() {
+        const slider = document.getElementById('cut-slider');
+        const VISUAL = 20;
+        slider.min   = 1;
+        slider.max   = VISUAL;
+        // Casino default: dealer places penetration 14–26 cards from the back.
+        // Default to ~18 so it sits comfortably in that range.
+        slider.value = 18;
+
+        document.getElementById('cut-card-icon').textContent     = '🔴';
+        document.getElementById('cut-card-title').textContent    = 'SET PENETRATION';
+        document.getElementById('cut-card-subtitle').textContent = 'DEALER PLACES CUT CARD NEAR THE BACK OF SHOE';
+        document.getElementById('cut-btn-skip').textContent      = 'USE DEFAULT';
+        document.getElementById('cut-btn-skip').onclick          = () => confirmPenetration(14); // casino minimum
+        document.getElementById('cut-btn-cut').textContent       = '📍 PLACE';
+        document.getElementById('cut-btn-cut').onclick           = () => confirmPenetration();
+
+        updateCutSlider();
+    }
+
+    function updateCutSlider() {
+        const slider    = document.getElementById('cut-slider');
+        const total     = parseInt(slider.max);
+        const pos       = parseInt(slider.value);
         const totalCards = shoeSize > 0 ? shoeSize * 52 : 416;
-        // The cut removes 'pos' cards (scaled: visual 1-20 maps to ~1-20 actual cards)
-        const hint = `~${pos} card${pos !== 1 ? 's' : ''} burned from top of shoe`;
-        document.getElementById('cut-position-hint').textContent = hint;
 
-        // Render visual
+        if (_cutPhase === 1) {
+            // Phase 1: show where the deck splits.
+            // Map visual position (1–30) to a real card count for the label.
+            const realPos = Math.round((pos / total) * totalCards);
+            document.getElementById('cut-pos-num').textContent = `Split after ~${realPos} cards`;
+            document.getElementById('cut-position-hint').textContent =
+                'Cards before this point move to the back of the shoe.';
+        } else {
+            // Phase 2: show how deep the buffer is.
+            // Slider 1–20 maps directly: pos = buffer card count from back.
+            document.getElementById('cut-pos-num').textContent =
+                `Buffer: ${pos} card${pos !== 1 ? 's' : ''} hidden`;
+            document.getElementById('cut-position-hint').textContent =
+                `Last ${pos} card${pos !== 1 ? 's' : ''} will not be played (security buffer).`;
+        }
+
+        // Render visual shoe slabs
         const container = document.getElementById('cut-shoe-visual');
         container.innerHTML = '';
-        for (let i = 1; i <= total; i++) {
-            if (i === pos + 1) {
-                // Insert the red cut marker here
+
+        if (_cutPhase === 1) {
+            // Phase 1: all slabs are face-down (undealt), cut marker in the middle
+            for (let i = 1; i <= total; i++) {
+                if (i === pos + 1) {
+                    const marker = document.createElement('div');
+                    marker.className = 'cut-card-marker';
+                    container.appendChild(marker);
+                }
+                const card = document.createElement('div');
+                card.className = 'cut-card-deck-card';
+                container.appendChild(card);
+            }
+            if (pos >= total) {
                 const marker = document.createElement('div');
                 marker.className = 'cut-card-marker';
                 container.appendChild(marker);
             }
-            const card = document.createElement('div');
-            card.className = 'cut-card-deck-card' + (i <= pos ? ' dealt' : '');
-            container.appendChild(card);
-        }
-        // If cut is at the very end, add marker after all cards
-        if (pos >= total) {
-            const marker = document.createElement('div');
-            marker.className = 'cut-card-marker';
-            container.appendChild(marker);
+        } else {
+            // Phase 2: main shoe (lighter) on the left, buffer (darker) on the right.
+            // Buffer = last `pos` slabs, marked with the red penetration card.
+            const bufferStart = total - pos + 1; // first slab that is buffer
+            for (let i = 1; i <= total; i++) {
+                if (i === bufferStart) {
+                    const marker = document.createElement('div');
+                    marker.className = 'cut-card-marker';
+                    container.appendChild(marker);
+                }
+                const card = document.createElement('div');
+                card.className = 'cut-card-deck-card' + (i >= bufferStart ? ' dealt' : '');
+                container.appendChild(card);
+            }
         }
     }
 
+    // ── Phase 1 confirm (player split) ─────────────────────────
     function confirmCut(override) {
-        const cutCount = override === 0 ? 0 : parseInt(document.getElementById('cut-slider').value);
-        document.getElementById('cut-card-overlay').classList.remove('visible');
-        if (cutCount > 0 && shoe.length > 0) {
-            // Remove 'cutCount' cards from top of shoe (pop = top, so we just pop them)
-            const burned = [];
-            for (let i = 0; i < cutCount && shoe.length > 0; i++) {
-                burned.push(shoe.pop());
-            }
-            // Update shoeFullCopy to reflect the cut
+        const slider    = document.getElementById('cut-slider');
+        const VISUAL    = parseInt(slider.max);
+        const pos       = override === 0 ? 0 : parseInt(slider.value);
+        const totalCards = shoe.length;
+
+        if (pos > 0 && totalCards > 1) {
+            // Map visual position (1–VISUAL) to a real card index in the shoe.
+            // shoe is stored back-to-front (shoe[shoe.length-1] = next card to deal).
+            // "Front of stack" = high indices; "back of stack" = low indices.
+            // splitAt = number of cards that move from the front to the back.
+            const splitAt = Math.round((pos / VISUAL) * totalCards);
+            const clampedSplit = Math.max(1, Math.min(totalCards - 1, splitAt));
+
+            // Cards at indices [totalCards-clampedSplit .. totalCards-1] are the
+            // "front" portion.  Move them to the bottom (index 0 end) of the array.
+            const front = shoe.splice(totalCards - clampedSplit, clampedSplit);
+            shoe.unshift(...front);
             shoeFullCopy = [...shoe];
-            showToast(`✂ Cut: ${cutCount} card${cutCount !== 1 ? 's' : ''} burned`, '#1a3a1a', 2000);
+            showToast(`✂ Shoe split at ~${clampedSplit} cards`, '#1a3a1a', 2000);
         }
+
+        // Move straight into Phase 2 (dealer sets penetration)
+        _cutPhase = 2;
+        _setupCutPhase2();
+        // Keep overlay open for phase 2
+    }
+
+    // ── Phase 2 confirm (dealer penetration) ──────────────────
+    function confirmPenetration(overrideBuffer) {
+        const slider     = document.getElementById('cut-slider');
+        const bufferSize = overrideBuffer !== undefined
+            ? overrideBuffer
+            : Math.max(1, parseInt(slider.value));
+
+        document.getElementById('cut-card-overlay').classList.remove('visible');
+
+        // Set the live cut-card threshold to the buffer size.
+        // When shoe.length drops to <= cutCardThreshold the cut card "appears".
+        cutCardThreshold = bufferSize;
+
+        // Physically trim the buffer from the bottom of the shoe so those
+        // cards are genuinely unreachable during play.
+        const trimmed = Math.min(bufferSize, shoe.length);
+        shoe.splice(0, trimmed); // remove from the bottom (back of stack)
+        shoeFullCopy = [...shoe];
+
+        showToast(`📍 Penetration set — ${trimmed} card${trimmed !== 1 ? 's' : ''} buffered`, '#0d1a3a', 2200);
+
         if (_cutCardCallback) {
             _cutCardCallback();
             _cutCardCallback = null;
@@ -3986,7 +4127,8 @@
         { id: 'road-big',     icon: '🔴', label: 'Big Road' },
         { id: 'road-betting', icon: '💰', label: 'Betting Road' },
         { id: 'road-beb',     icon: '👁', label: 'Big Eye Boy' },
-        { id: 'road-derived', icon: '📍', label: 'Small Road + Cockroach' },
+        { id: 'road-small',   icon: '📍', label: 'Small Road' },
+        { id: 'road-cock',    icon: '🪳', label: 'Cockroach Pig' },
         { id: 'table',        icon: '🎰', label: 'Table + Controls' },
         { id: 'financials',   icon: '💵', label: 'Financials' },
         { id: 'inspector',    icon: '🔍', label: 'Shoe Inspector' },
@@ -4002,6 +4144,11 @@
                 if (order.includes('road-main')) {
                     const idx = order.indexOf('road-main');
                     order.splice(idx, 1, 'road-bead', 'road-big');
+                }
+                // Migrate old layout that used 'road-derived' -> split into road-small + road-cock
+                if (order.includes('road-derived')) {
+                    const idx = order.indexOf('road-derived');
+                    order.splice(idx, 1, 'road-small', 'road-cock');
                 }
                 // Validate all known slots are present
                 if (SLOT_DEFS.every(s => order.includes(s.id))) return order;
@@ -5077,8 +5224,6 @@ let activeInspectorTab = 'history';
         const box = document.getElementById(id);
         if (!box) return;
         box.classList.toggle('collapsed');
-        const wrap = box.querySelector('.road-canvas-wrap');
-        if (wrap) wrap.style.display = box.classList.contains('collapsed') ? 'none' : '';
     }
 
     // ══════════════════════════════════════════════════════════
@@ -5790,6 +5935,313 @@ let activeInspectorTab = 'history';
           .catch(err => console.log('SW registration failed:', err));
       });
     }
+  </script>
+
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FREE-DRAG WINDOW SYSTEM  v4
+       • Drag any panel's bar → floats freely as a "ghost clone"
+       • While dragging, hover over any other panel → it highlights
+       • Release → the dragged panel swaps/inserts at that position
+       • Panels in layout shift around live as you drag over them
+       • Works with mouse and touch
+  ════════════════════════════════════════════════════════════ -->
+  <style>
+    /* ── Drag bar on every layout-slot ── */
+    .fd-bar {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 6px;
+      background: rgba(0,0,0,0.4);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      border-radius: 5px 5px 0 0;
+      cursor: grab; user-select: none; touch-action: none;
+      box-sizing: border-box; width: 100%; flex-shrink: 0;
+    }
+    .fd-bar:active { cursor: grabbing; }
+    .fd-bar-icon  { font-size: 0.82rem; flex-shrink: 0; }
+    .fd-bar-label { flex: 1; font-size: 0.58rem; font-weight: bold;
+                    letter-spacing: 1px; color: rgba(212,175,55,0.75);
+                    text-transform: uppercase; }
+    .fd-bar-grip  { font-size: 1rem; color: rgba(212,175,55,0.35);
+                    flex-shrink: 0; line-height: 1; }
+
+    /* ── Floating "ghost" clone that follows cursor ── */
+    .fd-ghost-clone {
+      position: fixed;
+      pointer-events: none;
+      z-index: 2000;
+      opacity: 0.82;
+      box-shadow: 0 12px 50px rgba(0,0,0,0.9), 0 0 0 2px rgba(212,175,55,0.7);
+      border-radius: 7px;
+      border: 1.5px solid rgba(212,175,55,0.6);
+      background: #061a0d;
+      overflow: hidden;
+      transition: none;
+    }
+
+    /* ── Original slot while it's being dragged (collapsed/dimmed) ── */
+    .layout-slot.fd-dragging-src {
+      opacity: 0.28;
+      border: 2px dashed rgba(212,175,55,0.35) !important;
+      border-radius: 6px;
+      background: rgba(212,175,55,0.03);
+      pointer-events: none;
+    }
+    .layout-slot.fd-dragging-src > *:not(.fd-bar) { visibility: hidden; }
+
+    /* ── Drop target highlight ── */
+    .layout-slot.fd-drop-target {
+      outline: 2px solid rgba(212,175,55,0.85) !important;
+      outline-offset: -2px;
+      background: rgba(212,175,55,0.07) !important;
+      border-radius: 6px;
+      transition: outline 0.1s, background 0.1s;
+    }
+
+    /* ── Insert line (shows where panel will land) ── */
+    .fd-insert-line {
+      position: absolute;
+      left: 8px; right: 8px;
+      height: 3px;
+      background: rgba(212,175,55,0.9);
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 1900;
+      box-shadow: 0 0 8px rgba(212,175,55,0.6);
+      transition: top 0.1s, bottom 0.1s;
+    }
+  </style>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ─── Slot metadata ──────────────────────────────────────── */
+    var SLOT_META = {
+      'road-bead':    { icon: '🔵', label: 'Bead Plate'      },
+      'road-big':     { icon: '🔴', label: 'Big Road'         },
+      'road-betting': { icon: '💰', label: 'Betting Road'     },
+      'road-beb':     { icon: '👁', label: 'Big Eye Boy'      },
+      'road-small':   { icon: '📍', label: 'Small Road'       },
+      'road-cock':    { icon: '🪳', label: 'Cockroach Pig'    },
+      'table':        { icon: '🎰', label: 'Table + Controls' },
+      'financials':   { icon: '💵', label: 'Financials'       },
+      'inspector':    { icon: '🔍', label: 'Shoe Inspector'   },
+      'coffee':       { icon: '☕', label: 'Support'           },
+    };
+
+    /* ─── State ──────────────────────────────────────────────── */
+    var drag = null;
+    /* drag = {
+         src      : layout-slot being dragged
+         clone    : ghost clone element
+         offsetX  : cursor offset within clone
+         offsetY  : cursor offset within clone
+         target   : current hovered slot (or null)
+         insertPos: 'before'|'after' relative to target
+         line     : fd-insert-line element
+       }
+    */
+
+    /* ─── Helpers ────────────────────────────────────────────── */
+    function pt(e) {
+      var t = e.touches || e.changedTouches;
+      return t && t.length ? { x: t[0].clientX, y: t[0].clientY }
+                           : { x: e.clientX,    y: e.clientY };
+    }
+
+    function getAllSlots() {
+      return Array.prototype.slice.call(
+        document.querySelectorAll('.layout-slot[data-slot]'));
+    }
+
+    function slotAtPoint(x, y, exclude) {
+      // Temporarily hide clone so elementFromPoint works
+      if (drag && drag.clone) drag.clone.style.display = 'none';
+      var el = document.elementFromPoint(x, y);
+      if (drag && drag.clone) drag.clone.style.display = '';
+
+      if (!el) return null;
+      var slot = el.closest('.layout-slot[data-slot]');
+      if (!slot || slot === exclude) return null;
+      return slot;
+    }
+
+    function insertPosition(slot, y) {
+      var r = slot.getBoundingClientRect();
+      return y < r.top + r.height / 2 ? 'before' : 'after';
+    }
+
+    /* ─── Start drag ─────────────────────────────────────────── */
+    function startDrag(src, clientX, clientY) {
+      var rect  = src.getBoundingClientRect();
+      var clone = src.cloneNode(true);
+
+      // Style the clone
+      clone.className = 'fd-ghost-clone';
+      clone.style.width  = rect.width  + 'px';
+      clone.style.height = rect.height + 'px';
+      clone.style.left   = rect.left   + 'px';
+      clone.style.top    = rect.top    + 'px';
+      document.body.appendChild(clone);
+
+      // Dim the source slot in-layout
+      src.classList.add('fd-dragging-src');
+
+      // Insert-line indicator
+      var line = document.createElement('div');
+      line.className = 'fd-insert-line';
+      line.style.display = 'none';
+      document.body.appendChild(line);
+
+      drag = {
+        src: src,
+        clone: clone,
+        offsetX: clientX - rect.left,
+        offsetY: clientY - rect.top,
+        target: null,
+        insertPos: 'after',
+        line: line
+      };
+    }
+
+    /* ─── Move ───────────────────────────────────────────────── */
+    function onMove(e) {
+      if (!drag) return;
+      if (e.cancelable) e.preventDefault();
+
+      var p = pt(e);
+
+      // Move clone
+      drag.clone.style.left = (p.x - drag.offsetX) + 'px';
+      drag.clone.style.top  = (p.y - drag.offsetY) + 'px';
+
+      // Find hovered slot
+      var hovered = slotAtPoint(p.x, p.y, drag.src);
+
+      // Clear old highlight
+      if (drag.target && drag.target !== hovered) {
+        drag.target.classList.remove('fd-drop-target');
+      }
+
+      if (hovered) {
+        hovered.classList.add('fd-drop-target');
+        drag.target    = hovered;
+        drag.insertPos = insertPosition(hovered, p.y);
+
+        // Position the insert line
+        var hr = hovered.getBoundingClientRect();
+        drag.line.style.display = 'block';
+        drag.line.style.left    = hr.left + 'px';
+        drag.line.style.width   = hr.width + 'px';
+        if (drag.insertPos === 'before') {
+          drag.line.style.top = (hr.top - 2 + window.scrollY) + 'px';
+        } else {
+          drag.line.style.top = (hr.bottom - 2 + window.scrollY) + 'px';
+        }
+      } else {
+        drag.target = null;
+        drag.line.style.display = 'none';
+      }
+    }
+
+    /* ─── End drag ───────────────────────────────────────────── */
+    function onEnd(e) {
+      if (!drag) return;
+
+      var src    = drag.src;
+      var target = drag.target;
+      var pos    = drag.insertPos;
+
+      // Cleanup
+      drag.clone.parentNode && drag.clone.parentNode.removeChild(drag.clone);
+      drag.line.parentNode  && drag.line.parentNode.removeChild(drag.line);
+      src.classList.remove('fd-dragging-src');
+      if (target) target.classList.remove('fd-drop-target');
+      drag = null;
+
+      // Perform the reorder
+      if (target && target !== src) {
+        if (pos === 'before') {
+          target.parentNode.insertBefore(src, target);
+        } else {
+          // Insert after target
+          var after = target.nextSibling;
+          if (after) target.parentNode.insertBefore(src, after);
+          else       target.parentNode.appendChild(src);
+        }
+        // Persist new order
+        saveOrder();
+      }
+    }
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup',   onEnd);
+    window.addEventListener('touchend',  onEnd);
+
+    /* ─── Persist order (mirrors game's layout system) ────────── */
+    var LAYOUT_KEY = 'df_layout_order';
+    function saveOrder() {
+      try {
+        var order = getAllSlots().map(function(s) {
+          return s.getAttribute('data-slot');
+        });
+        localStorage.setItem(LAYOUT_KEY, JSON.stringify(order));
+      } catch(e) {}
+    }
+
+    /* ─── Wire one slot ──────────────────────────────────────── */
+    function wire(slot) {
+      if (slot._fdWired) return;
+      slot._fdWired = true;
+
+      var slotId = slot.getAttribute('data-slot') || '';
+      var meta   = SLOT_META[slotId] || { icon: '⠿', label: slotId };
+
+      /* Build drag bar */
+      var bar = document.createElement('div');
+      bar.className = 'fd-bar';
+      bar.innerHTML =
+        '<span class="fd-bar-icon">'  + meta.icon  + '</span>' +
+        '<span class="fd-bar-label">' + meta.label + '</span>' +
+        '<span class="fd-bar-grip">⠿</span>';
+
+      slot.insertBefore(bar, slot.firstChild);
+
+      /* Mouse */
+      bar.addEventListener('mousedown', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        startDrag(slot, e.clientX, e.clientY);
+      });
+
+      /* Touch */
+      bar.addEventListener('touchstart', function(e) {
+        e.stopPropagation();
+        if (e.touches.length === 1)
+          startDrag(slot, e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
+    }
+
+    /* ─── Init ───────────────────────────────────────────────── */
+    function applyAll() {
+      document.querySelectorAll('.layout-slot[data-slot]').forEach(wire);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        applyAll();
+        new MutationObserver(applyAll).observe(document.body,
+          { childList: true, subtree: true });
+      });
+    } else {
+      applyAll();
+      new MutationObserver(applyAll).observe(document.body,
+        { childList: true, subtree: true });
+    }
+
+  }());
   </script>
 </body>
 </html>
