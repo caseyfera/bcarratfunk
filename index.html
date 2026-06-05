@@ -931,7 +931,7 @@
             </div>
             <div id="code-step" style="display:none;">
                 <p>Verification Code:</p>
-                <input type="text" id="access-code" placeholder="000000" autocomplete="one-time-code" inputmode="numeric" onkeydown="if(event.key==='Enter') verifyCode()">
+                <input type="text" id="access-code" placeholder="000000" onkeydown="if(event.key==='Enter') verifyCode()">
                 <br><br>
                 <button class="login-btn" onclick="verifyCode()" style="width:100%;font-size:1.1rem;padding:10px 0;">VERIFY CODE →</button>
             </div>
@@ -991,90 +991,6 @@
     </div>
 
     <!-- Shoe End Overlay -->
-
-  <!-- ═══════════════════════════════════════════════════════════
-       GAME HISTORY OVERLAY
-  ════════════════════════════════════════════════════════════ -->
-  <style>
-    #history-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.96); z-index: 1100;
-      overflow-y: auto; padding: 16px; box-sizing: border-box;
-      display: none;
-    }
-    .hist-inner { max-width: 620px; margin: 0 auto; }
-    .hist-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 14px;
-    }
-    .hist-title { color: var(--gold); font-weight: bold; letter-spacing: 2px; font-size: 0.9rem; }
-    .hist-close-btn {
-      background: none; border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.6); border-radius: 4px;
-      padding: 4px 12px; cursor: pointer; font-size: 0.75rem;
-    }
-    .hist-close-btn:hover { border-color: var(--gold); color: var(--gold); }
-    .hist-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
-    .hist-tab {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(212,175,55,0.25);
-      color: rgba(255,255,255,0.5); border-radius: 5px;
-      padding: 6px 16px; cursor: pointer;
-      font-size: 0.72rem; font-weight: bold; letter-spacing: 0.5px;
-    }
-    .hist-tab.active {
-      background: rgba(212,175,55,0.15);
-      border-color: var(--gold); color: var(--gold);
-    }
-    .hist-empty {
-      color: rgba(255,255,255,0.3); text-align: center;
-      padding: 50px 20px; font-size: 0.8rem; line-height: 2;
-    }
-    .hist-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(212,175,55,0.18);
-      border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;
-      transition: border-color 0.15s;
-    }
-    .hist-card:hover { border-color: rgba(212,175,55,0.45); }
-    .hist-card-top {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      margin-bottom: 8px;
-    }
-    .hist-card-label { color: var(--gold); font-weight: bold; font-size: 0.8rem; }
-    .hist-card-date { color: rgba(255,255,255,0.3); font-size: 0.6rem; margin-top: 2px; }
-    .hist-card-pl { font-size: 1rem; font-weight: bold; }
-    .hist-card-del {
-      background: none; border: none; color: rgba(255,255,255,0.2);
-      cursor: pointer; font-size: 0.85rem; padding: 0 0 0 8px;
-    }
-    .hist-card-del:hover { color: #ff6b6b; }
-    .hist-stats {
-      display: flex; flex-wrap: wrap; gap: 10px 18px;
-    }
-    .hist-stat { font-size: 0.63rem; color: rgba(255,255,255,0.4); }
-    .hist-stat b { color: rgba(255,255,255,0.85); font-weight: 600; }
-    #hist-loading {
-      color: rgba(255,255,255,0.35); text-align: center;
-      padding: 40px; font-size: 0.8rem; display: none;
-    }
-  </style>
-
-  <div id="history-overlay">
-    <div class="hist-inner">
-      <div class="hist-header">
-        <div class="hist-title">🕓 GAME HISTORY</div>
-        <button class="hist-close-btn" onclick="closeHistory()">✕ Close</button>
-      </div>
-      <div class="hist-tabs">
-        <button id="hist-tab-played" class="hist-tab active" onclick="switchHistTab('played')">🎴 Played Shoes</button>
-        <button id="hist-tab-sims"   class="hist-tab"        onclick="switchHistTab('sims')">🧪 Simulations</button>
-      </div>
-      <div id="hist-loading">Loading...</div>
-      <div id="hist-list"></div>
-    </div>
-  </div>
-
     <div id="shoe-end-overlay" style="display:none;">
         <div class="shoe-end-card">
             <button class="shoe-end-close" onclick="minimizeShoeEnd()" title="Close and inspect roads">✕</button>
@@ -1260,7 +1176,6 @@
                 <button id="btn-layout" class="settings-btn" onclick="openLayoutPanel()" title="Customise Layout">⊞</button>
                 <button class="settings-btn" onclick="openBtnCustomPanel()" title="Customise Buttons">🎛</button>
                 <button class="settings-btn" onclick="openSimulator()" title="Strategy Simulator" style="font-size:0.65rem;">🧪</button>
-                <button class="settings-btn" onclick="openHistory()" title="Game History" style="font-size:0.72rem;">🕓</button>
                 <button class="settings-btn" onclick="if(confirm('Clear all saved data and start fresh?')){localStorage.clear();location.reload();}" title="Clear saved data" style="font-size:0.65rem;">🗑</button>
                 <button class="settings-btn" onclick="newGame()" title="New Game" style="font-size:0.58rem;letter-spacing:0.3px;width:32px;border-radius:7px;">NEW</button>
                 <button class="settings-btn logout-btn" onclick="logout()" title="Log out" style="font-size:0.58rem;width:32px;border-radius:7px;">OUT</button>
@@ -1564,55 +1479,22 @@
     // ══════════════════════════════════════════════════════════
     //  SESSION MANAGEMENT
     // ══════════════════════════════════════════════════════════
-   // ── Supabase Game History ──────────────────────────
-const SUPABASE_URL      = 'https://bwquydqdvopyyzbycokt.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_TkBe80yXgIcrHiUoWIDLhQ_N4pNmokl';
-
-const supa = {
-  async req(method, table, body = null, params = '') {
-    const url = `${SUPABASE_URL}/rest/v1/${table}${params}`;
-    const opts = {
-      method,
-      headers: {
-        'apikey':        SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type':  'application/json',
-        'Prefer':        method === 'POST' ? 'return=representation' : '',
-      },
-    };
-    if (body) opts.body = JSON.stringify(body);
-    try {
-      const r = await fetch(url, opts);
-      if (!r.ok) { console.warn('Supabase error', r.status, await r.text()); return null; }
-      return method === 'DELETE' ? true : await r.json();
-    } catch(e) { console.warn('Supabase fetch failed', e); return null; }
-  },
-
-  async savePlayedShoe(data)        { return this.req('POST',   'played_shoes', data); },
-  async getPlayedShoes(email, n=50) { return this.req('GET',    'played_shoes', null,
-    `?email=eq.${encodeURIComponent(email)}&order=created_at.desc&limit=${n}`); },
-  async deletePlayedShoe(id)        { return this.req('DELETE', 'played_shoes', null, `?id=eq.${id}`); },
-
-  async saveSimRun(data)          { return this.req('POST',   'sim_runs', data); },
-  async getSimRuns(email, n=50)   { return this.req('GET',    'sim_runs', null,
-    `?email=eq.${encodeURIComponent(email)}&order=created_at.desc&limit=${n}`); },
-  async deleteSimRun(id)          { return this.req('DELETE', 'sim_runs', null, `?id=eq.${id}`); },
-};
+    const SESSION_EMAIL_KEY = 'df_email';
+    const SESSION_TOKEN_KEY = 'df_session';
 
     // Called on page load — checks localStorage for a saved session and validates it
     async function checkExistingSession() {
         const savedEmail = localStorage.getItem(SESSION_EMAIL_KEY);
         const savedToken = localStorage.getItem(SESSION_TOKEN_KEY);
 
-        // No saved session at all — go straight to login
         if (!savedEmail || !savedToken) {
             hideSplash();
             showLoginOverlay();
             return;
         }
 
-        // Give the network 6 seconds before falling back gracefully
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000));
+        // Give the network 4 seconds before falling back gracefully
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
 
         try {
             const fetchProm = fetch(`${SCRIPT_URL}?email=${encodeURIComponent(savedEmail)}&token=${encodeURIComponent(savedToken)}&sessionCheck=true`);
@@ -1625,10 +1507,10 @@ const supa = {
                 buildCasinoGrid();
                 document.getElementById('setup-overlay').style.display = 'flex';
             } else {
-                // Invalid/expired — clear tokens and go to login
+                // Invalid/expired — clear token but check for saved game first
                 localStorage.removeItem(SESSION_TOKEN_KEY);
-                localStorage.removeItem(SESSION_EMAIL_KEY);
                 hideSplash();
+                // If they have a game in progress, let them back in with re-auth notice
                 if (loadGameState()) {
                     showReloginBanner(savedEmail);
                     restoreGameToScreen();
@@ -1637,15 +1519,12 @@ const supa = {
                 }
             }
         } catch (e) {
-            // Network error or timeout — always resolve, never loop
+            // Network error or timeout — if game exists show it offline, else show login
             hideSplash();
             if (loadGameState()) {
                 restoreGameToScreen();
                 showToast('⚠️ Offline mode — session unverified', '#b86200');
             } else {
-                // Clear bad tokens so next load goes straight to login
-                localStorage.removeItem(SESSION_TOKEN_KEY);
-                localStorage.removeItem(SESSION_EMAIL_KEY);
                 showLoginOverlay();
             }
         }
@@ -2366,9 +2245,6 @@ const supa = {
             </div>`;
         document.getElementById('shoe-end-stats').innerHTML = statsHTML;
         document.getElementById('shoe-end-overlay').style.display = 'flex';
-
-        // Auto-save to Supabase
-        savePlayedShoeToHistory();
     }
 
     function saveShoe() {
@@ -4798,9 +4674,6 @@ const supa = {
         _simResults = results;
         _simHistIdx = 0;
         renderSimShoeHistory();
-
-        // Auto-save to Supabase
-        saveSimToHistory(results, config, numShoes);
     }
 
     let _simResults = [];
@@ -6066,151 +5939,309 @@ let activeInspectorTab = 'history';
 
 
 
-
   <!-- ═══════════════════════════════════════════════════════════
-       GAME HISTORY — Save & Viewer Functions
+       FREE-DRAG WINDOW SYSTEM  v4
+       • Drag any panel's bar → floats freely as a "ghost clone"
+       • While dragging, hover over any other panel → it highlights
+       • Release → the dragged panel swaps/inserts at that position
+       • Panels in layout shift around live as you drag over them
+       • Works with mouse and touch
   ════════════════════════════════════════════════════════════ -->
+  <style>
+    /* ── Drag bar on every layout-slot ── */
+    .fd-bar {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 6px;
+      background: rgba(0,0,0,0.4);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      border-radius: 5px 5px 0 0;
+      cursor: grab; user-select: none; touch-action: none;
+      box-sizing: border-box; width: 100%; flex-shrink: 0;
+    }
+    .fd-bar:active { cursor: grabbing; }
+    .fd-bar-icon  { font-size: 0.82rem; flex-shrink: 0; }
+    .fd-bar-label { flex: 1; font-size: 0.58rem; font-weight: bold;
+                    letter-spacing: 1px; color: rgba(212,175,55,0.75);
+                    text-transform: uppercase; }
+    .fd-bar-grip  { font-size: 1rem; color: rgba(212,175,55,0.35);
+                    flex-shrink: 0; line-height: 1; }
+
+    /* ── Floating "ghost" clone that follows cursor ── */
+    .fd-ghost-clone {
+      position: fixed;
+      pointer-events: none;
+      z-index: 2000;
+      opacity: 0.82;
+      box-shadow: 0 12px 50px rgba(0,0,0,0.9), 0 0 0 2px rgba(212,175,55,0.7);
+      border-radius: 7px;
+      border: 1.5px solid rgba(212,175,55,0.6);
+      background: #061a0d;
+      overflow: hidden;
+      transition: none;
+    }
+
+    /* ── Original slot while it's being dragged (collapsed/dimmed) ── */
+    .layout-slot.fd-dragging-src {
+      opacity: 0.28;
+      border: 2px dashed rgba(212,175,55,0.35) !important;
+      border-radius: 6px;
+      background: rgba(212,175,55,0.03);
+      pointer-events: none;
+    }
+    .layout-slot.fd-dragging-src > *:not(.fd-bar) { visibility: hidden; }
+
+    /* ── Drop target highlight ── */
+    .layout-slot.fd-drop-target {
+      outline: 2px solid rgba(212,175,55,0.85) !important;
+      outline-offset: -2px;
+      background: rgba(212,175,55,0.07) !important;
+      border-radius: 6px;
+      transition: outline 0.1s, background 0.1s;
+    }
+
+    /* ── Insert line (shows where panel will land) ── */
+    .fd-insert-line {
+      position: absolute;
+      left: 8px; right: 8px;
+      height: 3px;
+      background: rgba(212,175,55,0.9);
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 1900;
+      box-shadow: 0 0 8px rgba(212,175,55,0.6);
+      transition: top 0.1s, bottom 0.1s;
+    }
+  </style>
+
   <script>
+  (function () {
+    'use strict';
 
-    // ── Save simulation run to Supabase ──────────────────────
-    async function saveSimToHistory(results, config, numShoes) {
-      if (!userEmail) return;
-      const plCurve    = results.map(r => Math.round(r.netPL * 100) / 100);
-      const totalPL    = results.reduce((s, r) => s + r.netPL, 0);
-      const plSorted   = [...plCurve].sort((a, b) => a - b);
-      const median     = plSorted[Math.floor(plSorted.length / 2)];
-      const totalBets  = results.reduce((s, r) => s + r.betsPlaced, 0);
-      const roi        = totalBets > 0 ? (totalPL / (config.baseBet * totalBets)) * 100 : 0;
-      const busted     = results.filter(r => r.bankroll <= 0).length;
-      const stratEl    = document.getElementById('sim-strategy');
-      const stratLabel = stratEl ? stratEl.options[stratEl.selectedIndex].text : config.strategy;
+    /* ─── Slot metadata ──────────────────────────────────────── */
+    var SLOT_META = {
+      'road-bead':    { icon: '🔵', label: 'Bead Plate'      },
+      'road-big':     { icon: '🔴', label: 'Big Road'         },
+      'road-betting': { icon: '💰', label: 'Betting Road'     },
+      'road-beb':     { icon: '👁', label: 'Big Eye Boy'      },
+      'road-small':   { icon: '📍', label: 'Small Road'       },
+      'road-cock':    { icon: '🪳', label: 'Cockroach Pig'    },
+      'table':        { icon: '🎰', label: 'Table + Controls' },
+      'financials':   { icon: '💵', label: 'Financials'       },
+      'inspector':    { icon: '🔍', label: 'Shoe Inspector'   },
+      'coffee':       { icon: '☕', label: 'Support'           },
+    };
 
-      const payload = {
-        email:           userEmail,
-        strategy:        stratLabel,
-        sizing:          config.sizing,
-        base_bet:        config.baseBet,
-        max_bet:         config.maxBet,
-        num_shoes:       numShoes,
-        num_decks:       config.numDecks || 8,
-        start_bankroll:  config.startBankroll,
-        stop_loss:       config.stopLoss || null,
-        banker_odds:     config.bankerOdds,
-        skip_ties:       config.skipTies,
-        total_pl:        Math.round(totalPL * 100) / 100,
-        avg_pl_per_shoe: Math.round((totalPL / numShoes) * 100) / 100,
-        roi_pct:         Math.round(roi * 100) / 100,
-        winning_shoes:   results.filter(r => r.netPL > 0).length,
-        losing_shoes:    results.filter(r => r.netPL < 0).length,
-        best_shoe:       Math.max(...plCurve),
-        worst_shoe:      Math.min(...plCurve),
-        median_pl:       median,
-        max_drawdown:    Math.max(...results.map(r => r.maxDrawdown)),
-        max_win_streak:  Math.max(...results.map(r => r.maxWinStreak)),
-        max_loss_streak: Math.max(...results.map(r => r.maxLossStreak)),
-        avg_hands:       Math.round(results.reduce((s,r) => s + r.handsPlayed, 0) / numShoes),
-        bust_rate:       Math.round((busted / numShoes) * 10000) / 100,
-        pl_curve:        plCurve,
+    /* ─── State ──────────────────────────────────────────────── */
+    var drag = null;
+    /* drag = {
+         src      : layout-slot being dragged
+         clone    : ghost clone element
+         offsetX  : cursor offset within clone
+         offsetY  : cursor offset within clone
+         target   : current hovered slot (or null)
+         insertPos: 'before'|'after' relative to target
+         line     : fd-insert-line element
+       }
+    */
+
+    /* ─── Helpers ────────────────────────────────────────────── */
+    function pt(e) {
+      var t = e.touches || e.changedTouches;
+      return t && t.length ? { x: t[0].clientX, y: t[0].clientY }
+                           : { x: e.clientX,    y: e.clientY };
+    }
+
+    function getAllSlots() {
+      return Array.prototype.slice.call(
+        document.querySelectorAll('.layout-slot[data-slot]'));
+    }
+
+    function slotAtPoint(x, y, exclude) {
+      // Temporarily hide clone so elementFromPoint works
+      if (drag && drag.clone) drag.clone.style.display = 'none';
+      var el = document.elementFromPoint(x, y);
+      if (drag && drag.clone) drag.clone.style.display = '';
+
+      if (!el) return null;
+      var slot = el.closest('.layout-slot[data-slot]');
+      if (!slot || slot === exclude) return null;
+      return slot;
+    }
+
+    function insertPosition(slot, y) {
+      var r = slot.getBoundingClientRect();
+      return y < r.top + r.height / 2 ? 'before' : 'after';
+    }
+
+    /* ─── Start drag ─────────────────────────────────────────── */
+    function startDrag(src, clientX, clientY) {
+      var rect  = src.getBoundingClientRect();
+      var clone = src.cloneNode(true);
+
+      // Style the clone
+      clone.className = 'fd-ghost-clone';
+      clone.style.width  = rect.width  + 'px';
+      clone.style.height = rect.height + 'px';
+      clone.style.left   = rect.left   + 'px';
+      clone.style.top    = rect.top    + 'px';
+      document.body.appendChild(clone);
+
+      // Dim the source slot in-layout
+      src.classList.add('fd-dragging-src');
+
+      // Insert-line indicator
+      var line = document.createElement('div');
+      line.className = 'fd-insert-line';
+      line.style.display = 'none';
+      document.body.appendChild(line);
+
+      drag = {
+        src: src,
+        clone: clone,
+        offsetX: clientX - rect.left,
+        offsetY: clientY - rect.top,
+        target: null,
+        insertPos: 'after',
+        line: line
       };
-
-      const saved = await supa.saveSimRun(payload);
-      if (saved && saved[0]) showToast('✅ Simulation saved to history', '#2e7d32');
     }
 
-    // ── Save played shoe to Supabase ─────────────────────────
-    async function savePlayedShoeToHistory() {
-      if (!userEmail) return;
+    /* ─── Move ───────────────────────────────────────────────── */
+    function onMove(e) {
+      if (!drag) return;
+      if (e.cancelable) e.preventDefault();
 
-      // Encode hand log compactly: [outcome, side, bet_cents, pl_cents]
-      const encodedLog = beadHistory.map((h, i) => [
-        (h.cls || 'T')[0].toUpperCase(),
-        'N',
-        0,
-        Math.round((handHistory[i] || 0) * 100)
-      ]);
+      var p = pt(e);
 
-      const pl = bankroll - initialBankroll - totalDeposits;
+      // Move clone
+      drag.clone.style.left = (p.x - drag.offsetX) + 'px';
+      drag.clone.style.top  = (p.y - drag.offsetY) + 'px';
 
-      const payload = {
-        email:          userEmail,
-        num_decks:      shoeSize || 8,
-        num_hands:      stats.hands,
-        net_pl:         Math.round(pl * 100) / 100,
-        start_bankroll: initialBankroll,
-        end_bankroll:   Math.round(bankroll * 100) / 100,
-        peak_bankroll:  null,
-        low_bankroll:   null,
-        banker_wins:    stats.banker,
-        player_wins:    stats.player,
-        ties:           stats.tie,
-        hand_log:       encodedLog,
-      };
+      // Find hovered slot
+      var hovered = slotAtPoint(p.x, p.y, drag.src);
 
-      const saved = await supa.savePlayedShoe(payload);
-      if (saved && saved[0]) showToast('✅ Shoe saved to history', '#2e7d32');
-    }
-
-    // ── History viewer ───────────────────────────────────────
-    let _histTab = 'played';
-
-    function openHistory() {
-      document.getElementById('history-overlay').style.display = 'block';
-      loadHistory();
-    }
-    function closeHistory() {
-      document.getElementById('history-overlay').style.display = 'none';
-    }
-    function switchHistTab(tab) {
-      _histTab = tab;
-      document.getElementById('hist-tab-played').classList.toggle('active', tab === 'played');
-      document.getElementById('hist-tab-sims').classList.toggle('active', tab === 'sims');
-      loadHistory();
-    }
-
-    async function loadHistory() {
-      const listEl    = document.getElementById('hist-list');
-      const loadingEl = document.getElementById('hist-loading');
-      listEl.innerHTML = '';
-      loadingEl.style.display = 'block';
-
-      const data = _histTab === 'played'
-        ? await supa.getPlayedShoes(userEmail)
-        : await supa.getSimRuns(userEmail);
-
-      loadingEl.style.display = 'none';
-
-      if (!data || data.length === 0) {
-        listEl.innerHTML = `<div class="hist-empty">
-          No ${_histTab === 'played' ? 'played shoes' : 'simulations'} saved yet.<br>
-          <span style="font-size:0.7rem;opacity:0.6;">
-            ${_histTab === 'played'
-              ? 'Play a full shoe and it will appear here automatically.'
-              : 'Run a simulation and it will appear here automatically.'}
-          </span>
-        </div>`;
-        return;
+      // Clear old highlight
+      if (drag.target && drag.target !== hovered) {
+        drag.target.classList.remove('fd-drop-target');
       }
 
-      listEl.innerHTML = data.map(row =>
-        _histTab === 'played' ? buildPlayedCard(row) : buildSimCard(row)
-      ).join('');
+      if (hovered) {
+        hovered.classList.add('fd-drop-target');
+        drag.target    = hovered;
+        drag.insertPos = insertPosition(hovered, p.y);
+
+        // Position the insert line
+        var hr = hovered.getBoundingClientRect();
+        drag.line.style.display = 'block';
+        drag.line.style.left    = hr.left + 'px';
+        drag.line.style.width   = hr.width + 'px';
+        if (drag.insertPos === 'before') {
+          drag.line.style.top = (hr.top - 2 + window.scrollY) + 'px';
+        } else {
+          drag.line.style.top = (hr.bottom - 2 + window.scrollY) + 'px';
+        }
+      } else {
+        drag.target = null;
+        drag.line.style.display = 'none';
+      }
     }
 
-    function fmt$(v) {
-      if (v == null) return '—';
-      return (v >= 0 ? '+$' : '-$') + Math.abs(v).toFixed(0);
-    }
-    function fmtDate(iso) {
-      return new Date(iso).toLocaleDateString('en-US',
-        { month:'short', day:'numeric', year:'numeric',
-          hour:'2-digit', minute:'2-digit' });
+    /* ─── End drag ───────────────────────────────────────────── */
+    function onEnd(e) {
+      if (!drag) return;
+
+      var src    = drag.src;
+      var target = drag.target;
+      var pos    = drag.insertPos;
+
+      // Cleanup
+      drag.clone.parentNode && drag.clone.parentNode.removeChild(drag.clone);
+      drag.line.parentNode  && drag.line.parentNode.removeChild(drag.line);
+      src.classList.remove('fd-dragging-src');
+      if (target) target.classList.remove('fd-drop-target');
+      drag = null;
+
+      // Perform the reorder
+      if (target && target !== src) {
+        if (pos === 'before') {
+          target.parentNode.insertBefore(src, target);
+        } else {
+          // Insert after target
+          var after = target.nextSibling;
+          if (after) target.parentNode.insertBefore(src, after);
+          else       target.parentNode.appendChild(src);
+        }
+        // Persist new order
+        saveOrder();
+      }
     }
 
-    function buildPlayedCard(r) {
-      const pl    = r.net_pl;
-      const plCol = pl >= 0 ? '#7dff7d' : '#ff9e9e';
-      return `<div class="hist-card">
-        <div class="hist-card-top">
-          <div>
-            <div class="hist-card-label">🎴 ${r.name || 'Played Shoe'}</div>
-            <div class="hist-card-date">${fmtDate(r.created_at)}
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup',   onEnd);
+    window.addEventListener('touchend',  onEnd);
+
+    /* ─── Persist order (mirrors game's layout system) ────────── */
+    var LAYOUT_KEY = 'df_layout_order';
+    function saveOrder() {
+      try {
+        var order = getAllSlots().map(function(s) {
+          return s.getAttribute('data-slot');
+        });
+        localStorage.setItem(LAYOUT_KEY, JSON.stringify(order));
+      } catch(e) {}
+    }
+
+    /* ─── Wire one slot ──────────────────────────────────────── */
+    function wire(slot) {
+      if (slot._fdWired) return;
+      slot._fdWired = true;
+
+      var slotId = slot.getAttribute('data-slot') || '';
+      var meta   = SLOT_META[slotId] || { icon: '⠿', label: slotId };
+
+      /* Build drag bar */
+      var bar = document.createElement('div');
+      bar.className = 'fd-bar';
+      bar.innerHTML =
+        '<span class="fd-bar-icon">'  + meta.icon  + '</span>' +
+        '<span class="fd-bar-label">' + meta.label + '</span>' +
+        '<span class="fd-bar-grip">⠿</span>';
+
+      slot.insertBefore(bar, slot.firstChild);
+
+      /* Mouse */
+      bar.addEventListener('mousedown', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        startDrag(slot, e.clientX, e.clientY);
+      });
+
+      /* Touch */
+      bar.addEventListener('touchstart', function(e) {
+        e.stopPropagation();
+        if (e.touches.length === 1)
+          startDrag(slot, e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
+    }
+
+    /* ─── Init ───────────────────────────────────────────────── */
+    function applyAll() {
+      document.querySelectorAll('.layout-slot[data-slot]').forEach(wire);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        applyAll();
+        new MutationObserver(applyAll).observe(document.body,
+          { childList: true, subtree: true });
+      });
+    } else {
+      applyAll();
+      new MutationObserver(applyAll).observe(document.body,
+        { childList: true, subtree: true });
+    }
+
+  }());
+  </script>
+</body>
+</html>
