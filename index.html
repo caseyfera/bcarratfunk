@@ -931,7 +931,7 @@
             </div>
             <div id="code-step" style="display:none;">
                 <p>Verification Code:</p>
-                <input type="text" id="access-code" placeholder="000000" onkeydown="if(event.key==='Enter') verifyCode()">
+                <input type="text" id="access-code" placeholder="000000" autocomplete="one-time-code" inputmode="numeric" onkeydown="if(event.key==='Enter') verifyCode()">
                 <br><br>
                 <button class="login-btn" onclick="verifyCode()" style="width:100%;font-size:1.1rem;padding:10px 0;">VERIFY CODE →</button>
             </div>
@@ -1604,14 +1604,15 @@ const supa = {
         const savedEmail = localStorage.getItem(SESSION_EMAIL_KEY);
         const savedToken = localStorage.getItem(SESSION_TOKEN_KEY);
 
+        // No saved session at all — go straight to login
         if (!savedEmail || !savedToken) {
             hideSplash();
             showLoginOverlay();
             return;
         }
 
-        // Give the network 4 seconds before falling back gracefully
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
+        // Give the network 6 seconds before falling back gracefully
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000));
 
         try {
             const fetchProm = fetch(`${SCRIPT_URL}?email=${encodeURIComponent(savedEmail)}&token=${encodeURIComponent(savedToken)}&sessionCheck=true`);
@@ -1624,10 +1625,10 @@ const supa = {
                 buildCasinoGrid();
                 document.getElementById('setup-overlay').style.display = 'flex';
             } else {
-                // Invalid/expired — clear token but check for saved game first
+                // Invalid/expired — clear tokens and go to login
                 localStorage.removeItem(SESSION_TOKEN_KEY);
+                localStorage.removeItem(SESSION_EMAIL_KEY);
                 hideSplash();
-                // If they have a game in progress, let them back in with re-auth notice
                 if (loadGameState()) {
                     showReloginBanner(savedEmail);
                     restoreGameToScreen();
@@ -1636,12 +1637,15 @@ const supa = {
                 }
             }
         } catch (e) {
-            // Network error or timeout — if game exists show it offline, else show login
+            // Network error or timeout — always resolve, never loop
             hideSplash();
             if (loadGameState()) {
                 restoreGameToScreen();
                 showToast('⚠️ Offline mode — session unverified', '#b86200');
             } else {
+                // Clear bad tokens so next load goes straight to login
+                localStorage.removeItem(SESSION_TOKEN_KEY);
+                localStorage.removeItem(SESSION_EMAIL_KEY);
                 showLoginOverlay();
             }
         }
@@ -6209,8 +6213,4 @@ let activeInspectorTab = 'history';
         <div class="hist-card-top">
           <div>
             <div class="hist-card-label">🎴 ${r.name || 'Played Shoe'}</div>
-            <div class="hist-card-date">${fmtDate(r.created_at)}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div class="hist-card-pl" style="color:${plCol};">${fmt$(pl)}</div>
-            <button class="hist-card-del" onclick="deleteHistItem(
+            <div class="hist-card-date">${fmtDate(r.created_at)}
