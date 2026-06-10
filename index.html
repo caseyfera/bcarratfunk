@@ -3525,7 +3525,7 @@ const supa = {
         return true;
     }
 
-  async function openSubscribeLink(plan) {
+ async function openSubscribeLink(plan) {
   const email = localStorage.getItem(SESSION_EMAIL_KEY);
   if (!email) { alert('Please log in first.'); return; }
   const r = await fetch(`${SCRIPT_URL}?action=checkout&email=${encodeURIComponent(email)}&plan=${plan}`);
@@ -3533,6 +3533,8 @@ const supa = {
   if (data.url) window.location = data.url;
   else alert(data.error || 'Could not start checkout.');
 }
+        window.open(links[plan] || links.monthly, '_blank');
+    }
 
     function showTerms() {
         document.getElementById('terms-overlay').style.display = 'flex';
