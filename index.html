@@ -3526,23 +3526,17 @@
         }
 
   async function openSubscribeLink(plan) {
-      const email = localStorage.getItem(SESSION_EMAIL_KEY);
-      if (!email) { alert('Please log in first.'); return; }
-      const r = await fetch(`${SCRIPT_URL}?action=checkout&email=${encodeURIComponent(email)}&plan=${plan}`);
-      const data = await r.json();
-      if (data.url) window.location = data.url;
-      else alert(data.error || 'Could not start checkout.');
-    }
-
-    function showTerms() {
-        document.getElementById('terms-overlay').style.display = 'flex';
-    }  window.open(links[plan] || links.monthly, '_blank');
+            const email = localStorage.getItem(SESSION_EMAIL_KEY);
+            if (!email) { alert('Please log in first.'); return; }
+            const r = await fetch(`${SCRIPT_URL}?action=checkout&email=${encodeURIComponent(email)}&plan=${plan}`);
+            const data = await r.json();
+            if (data.url) window.location = data.url;
+            else alert(data.error || 'Could not start checkout.');
         }
 
         function showTerms() {
             document.getElementById('terms-overlay').style.display = 'flex';
         }
-
         // ══════════════════════════════════════════════════════════
         //  SERVER-SIDE SHOE DEALING
         //  Cards are requested from Google Apps Script one hand at a
