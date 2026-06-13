@@ -3524,8 +3524,10 @@
                 return true;
             }
 
-            function requirePaid() {
+      function requirePaid() {
                 if (subscriptionStatus === 'active' || subscriptionStatus === 'trial') return true;
+                // Close the simulator so the subscribe overlay isn't hidden behind it
+                if (typeof closeSimulator === 'function') closeSimulator();
                 const msg = subscriptionStatus === 'expired'
                     ? 'Your subscription has expired. Subscribe to unlock this feature.'
                     : 'This is a Strategist feature. Subscribe to unlock the simulator, saved sessions, and history.';
