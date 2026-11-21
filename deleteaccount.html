@@ -7,73 +7,22 @@
   <meta name="description" content="How to delete your Dragonfly account and the data connected to it.">
   <style>
     :root { color-scheme: dark; }
-    body {
-      margin: 0;
-      background: #050e07;
-      color: rgba(255,255,255,0.85);
-      font-family: Helvetica Neue, Arial, sans-serif;
-      line-height: 1.6;
-    }
-    main {
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 40px 20px 60px;
-    }
-    .brand {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .brand .name {
-      font-size: 1.8rem;
-      font-weight: bold;
-      letter-spacing: 6px;
-      color: #d4af37;
-    }
-    .brand .tag {
-      font-size: 0.8rem;
-      letter-spacing: 3px;
-      color: rgba(212,175,55,0.55);
-      margin-top: 4px;
-    }
-    h1 {
-      color: #d4af37;
-      font-size: 1.4rem;
-      letter-spacing: 1px;
-      margin: 0 0 12px;
-    }
-    h2 {
-      color: #d4af37;
-      font-size: 1.05rem;
-      margin: 28px 0 10px;
-    }
+    body { margin: 0; background: #050e07; color: rgba(255,255,255,0.85); font-family: Helvetica Neue, Arial, sans-serif; line-height: 1.6; }
+    main { max-width: 680px; margin: 0 auto; padding: 40px 20px 60px; }
+    .brand { text-align: center; margin-bottom: 28px; }
+    .brand .name { font-size: 1.8rem; font-weight: bold; letter-spacing: 6px; color: #d4af37; }
+    .brand .tag { font-size: 0.8rem; letter-spacing: 3px; color: rgba(212,175,55,0.55); margin-top: 4px; }
+    h1 { color: #d4af37; font-size: 1.4rem; letter-spacing: 1px; margin: 0 0 12px; }
+    h2 { color: #d4af37; font-size: 1.05rem; margin: 28px 0 10px; }
     p, li { font-size: 0.95rem; }
     ol, ul { padding-left: 22px; }
     a { color: #d4af37; }
-    .card {
-      background: #0b2e1a;
-      border: 1px solid rgba(212,175,55,0.4);
-      border-radius: 12px;
-      padding: 20px 22px;
-      margin: 20px 0;
-    }
-    .btn {
-      display: inline-block;
-      background: #d4af37;
-      color: #000;
-      font-weight: bold;
-      letter-spacing: 1px;
-      padding: 12px 26px;
-      border-radius: 50px;
-      text-decoration: none;
-      margin-top: 8px;
-    }
-    footer {
-      margin-top: 40px;
-      padding-top: 18px;
-      border-top: 1px solid rgba(212,175,55,0.15);
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.4);
-    }
+    .card { background: #0b2e1a; border: 1px solid rgba(212,175,55,0.4); border-radius: 12px; padding: 20px 22px; margin: 20px 0; }
+    .email { font-size: 1.05rem; font-weight: bold; color: #fff; user-select: all; }
+    .btn { display: inline-block; background: #d4af37; color: #000; font-weight: bold; letter-spacing: 1px; padding: 12px 26px; border-radius: 50px; text-decoration: none; margin: 8px 8px 0 0; border: none; font-size: 0.95rem; cursor: pointer; font-family: inherit; }
+    .btn.alt { background: transparent; color: #d4af37; border: 1px solid #d4af37; }
+    #copied { color: #7dff7d; font-size: 0.85rem; min-height: 1.2em; margin-top: 8px; }
+    footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid rgba(212,175,55,0.15); font-size: 0.8rem; color: rgba(255,255,255,0.4); }
   </style>
 </head>
 <body>
@@ -88,13 +37,57 @@
 
   <div class="card">
     <h2 style="margin-top:0;">Option 1: Delete from inside the app</h2>
-    <p>Open Dragonfly, tap <strong>Account</strong> at the bottom of the screen, then tap <strong>Delete account</strong>.</p>
+    <p>Open Dragonfly, go to <strong>Account</strong> (in the footer), then tap <strong>Delete account</strong>.</p>
   </div>
 
   <h2>Option 2: Request deletion by email</h2>
   <ol>
-    <li>Send an email to <a href="mailto:grandillusione@gmail.com?subject=Dragonfly%20account%20deletion%20request">grandillusione@gmail.com</a> with the subject <strong>Dragonfly account deletion request</strong>.</li>
+    <li>Send an email to <span class="email">grandillusione@gmail.com</span> with the subject <strong>Dragonfly account deletion request</strong>.</li>
     <li>Send it from the email address you use to sign in to Dragonfly. That is how we confirm the account is yours.</li>
     <li>We will confirm by reply and delete your account and data within 30 days.</li>
   </ol>
-  <a class="btn" href="mailto:grandillusione@gmail.com?subject=Dragonfly%20account%20deletion%20request">Email a deletion request</a>
+
+  <a class="btn" href="https://mail.google.com/mail/?view=cm&to=grandillusione%40gmail.com&su=Dragonfly%20account%20deletion%20request" target="_blank" rel="noopener">Write it in Gmail</a>
+  <button class="btn alt" id="copyBtn" type="button">Copy email address</button>
+  <div id="copied"></div>
+
+  <h2>What we delete</h2>
+  <ul>
+    <li>Your email address and account record.</li>
+    <li>Your saved sessions and game history.</li>
+    <li>Your device identifier and any active login sessions.</li>
+    <li>Your subscription status record.</li>
+  </ul>
+
+  <h2>Subscriptions</h2>
+  <ul>
+    <li><strong>Bought on the web (Stripe):</strong> deleting your account cancels the subscription. No further charges will be made.</li>
+    <li><strong>Bought through Google Play:</strong> cancel it in the Google Play Store under Payments and subscriptions. Deleting your account does not cancel a Google Play subscription, and we cannot cancel it for you.</li>
+  </ul>
+
+  <h2>What we may keep</h2>
+  <ul>
+    <li>If you made a purchase, the payment provider (Google Play or Stripe) keeps transaction records for as long as the law and tax rules require. We do not store your card number.</li>
+    <li>Backups and server logs may hold your data for up to 30 additional days before they are overwritten.</li>
+  </ul>
+
+  <h2>Deleting only some data</h2>
+  <p>If you only want certain data removed, such as your saved sessions, say so in your email and we will delete just that.</p>
+
+  <p>Read our <a href="https://baccaratfunk.win/privacypolicy.html">Privacy Policy</a> for more on how we handle your information.</p>
+
+  <footer>Grand Illusion Entertainment · grandillusione@gmail.com</footer>
+</main>
+<script>
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    var address = 'grandillusione@gmail.com';
+    var done = function (msg) { document.getElementById('copied').textContent = msg; };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(address).then(function () { done('Copied: ' + address); }, function () { done('Address: ' + address); });
+    } else {
+      done('Address: ' + address);
+    }
+  });
+</script>
+</body>
+</html>
